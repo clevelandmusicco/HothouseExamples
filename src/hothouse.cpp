@@ -1,20 +1,18 @@
-/**
-    Hardware proxy for Hothouse DIY DSP Platform
-    Copyright (C) 2024  Cleveland Music Co.  <code@clevelandmusicco.com>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+// Hardware proxy for Hothouse DIY DSP Platform
+// Copyright (C) 2024  Cleveland Music Co.  <code@clevelandmusicco.com>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "hothouse.h"
 
@@ -131,20 +129,26 @@ void Hothouse::InitSwitches() {
 }
 
 void Hothouse::InitAnalogControls() {
+  constexpr Pin knob_pins[KNOB_LAST] = {PIN_KNOB_1, PIN_KNOB_2, PIN_KNOB_3,
+                                        PIN_KNOB_4, PIN_KNOB_5, PIN_KNOB_6};
+
   // Set order of ADCs based on CHANNEL NUMBER
   AdcChannelConfig cfg[KNOB_LAST];
-  // Init with Single Pins
-  cfg[KNOB_1].InitSingle(PIN_KNOB_1);
-  cfg[KNOB_2].InitSingle(PIN_KNOB_2);
-  cfg[KNOB_3].InitSingle(PIN_KNOB_3);
-  cfg[KNOB_4].InitSingle(PIN_KNOB_4);
-  cfg[KNOB_5].InitSingle(PIN_KNOB_5);
-  cfg[KNOB_6].InitSingle(PIN_KNOB_6);
 
+  // Initialize ADC configuration with Single Pins
+  for (size_t i = 0; i < KNOB_LAST; ++i) {
+    cfg[i].InitSingle(knob_pins[i]);
+  }
+
+  // Initialize ADC with configuration
   seed.adc.Init(cfg, KNOB_LAST);
-  // Make an array of pointers to the knobs.
-  for (int i = 0; i < KNOB_LAST; i++) {
-    knobs[i].Init(seed.adc.GetPtr(i), AudioCallbackRate());
+
+  // Get the audio callback rate once
+  float callback_rate = AudioCallbackRate();
+
+  // Initialize knobs with ADC pointers and callback rate
+  for (size_t i = 0; i < KNOB_LAST; ++i) {
+    knobs[i].Init(seed.adc.GetPtr(i), callback_rate);
   }
 }
 
@@ -155,15 +159,12 @@ Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
     case (TOGGLESWITCH_1):
       return GetLogicalSwitchPosition(switches[SWITCH_1_UP],
                                       switches[SWITCH_1_DOWN]);
-      break;
     case (TOGGLESWITCH_2):
       return GetLogicalSwitchPosition(switches[SWITCH_2_UP],
                                       switches[SWITCH_2_DOWN]);
-      break;
     case (TOGGLESWITCH_3):
       return GetLogicalSwitchPosition(switches[SWITCH_3_UP],
                                       switches[SWITCH_3_DOWN]);
-      break;
     default:
       seed.PrintLine(
           "ERROR: Unexpected value provided for Toggleswitch 'tsw'. "
@@ -175,11 +176,7 @@ Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
 // Private for simplicity of use.
 Hothouse::ToggleswitchPosition Hothouse::GetLogicalSwitchPosition(Switch up,
                                                                   Switch down) {
-  if (up.Pressed()) {
-    return TOGGLESWITCH_UP;
-  } else if (down.Pressed()) {
-    return TOGGLESWITCH_DOWN;
-  } else {
-    return TOGGLESWITCH_MIDDLE;
-  }
+  return up.Pressed()
+             ? TOGGLESWITCH_UP
+             : (down.Pressed() ? TOGGLESWITCH_DOWN : TOGGLESWITCH_MIDDLE);
 }

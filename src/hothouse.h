@@ -1,20 +1,18 @@
-/**
-    Hardware proxy for Hothouse DIY DSP Platform
-    Copyright (C) 2024  Cleveland Music Co.  <code@clevelandmusicco.com>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+// Hardware proxy for Hothouse DIY DSP Platform
+// Copyright (C) 2024  Cleveland Music Co.  <code@clevelandmusicco.com>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "daisy_seed.h"
 #include "optional"
@@ -75,12 +73,11 @@ class Hothouse {
     TOGGLESWITCH_3,
   };
 
-  /** Constructor */
-  Hothouse() {}
-  /** Destructor */
-  ~Hothouse() {}
+  // Constructor and Destructor
+  Hothouse() = default;
+  ~Hothouse() = default;
 
-  /** Initialize daisy petal */
+  /** Initialize Hothouse */
   void Init(bool boost = false);
 
   /**
@@ -162,7 +159,7 @@ class Hothouse {
   \param tsw Which toggleswitch to interogate (TOGGLESWITCH_1, TOGGLESWITCH_2,
   or TOGGLESWITCH_3) \return TOGGLESWITCH_UP, TOGGLESWITCH_DOWN, or
   TOGGLESWITCH_MIDDLE. \note If the toggleswitch in question is ON-ON (rather
-  than ON-OFF-ON), then TOGGLESWITCH_MIDDLE can never be the return value. Write
+  than ON-OFF-ON), TOGGLESWITCH_MIDDLE can never be the return value. Write
   your code with this in mind.
   */
   ToggleswitchPosition GetToggleswitchPosition(Toggleswitch tsw);
