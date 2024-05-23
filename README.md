@@ -50,14 +50,14 @@ To flash an example to your Hothouse, you will be loading a compiled binary on t
 cd src/HelloWorld
 ```
 
-Then, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with with the following command:
+Assuming you've already compiled the example, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with with the following command:
 
 ```bash
 # Using USB
 make program-dfu
 ```
 
-If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (and we highly recommend you do if you're doing development work!) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command:
+If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (*and we highly recommend you do if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command:
 
 ```bash
 # Using JTAG/SWD adaptor (like STLink)
