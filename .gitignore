@@ -1,0 +1,5 @@
+build/
+__MACOSX/
+_MACOSX/
+.cortex-debug.registers.state.json
+.cortex-debug.peripherals.state.json
