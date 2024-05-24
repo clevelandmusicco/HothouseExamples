@@ -4,22 +4,24 @@ The Cleveland Music Co. Hothouse DIY DSP Platform is a compact pedal interface f
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory is a collection of ready-to-go effects you can flash to your Hothouse or modify as you wish:
 
-* **ModDelay** - Modulated delay with a 5-minute looper and vibrato or chorus modes
+* **ModDelay** - Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
 * **MegaTremolo** - Tremolo with fully-tweakable harmonic tremolo mode
-* **TriChorus** - Chorus effect with up to three choris voices
+* **TriChorus** - Chorus effect with up to three chorus voices
 * And more to come ...
 
 Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
 
-## Prerequisites
+## Getting started
+
+### Prerequisites
 
 * **[A Daisy development environment](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment)** - Nothing that comes after this will work until you have the Daisy toolchain installed, configured, and functioning properly.
 * **A Cleveland Music Co. Hothouse (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
 
-## Building the code
+### Building the code
 
 Clone the repo:
 
@@ -50,7 +52,7 @@ cd src/HelloWorld
 make clean; make
 ```
 
-## Flashing the Hothouse
+### Flashing the Hothouse
 
 To flash an effect to your Hothouse, you will be loading a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
 
@@ -72,11 +74,11 @@ If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link
 make program
 ```
 
-## Daisy Web Programmer
+### Daisy Web Programmer
 
 Alternatively, you can flash the Daisy Seed using the [Daisy Web Programmer](https://electro-smith.github.io/Programmer/).
 
-## Creating your own effect
+### Creating your own effect
 
 Use the `create_new_proj.py` helper script to create a bare effect project in the `src` dir:
 
@@ -135,7 +137,7 @@ make program-dfu
 make program
 ```
 
-## VS Code
+### VS Code
 
 Any of the effect projects in the `src` directory can be opened in VS Code. Simply use the `Open Folder...` option and select the effect directory (**NOT** the `HothouseExamples` or `src` directory):
 

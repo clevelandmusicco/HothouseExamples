@@ -187,7 +187,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     if (depth >= 0.1f) {
       float chorused = chorus.Process(wet);
       wet = chorused * 1.5f;  // Make up volume loss to phase
-      // Old approach sounded pretty good too ¯\_(ツ)_/¯
+      // The old approach sounds pretty good too ¯\_(ツ)_/¯
       // wet = (wet + chorused * 2.0f) / 2.0f;
     }
 
