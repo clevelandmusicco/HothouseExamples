@@ -37,7 +37,7 @@ using daisysp::ReverbSc;
 // Global variables for hardware and effects parameters
 ChorusEngine chorus;
 Hothouse hw;
-OnePole ar_lpf, ar_hpf, ps_lpf;
+OnePole ar_lpf, ar_hpf, ps_lpf, ps_hpf;
 Parameter decay_param, lpf_param, mix_param, depth_param, rate_param,
     shimmer_param;
 PitchShifter ps;
@@ -89,9 +89,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   chorus.SetLfoDepth(depth);
   chorus.SetLfoFreq(rate);
   chorus.SetFeedback(0);
-  ps.SetDelSize(4200);  // Delay in samples
-  ps.SetFun(0.05f);     // Adds some warbly texture to the pitch-shifting
-  ps_lpf.SetFrequency(2200.0f / sample_rate);  // Set pitch shifter LPF
+  ps.SetDelSize(0.085f * sample_rate);  // Delay in samples
+  ps.SetFun(0.03f);  // Adds some warbly texture to the pitch-shifting
+
+  // 4kHz cuts "robot" chatter from the pitch-shifted signal;
+  ps_lpf.SetFrequency(4000.0f / sample_rate);
+
+  // Pitch shifting low frequencies is innacurate;
+  // we'll use this to filter them out
+  ps_hpf.SetFrequency(600.0f / sample_rate);
 
   // Determine pitch shift interval based on TOGGLESWITCH_1
   float semitones = 0.0f;
@@ -121,10 +127,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       hpf_freq = 600.0f;
       lpf_freq = 10000.0f;
       break;
-    case Hothouse::TOGGLESWITCH_DOWN:
-      hpf_freq = 24.0f;
-      lpf_freq = 22000.0f;
-      break;
+    case Hothouse::TOGGLESWITCH_DOWN:  // Fall through
     default:
       hpf_freq = 24.0f;
       lpf_freq = 22000.0f;
@@ -133,40 +136,48 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   ar_hpf.SetFrequency(hpf_freq / sample_rate);
   ar_lpf.SetFrequency(lpf_freq / sample_rate);
 
+  // Determine delay settings based on TOGGLESWITCH_3
+  bool apply_delay = false;
+  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)) {
+    case Hothouse::TOGGLESWITCH_UP:
+      delay_time = 0.3f;
+      feedback = decay * 0.6f;
+      apply_delay = true;
+      break;
+    case Hothouse::TOGGLESWITCH_MIDDLE:
+      delay_time = 0.15f;
+      feedback = 0.3f;
+      apply_delay = true;
+      break;
+    case Hothouse::TOGGLESWITCH_DOWN:  // No delay
+    default:
+      break;
+  }
+
   // Process audio samples
   for (size_t i = 0; i < size; i++) {
     if (bypass) {
       out[0][i] = in[0][i];
-      continue;
+      continue;  // Skip the rest of the loop while bypassed
     }
 
     float dry = in[0][i];
+
+    // Pre-reverb filtered signal
     float filtered = ar_lpf.Process(ar_hpf.Process(dry));
-    float pitch_shifted = ps_lpf.Process(ps.Process(filtered));
+
+    // Pre-pitch-shift filtered signal
+    float pre_ps = ps_hpf.Process(dry);
+
+    // Post-pitch-shifted and filtered signal
+    float pitch_shifted = ps_lpf.Process(ps.Process(pre_ps));
+
+    // Pre-reverb signal
     float send = (filtered + pitch_shifted * shimmer) *
                  (hundred_percent_wet ? 1.0f : mix);
     float wet;
 
     reverb.Process(send, send, &wet, &wet);
-
-    // Determine delay settings based on TOGGLESWITCH_3
-    bool apply_delay = false;
-    switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)) {
-      case Hothouse::TOGGLESWITCH_UP:
-        delay_time = 0.3f;
-        feedback = decay * 0.6f;
-        apply_delay = true;
-        break;
-      case Hothouse::TOGGLESWITCH_MIDDLE:
-        delay_time = 0.15f;
-        feedback = 0.3f;
-        apply_delay = true;
-        break;
-      case Hothouse::TOGGLESWITCH_DOWN:
-        break;
-      default:
-        break;
-    }
 
     if (apply_delay) {
       delay.SetDelay(sample_rate * delay_time);
@@ -175,7 +186,9 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
     if (depth >= 0.1f) {
       float chorused = chorus.Process(wet);
-      wet = (wet + chorused * 2.0f) / 2.0f;
+      wet = chorused * 1.5f;  // Make up volume loss to phase
+      // Old approach sounded pretty good too ¯\_(ツ)_/¯
+      // wet = (wet + chorused * 2.0f) / 2.0f;
     }
 
     out[0][i] = hundred_percent_wet ? wet : dry + wet;
@@ -200,7 +213,7 @@ int main(void) {
   lpf_param.Init(hw.knobs[Hothouse::KNOB_2], 600.0f, 22000.0f,
                  Parameter::LINEAR);
   mix_param.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
-  depth_param.Init(hw.knobs[Hothouse::KNOB_4], 0.0f, 1.0f, Parameter::LINEAR);
+  depth_param.Init(hw.knobs[Hothouse::KNOB_4], 0.0f, 0.7f, Parameter::LINEAR);
   rate_param.Init(hw.knobs[Hothouse::KNOB_5], 0.1f, 5.0f, Parameter::LINEAR);
   shimmer_param.Init(hw.knobs[Hothouse::KNOB_6], 0.0f, 1.0f, Parameter::LINEAR);
 
@@ -219,6 +232,7 @@ int main(void) {
   init_filter(ar_hpf, OnePole::FILTER_MODE_HIGH_PASS);
   init_filter(ar_lpf, OnePole::FILTER_MODE_LOW_PASS);
   init_filter(ps_lpf, OnePole::FILTER_MODE_LOW_PASS);
+  init_filter(ps_hpf, OnePole::FILTER_MODE_HIGH_PASS);
 
   // Helper lambda to init LEDs
   auto init_led = [](Led& led, dsy_gpio_pin pin) {
