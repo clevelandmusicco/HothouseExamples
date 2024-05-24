@@ -23,13 +23,13 @@ If you're not familar with the Daisy Seed or its development environment, check 
 
 Clone the repo:
 
-```bash
+```console
 git clone https://github.com/clevelandmusicco/HothouseExamples
 ```
 
 Init and build the [libDaisy](https://github.com/electro-smith/libDaisy.git) and [DaisySP](https://github.com/electro-smith/DaisySP.git) libraries; these are included as submodules:
 
-```bash
+```console
 cd HothouseExamples
 git submodule update --init --recursive
 
@@ -39,13 +39,13 @@ make -C DaisySP
 
 To build all of the effects in the `src` dir:
 
-```bash
+```console
 python build_examples.py
 ```
 
 To (re)build a specific effect (replace 'HelloWorld' with the desired effect):
 
-```bash
+```console
 cd src/HelloWorld
 make clean; make
 ```
@@ -54,20 +54,20 @@ make clean; make
 
 To flash an effect to your Hothouse, you will be loading a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
 
-```bash
+```console
 cd src/HelloWorld
 ```
 
 Assuming you've already compiled the code, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with with the following command:
 
-```bash
+```console
 # Using USB
 make program-dfu
 ```
 
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (*and we highly recommend you do so if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command:
 
-```bash
+```console
 # Using JTAG/SWD adaptor (like STLink)
 make program
 ```
@@ -80,7 +80,7 @@ Alternatively, you can flash the Daisy Seed using the [Daisy Web Programmer](htt
 
 Use the `create_new_proj.py` helper script to create a bare effect project in the `src` dir:
 
-```bash
+```console
 python create_new_proj.py -h
 usage: create_new_proj.py [-h] --proj_name PROJ_NAME [--your_name YOUR_NAME] [--your_email YOUR_EMAIL]
 
@@ -97,13 +97,15 @@ options:
 
 `--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
 
-```bash
-python create_new_proj.py --proj_name MyAwesomeEffect --your_name "John Developer" --your_email john@developer.io
+```console
+python create_new_proj.py --proj_name MyAwesomeEffect \
+                          --your_name "John Developer" \
+                          --your_email john.developer@email.domain
 ```
 
 This results in a new directory under `src`:
 
-```bash
+```console
 src/MyAwesomeEffect
 ├── Makefile
 ├── my_awesome_effect.cpp
@@ -121,7 +123,7 @@ The template project the `create_new_proj.py` script copies from is in `resource
 
 Straight away, the code can be compiled and flashed as usual, but it simply writes silence to the output.
 
-```bash
+```console
 cd src/MyAwesomeEffect
 make clean
 make
