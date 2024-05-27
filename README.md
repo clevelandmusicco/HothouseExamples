@@ -121,8 +121,6 @@ src/MyAwesomeEffect
     └── tasks.json
 ```
 
-The template project the `create_new_proj.py` script copies from is in `resources/_template'`.
-
 Straight away, the code can be compiled and flashed as usual, but it simply writes silence to the output.
 
 ```console
@@ -136,6 +134,8 @@ make program-dfu
 # JTAG/SWD
 make program
 ```
+
+The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template'` and can be modified / extended to your liking.
 
 ### VS Code
 
