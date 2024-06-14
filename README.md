@@ -21,7 +21,7 @@ If you're not familar with the Daisy Seed or its development environment, check 
 ### Prerequisites
 
 * **[A Daisy development environment](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment)** - Nothing that comes after this will work until you have the Daisy toolchain installed, configured, and functioning properly.
-* **A Cleveland Music Co. Hothouse (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
+* **[A Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
 
 ### Building the code
 
