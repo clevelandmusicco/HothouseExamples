@@ -1,6 +1,6 @@
 # Examples for the Hothouse DIY DSP Platform
 
-The Cleveland Music Co. Hothouse DIY DSP Platform is a compact pedal interface for the [Electrosmith Daisy Seed DSP](https://electro-smith.com/products/daisy-seed).
+The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/)] is a compact pedal kit for the [Electrosmith Daisy Seed DSP](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, and / or you can simply compile and flash any of the code in this repo to your Hothouse.
 
 <img src="/resources/hothouse_front.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse_kit.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
