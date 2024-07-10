@@ -6,10 +6,10 @@ The Cleveland Music Co. Hothouse DIY DSP Platform is a compact pedal interface f
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory is a collection of ready-to-go effects you can flash to your Hothouse or modify as you wish:
 
-* **ModDelay** - Modulated delay with vibrato or chorus mode, and a 5-minute looper
+* **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
-* **MegaTremolo** - Tremolo with fully-tweakable harmonic tremolo mode
-* **TriChorus** - Chorus effect with up to three chorus voices
+* **MegaTremolo** - Coming soon ... Tremolo with fully-tweakable harmonic tremolo mode
+* **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
 
 Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
@@ -20,7 +20,7 @@ If you're not familar with the Daisy Seed or its development environment, check 
 
 ### Prerequisites
 
-* **[A Daisy Seed with 65MB of memory](https://electro-smith.com/products/daisy-seed?variant=45234245108004)** - While the 65MB is not critical, it is highly recommended. Several of the examples in this repo will not compile on 1MB version of the Daisy Seed.
+* **[A Daisy Seed with 65MB of memory](https://electro-smith.com/products/daisy-seed?variant=45234245108004)** - While the 65MB is not critical, it is highly recommended. Several of the examples in this repo will not compile on 1MB version of the Daisy Seed. Just spend the extra few dollars for the additional capacity.
 * **[A Daisy development environment](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment)** - Nothing that comes after this will work until you have the Daisy toolchain installed, configured, and functioning properly.
 * **[A Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
 
@@ -57,7 +57,7 @@ make clean; make
 
 ### Flashing the Hothouse
 
-To flash an effect to your Hothouse, you will be loading a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
+To flash an effect to your Hothouse, you will load a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
 
 ```console
 cd src/HelloWorld
@@ -70,7 +70,7 @@ Assuming you've already compiled the code, enter bootloader mode on your Daisy S
 make program-dfu
 ```
 
-If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (*and we highly recommend you do so if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command:
+If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (***AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
 
 ```console
 # Using JTAG/SWD adaptor (like STLink)
@@ -124,7 +124,7 @@ src/MyAwesomeEffect
     └── tasks.json
 ```
 
-Straight away, the code can be compiled and flashed as usual, but it simply writes silence to the output.
+Straight away, the code can be compiled and flashed as usual, but until you add your own code, it will just write silence to the output.
 
 ```console
 cd src/MyAwesomeEffect
