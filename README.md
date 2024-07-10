@@ -20,9 +20,10 @@ If you're not familar with the Daisy Seed or its development environment, check 
 
 ### Prerequisites
 
-* **[A Daisy Seed with 65MB of memory](https://electro-smith.com/products/daisy-seed?variant=45234245108004)** - While the 65MB is not critical, it is highly recommended. Several of the examples in this repo will not compile on 1MB version of the Daisy Seed. Just spend the extra few dollars for the additional capacity.
-* **[A Daisy development environment](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment)** - Nothing that comes after this will work until you have the Daisy toolchain installed, configured, and functioning properly.
+* **[A Daisy Seed with 65MB of memory](https://electro-smith.com/products/daisy-seed?variant=45234245108004)** - While the 65MB is not critical, it is highly recommended. Several of the examples in this repo will not compile on the 1MB version of the Daisy Seed. Just spend the extra few dollars for the additional capacity.
+* **[A Daisy development environment](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment)** - Nothing that comes after this will work until you have the Daisy toolchain installed, configured, and functioning properly. We use Linux for development and testing, but the commands on this README page should be cross-platform if your toolchain is configured properly.
 * **[A Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
+* **Python 3.x** - The commands on this page were tested with `Python 3.10.14` aliased to the local `python` command. The python scripts in this repo have not been tested with any other version.
 
 ### Building the code
 
@@ -70,12 +71,17 @@ Assuming you've already compiled the code, enter bootloader mode on your Daisy S
 make program-dfu
 ```
 
+Install the Daisy Seed into your Hothouse, power it up and off you go!
+
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (***AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
 
 ```console
 # Using JTAG/SWD adaptor (like STLink)
 make program
 ```
+
+> [!TIP]
+> An added convenience when using the JTAG debugger / programmer is that you don't need to remove and reinstall the Daisy Seed to flash it; you can easily leave the Daisy Seed installed in the Hothouse while debugging or programming.
 
 ### Daisy Web Programmer
 
@@ -100,7 +106,8 @@ options:
 
 ```
 
-`--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
+> [!NOTE]
+> `--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
 
 ```console
 python create_new_proj.py --proj_name MyAwesomeEffect \
@@ -126,6 +133,27 @@ src/MyAwesomeEffect
 
 Straight away, the code can be compiled and flashed as usual, but until you add your own code, it will just write silence to the output.
 
+```cpp
+void AudioCallback(AudioHandle::InputBuffer in, 
+                  AudioHandle::OutputBuffer out,
+                  size_t size) {
+  hw.ProcessAllControls();
+
+  // Stuff omitted for brevity...
+
+  for (size_t i = 0; i < size; ++i) {
+    if (bypass) {
+      out[0][i] = in[0][i];
+    } else {
+      out[0][i] = 0.0f;  // TODO: replace silence with something awesome
+    }
+  }
+}
+```
+
+> [!NOTE]
+> Notice the `TODO` comment above! Once you've replaced the code with your own, build and flash as per normal.
+
 ```console
 cd src/MyAwesomeEffect
 make clean
@@ -138,7 +166,8 @@ make program-dfu
 make program
 ```
 
-The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template'` and can be modified / extended to your liking.
+> [!TIP]
+> The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template'` and can be modified / extended to your liking.
 
 ### VS Code
 
