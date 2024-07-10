@@ -4,7 +4,7 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 <img src="/resources/hothouse_front.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse_kit.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
-This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory is a collection of ready-to-go effects you can flash to your Hothouse or modify as you wish:
+This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish:
 
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
@@ -137,7 +137,6 @@ Straight away, the code can be compiled and flashed as usual, but until you add 
 void AudioCallback(AudioHandle::InputBuffer in, 
                   AudioHandle::OutputBuffer out,
                   size_t size) {
-  hw.ProcessAllControls();
 
   // Stuff omitted for brevity...
 
@@ -167,11 +166,11 @@ make program
 ```
 
 > [!TIP]
-> The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template'` and can be modified / extended to your liking.
+> The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template` and can be modified / extended to your liking.
 
 ### VS Code
 
-Any of the effect projects in the `src` directory can be opened in VS Code. Simply use the `Open Folder...` option and select the effect directory (**NOT** the `HothouseExamples` or `src` directory):
+Any of the effect projects in the `src` directory can be opened in VS Code. Use the `Open Folder...` option and select the effect directory (**NOT** the `HothouseExamples` or `src` directory):
 
 ![The MyAwesomeEffect project in VS Code](resources/images/new_proj_vscode.png)
 
