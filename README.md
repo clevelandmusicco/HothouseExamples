@@ -2,7 +2,7 @@
 
 The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/)] is a compact pedal kit for the [Electrosmith Daisy Seed DSP](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, and / or you can simply compile and flash any of the code in this repo to your Hothouse.
 
-<img src="/resources/hothouse_front.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse_kit.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
+<img src="/resources/hothouse-front-553px.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse-kit-553px.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish:
 
@@ -11,6 +11,9 @@ This project is a collection of digital signal processing code examples that you
 * **MegaTremolo** - Coming soon ... Tremolo with fully-tweakable harmonic tremolo mode
 * **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
+
+> [!NOTE]
+> This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;contributions from the community!
 
 Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
