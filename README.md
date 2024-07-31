@@ -14,6 +14,10 @@ This project is a collection of digital signal processing code examples that you
 * **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
 
+## Community Contributions
+
+* **TremVerb** - Tremolo / reverb effect contributed by by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
+
 > [!NOTE]
 > This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;contributions from the community!
 
