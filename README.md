@@ -1,6 +1,10 @@
 # Examples for the Hothouse Digital Signal Processing Pedal Kit
 
-**:wrench: [Hothouse Build Guide](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide) | :question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) | :books: [Wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki)**
+<p align="center">
+**:wrench: [Hothouse Build Guide](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide) |
+:question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) |
+:books: [Wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki)**
+</p>
 
 The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) is a compact pedal kit for the [Electrosmith Daisy Seed DSP](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, and / or you can simply compile and flash any of the code in this repo to your Hothouse.
 
@@ -10,11 +14,11 @@ This project is a collection of digital signal processing code examples that you
 
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
-* **MegaTremolo** - Coming soon ... Tremolo with fully-tweakable harmonic tremolo mode
+* **HarmonicTremVerb** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
 
-## Community Contributions
+## Community contributions
 
 * **TremVerb** - Tremolo / reverb effect contributed by by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
 
@@ -24,6 +28,10 @@ This project is a collection of digital signal processing code examples that you
 Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
+
+## A note for the ~~neckbeards~~ perfectionists
+
+The code in this project is meant to strike a balance between educational and functional. There are more elegant, concise, and sometimes "better" ways to accomplish what much of this code does. However, in the interest of accessibility and understandability, it is presented in a simple, straightforward form. If you want to improve the code in ways that make it more educational and functional, please do so! Pull requests are always welcome.
 
 ## Getting started
 

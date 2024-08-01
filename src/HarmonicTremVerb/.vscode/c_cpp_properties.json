@@ -10,7 +10,7 @@
                 "_UNICODE"
             ],
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/../**",
                 "${workspaceFolder}/../../libDaisy/**",
                 "${workspaceFolder}/../../DaisySP/**"
             ],
