@@ -115,6 +115,9 @@ void ProcessAudio(float dry, float &proc) {
     proc = dry + (wet_l + wet_r / 2.0f);
   }
 
+  // TODO: Implement formula found at
+  // https://christianfloisand.wordpress.com/2012/04/18/coding-some-tremolo/
+  // ModSignal = (1 – DEPTH) + DEPTH * (sin(w * FREQ))^2
   if (!trem_bypass) {
     if (hw.switches[Hothouse::SWITCH_3_UP].Pressed()) {
       proc = (lpf.Process(proc) * (1 - osc1.Process())) +
@@ -151,11 +154,13 @@ int main() {
   hw.SetAudioBlockSize(4);
   hw.SetAudioSampleRate(daisy::SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  parm_reverb_send.Init(hw.knobs[Hothouse::KNOB_1], 0.0f, 1.0f,
+  parm_reverb_send.Init(hw.knobs[Hothouse::KNOB_1], 0.0f, 0.99f,
                         Parameter::LINEAR);
   parm_trem_freq.Init(hw.knobs[Hothouse::KNOB_2], 0.2f, 12.0f,
                       Parameter::LINEAR);
-  parm_trem_depth.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f,
+
+  // HACK: To check overmodulation and digital distortion, cap the depth
+  parm_trem_depth.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 0.9f,
                        Parameter::LINEAR);
   parm_reverb_feedback.Init(hw.knobs[Hothouse::KNOB_4], 0.6f, 1.0f,
                             Parameter::LINEAR);
