@@ -36,3 +36,7 @@ Each of these frequency bands is then amplitude-modulated at a rate controlled b
 After modulation, the two signals are recombined and sent to the amplifier's output stage. This process creates a unique phasing or swirling effect, as the out-of-phase amplitude modulation of the different frequency bands interacts and blends back together. The result is a complex and musical effect that can sound like a combination of vibrato, phaser, and tremolo.
 
 The code in this project does essentially all of this in a no-frills way, using the DaisySP library for just about everything. The one exception is the addition of the ExtendedOscillator class, which implements the WAVE_SQUARE_ROUNDED wave form to help remove clicks from discontinuities in the audio.
+
+## TODOs
+
+* Fix the dead simple tremolo functions to address the digital distortion at higher amplitudes (depth settings). Basically, the current implementation is `Signal = Signal * ModSignal`, but it really needs to be `ModSignal = (1 – DEPTH) + DEPTH * (sin(w * FREQ))<sup>2</sup>` where `w = 2 * pi / samplerate`. Feel free to implement and submit a pull request :grin:
