@@ -39,4 +39,4 @@ The code in this project does essentially all of this in a no-frills way, using 
 
 ## TODOs
 
-* Fix the dead simple tremolo functions to address the digital distortion at higher amplitudes (depth settings). Basically, the current implementation is `Signal = Signal * ModSignal`, but it really needs to be `ModSignal = (1 – DEPTH) + DEPTH * (sin(w * FREQ))<sup>2</sup>` where `w = 2 * pi / samplerate`. Feel free to implement and submit a pull request :grin:
+* Fix the dead simple tremolo functions to address the digital distortion at higher amplitudes (depth settings). Basically, the current implementation is `Signal = Signal * ModSignal`, but it really needs to be `ModSignal = (1 – DEPTH) + DEPTH * (sin(w * FREQ))^2` where `w = 2 * pi / samplerate`. Feel free to implement and submit a pull request :grin:
