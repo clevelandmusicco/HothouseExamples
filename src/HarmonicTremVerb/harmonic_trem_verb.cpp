@@ -115,15 +115,29 @@ void ProcessAudio(float dry, float &proc) {
     proc = dry + (wet_l + wet_r / 2.0f);
   }
 
-  // TODO: Implement formula found at
-  // https://christianfloisand.wordpress.com/2012/04/18/coding-some-tremolo/
-  // ModSignal = (1 – DEPTH) + DEPTH * (sin(w * FREQ))^2
+  // Formula for mod signal:
+  //  ModSignal = (1 – DEPTH) + DEPTH * (sin((2 * pi / samplerate) * FREQ))^2
+  // From:
+  //  https://christianfloisand.wordpress.com/2012/04/18/coding-some-tremolo/
   if (!trem_bypass) {
+    auto freq =
+        parm_trem_freq.Process();  // HACK: Already called in
+                                   // SetOscillatorParameters(); make global?
+    auto freq_factor = 2 * PI_F / hw.AudioSampleRate();
+    auto adj_factor = pow(sin(freq_factor * freq), 2);
+    auto osc1_sig = osc1.Process();
+    auto osc2_sig = osc2.Process();
+
+    // Lambda function to apply tremolo effect
+    auto apply_trem = [&](float signal, float osc_sig) {
+      return signal * (1 - osc_sig) + osc_sig * adj_factor;
+    };
+
     if (hw.switches[Hothouse::SWITCH_3_UP].Pressed()) {
-      proc = (lpf.Process(proc) * (1 - osc1.Process())) +
-             (hpf.Process(proc) * (1 - osc2.Process()));
+      proc = apply_trem(lpf.Process(proc), osc1_sig) +
+             apply_trem(hpf.Process(proc), osc2_sig);
     } else {
-      proc = proc * (1 - osc1.Process());
+      proc = apply_trem(proc, osc1_sig);
     }
   }
 }
@@ -156,17 +170,15 @@ int main() {
 
   parm_reverb_send.Init(hw.knobs[Hothouse::KNOB_1], 0.0f, 0.99f,
                         Parameter::LINEAR);
-  parm_trem_freq.Init(hw.knobs[Hothouse::KNOB_2], 0.2f, 12.0f,
+  parm_trem_freq.Init(hw.knobs[Hothouse::KNOB_2], 0.1f, 12.0f,
                       Parameter::LINEAR);
-
-  // HACK: To check overmodulation and digital distortion, cap the depth
-  parm_trem_depth.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 0.9f,
+  parm_trem_depth.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f,
                        Parameter::LINEAR);
   parm_reverb_feedback.Init(hw.knobs[Hothouse::KNOB_4], 0.6f, 1.0f,
                             Parameter::LINEAR);
 
-  // More arbitrary magic numbers; these set the upper and lower bounds
-  // of the LPF and HPF applied to the "split" signal before amplitude
+  // Arbitrary magic numbers; these set the upper and lower bounds of
+  // the LPF and HPF applied to the "split" audio signal before amplitude
   // modulation ... tune to taste
   parm_trem_lpf_cutoff.Init(hw.knobs[Hothouse::KNOB_5], 100.0f, 500.f,
                             Parameter::LINEAR);
