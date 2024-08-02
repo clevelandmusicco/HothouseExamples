@@ -61,6 +61,10 @@ class ExtendedOscillator {
     eor_ = true;
   }
 
+  /** Gets the current frequency of the oscillator.
+   */
+  inline float GetFreq() { return freq_; }
+  
   /** Changes the frequency of the Oscillator, and recalculates phase
    * increment.
    */
@@ -68,15 +72,21 @@ class ExtendedOscillator {
     freq_ = f;
     phase_inc_ = CalcPhaseInc(f);
   }
-
+  
+  /** Gets the amplitude of the oscillator.
+   */
+  inline float GetAmp() { return amp_; }
+  
   /** Sets the amplitude of the waveform.
    */
   inline void SetAmp(const float a) { amp_ = a; }
+  
   /** Sets the waveform to be synthesized by the Process() function.
    */
   inline void SetWaveform(const uint8_t wf) {
     waveform_ = wf < WAVE_LAST ? wf : WAVE_SIN;
   }
+
   /** Sets the pulse width for WAVE_SQUARE and WAVE_POLYBLEP_SQUARE (range 0 -
    * 1)
    */

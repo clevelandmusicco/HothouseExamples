@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "daisysp-lgpl.h"  // Necessary for some VS Code configs ¯\_(ツ)_/¯
 #include "daisysp.h"
 #include "extended_oscillator.h"
 #include "hothouse.h"
@@ -120,9 +121,7 @@ void ProcessAudio(float dry, float &proc) {
   // From:
   //  https://christianfloisand.wordpress.com/2012/04/18/coding-some-tremolo/
   if (!trem_bypass) {
-    auto freq =
-        parm_trem_freq.Process();  // HACK: Already called in
-                                   // SetOscillatorParameters(); make global?
+    auto freq = osc1.GetFreq();  // Both oscillators have the same freq
     auto freq_factor = 2 * PI_F / hw.AudioSampleRate();
     auto adj_factor = pow(sin(freq_factor * freq), 2);
     auto osc1_sig = osc1.Process();

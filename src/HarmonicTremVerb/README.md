@@ -36,4 +36,4 @@ The code in this project does essentially all of this in a no-frills way, using 
 
 ## TODOs
 
-* There's a slight HACK in the `ProcessAudio()` function: `parm_trem_freq.Process()` is called again after it was previously called in `SetOscillatorParameters()`. Not a huge deal, but the value of the potentiometer slighty jitters over time so the formula has a margin for error. Either assign the value to a global (me no likey), or perhaps put a freq value getter function on the `ExtendedOscillator`?
+* Revisit the need for 2 `ExtendedOscillator`s. Could probably just flip the phase of each sample on the fly in the audio callback.
