@@ -8,9 +8,10 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish:
 
+* **BasicSpringReverb** - A spring reverb effect ported from the [DaisyExamples repo](https://github.com/electro-smith/DaisyExamples/tree/master)
+* **HarmonicTremVerb** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
-* **HarmonicTremVerb** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
 
