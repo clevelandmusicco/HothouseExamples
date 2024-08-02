@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Needed for some VS Code configs; uncomment if ReverbSc
+// and other LGPL stuff is not recognized by Intellisense ¯\_(ツ)_/¯
+// #include "daisysp-lgpl.h"
 #include "daisysp.h"
 #include "hothouse.h"
 
@@ -33,7 +36,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   hw.ProcessAllControls();
 
   // Toggle effect bypass LED when footswitch is pressed
-  if (hw.switches[Hothouse::FOOTSWITCH_2].FallingEdge()) {
+  if (hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge()) {
     bypass = !bypass;
     // LED off when bypassed, on otherwise
     led_bypass.Set(bypass ? 0.0f : 1.0f);
@@ -56,7 +59,6 @@ int main() {
   hw.SetAudioBlockSize(4);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  // Initialize LEDs
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
