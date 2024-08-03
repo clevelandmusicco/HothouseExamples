@@ -6,9 +6,17 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 <img src="/resources/hothouse-front-553px.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse-kit-553px.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
-This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish:
+This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish.
 
-* **BasicSpringReverb** - A spring reverb effect ported from the [DaisyExamples repo](https://github.com/electro-smith/DaisyExamples/tree/master)
+## Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master)
+
+A few examples ported as-is (bitwise XORs and all!):
+
+* **BasicChorus** - Fully-tweakable mono chorus effect
+* **BasicSpringReverb** - Straightforward spring reverb effect
+
+## Cleveland Music Co. examples
+
 * **HarmonicTremVerb** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **ShimmerVerb** - Shimmer reverb with modulated reverb tails
@@ -17,7 +25,7 @@ This project is a collection of digital signal processing code examples that you
 
 ## Community contributions
 
-* **TremVerb** - Tremolo / reverb effect contributed by by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
+* **TremVerb** - Tremolo / reverb effect contributed by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
 
 > [!NOTE]
 > This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;many more contributions from the community!
@@ -26,7 +34,7 @@ Also included is a `create_new_proj.py` helper script that creates a compilable,
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
 
-## A note for the ~~neckbeards~~ perfectionists
+### A note for the ~~neckbeards~~ perfectionists
 
 The code in this project is meant to strike a balance between educational and functional. There are more elegant, concise, and sometimes "better" ways to accomplish what much of this code does. However, in the interest of accessibility and understandability, it is presented in a simple, straightforward form. If you want to improve the code in ways that make it more educational and functional, please do so! Pull requests are always welcome.
 
