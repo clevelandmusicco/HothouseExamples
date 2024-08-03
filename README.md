@@ -10,22 +10,23 @@ This project is a collection of digital signal processing code examples that you
 
 ## Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master)
 
-A few examples ported as-is (bitwise XORs and all!):
+A few examples ported as-is (bitwise XORs and all):
 
-* **BasicChorus** - Fully-tweakable mono chorus effect
-* **BasicSpringReverb** - Straightforward spring reverb effect
+* **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable mono chorus effect
+* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicCFlanger)** - Simple flanger effect with adjustable delay and feedback
+* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Straightforward spring reverb effect
 
 ## Cleveland Music Co. examples
 
-* **HarmonicTremVerb** - Tremolo with tweakable harmonic mode and a spring reverb effect
+* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
-* **ShimmerVerb** - Shimmer reverb with modulated reverb tails
+* **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails
 * **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
 * And more to come ...
 
 ## Community contributions
 
-* **TremVerb** - Tremolo / reverb effect contributed by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
+* **[TremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TremVerb)** - Tremolo / reverb effect contributed by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
 
 > [!NOTE]
 > This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;many more contributions from the community!
