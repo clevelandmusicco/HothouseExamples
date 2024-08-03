@@ -13,7 +13,7 @@ This project is a collection of digital signal processing code examples that you
 A few examples ported as-is (bitwise XORs and all):
 
 * **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable mono chorus effect
-* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicCFlanger)** - Simple flanger effect with adjustable delay and feedback
+* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
 * **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Straightforward spring reverb effect
 
 ## Cleveland Music Co. examples
