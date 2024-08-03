@@ -1,5 +1,6 @@
 // BasicChorus for Hothouse DIY DSP Platform
-// Copyright (C) 2024 Your Name <your@email>
+// A port of the petal/chorus example from the DaisyExamples repo
+// Copyright (C) 2024 Cleveland Music Co. <code@clevelandmusicco.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
