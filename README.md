@@ -15,6 +15,7 @@ A few examples ported as-is (bitwise XORs and all):
 * **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable mono chorus effect
 * **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
 * **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Straightforward spring reverb effect
+* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo ... as basic as it gets
 
 ## Cleveland Music Co. examples
 
