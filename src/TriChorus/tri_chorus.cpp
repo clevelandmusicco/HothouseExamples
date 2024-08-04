@@ -21,33 +21,97 @@ using clevelandmusicco::Hothouse;
 using daisy::AudioHandle;
 using daisy::Led;
 using daisy::SaiHandle;
+using daisysp::Chorus;
+using daisysp::fonepole;
 
+const int num_voices = 3;
+Chorus ch[num_voices];
 Hothouse hw;
-
-// Bypass vars
 Led led_bypass;
+
+float wet, vol;
+float deltarget[num_voices], del[num_voices];
+float lfotarget[num_voices], lfo[num_voices];
+float freq_vary, depth_vary, delay_vary;
 bool bypass = true;
+
+// Arbitrary variation values for lfo freq, lfo depth, and delay time
+// Tweak to your use case
+float GetFreqVariation() {
+  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)) {
+    case Hothouse::TOGGLESWITCH_UP:
+      return 0.2f;
+    case Hothouse::TOGGLESWITCH_MIDDLE:
+      return 0.1f;
+    case Hothouse::TOGGLESWITCH_DOWN:
+    default:
+      return 0.02f;
+  }
+}
+
+float GetDepthVariation() {
+  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2)) {
+    case (Hothouse::TOGGLESWITCH_UP):
+      return 0.5f;
+    case (Hothouse::TOGGLESWITCH_MIDDLE):
+      return 0.25f;
+    case (Hothouse::TOGGLESWITCH_DOWN):
+    default:
+      return 0.05f;
+  }
+}
+
+float GetDelayVariation() {
+  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)) {
+    case (Hothouse::TOGGLESWITCH_UP):
+      return 0.2f;
+    case (Hothouse::TOGGLESWITCH_MIDDLE):
+      return 0.1f;
+    case (Hothouse::TOGGLESWITCH_DOWN):
+    default:
+      return 0.05f;
+  }
+}
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  // Toggle effect bypass LED when footswitch is pressed
-  if (hw.switches[Hothouse::FOOTSWITCH_2].FallingEdge()) {
-    bypass = !bypass;
-    // LED off when bypassed, on otherwise
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
+  vol = hw.knobs[Hothouse::KNOB_1].Process() * 2.0f;
+  float k = hw.knobs[Hothouse::KNOB_2].Process();
+  float base_lfo_freq = k * k * 20.0f;
+  float base_lfo_depth = hw.knobs[Hothouse::KNOB_3].Process();
+  float base_del = hw.knobs[Hothouse::KNOB_4].Process();
+  float feedback = hw.knobs[Hothouse::KNOB_5].Process();
+  wet = hw.knobs[Hothouse::KNOB_6].Process();
+
+  // Slightly vary values for lfo freq, lfo depth and delay time
+  for (int i = 0; i < num_voices; ++i) {
+    ch[i].SetLfoFreq(base_lfo_freq * (1.0f + GetFreqVariation() * (i - 1)));
+    lfo[i] = base_lfo_depth * (1.0f + GetDepthVariation() * (i - 1));
+    del[i] = base_del * (1.0f + GetDelayVariation() * (i - 1));
+    ch[i].SetFeedback(feedback);
   }
 
-  // Update the LEDs
-  led_bypass.Update();
+  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
-    if (bypass) {
-      out[0][i] = in[0][i];
-    } else {
-      out[0][i] = 0.0f;  // TODO: replace silence with something awesome
+    float sig = 0.0f;
+
+    for (int j = 0; j < num_voices; ++j) {
+      fonepole(del[j], deltarget[j], 0.0001f);  // smooth at audio rate
+      ch[j].SetDelay(del[j]);
+
+      fonepole(lfo[j], lfotarget[j], 0.0001f);  // smooth at audio rate
+      ch[j].SetLfoDepth(lfo[j]);
+
+      if (!bypass) {
+        ch[j].Process(in[0][i]);
+        sig += ch[j].GetLeft();
+      }
     }
+
+    out[0][i] = bypass ? in[0][i] : (sig * wet + in[0][i] * (1.0f - wet)) * vol;
   }
 }
 
@@ -56,14 +120,23 @@ int main() {
   hw.SetAudioBlockSize(4);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  // Initialize LEDs
+  for (int i = 0; i < num_voices; ++i) {
+    ch[i].Init(hw.AudioSampleRate());
+    deltarget[i] = del[i] = 0.0f;
+    lfotarget[i] = lfo[i] = 0.0f;
+  }
+
+  wet = 0.9f;
+
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever
+    hw.DelayMs(6);
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
   }
   return 0;
 }

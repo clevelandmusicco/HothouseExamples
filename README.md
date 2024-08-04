@@ -24,7 +24,7 @@ A few examples ported as-is:
 * **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with tweakable harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails
-* **TriChorus** - Coming soon ... Chorus effect with up to three chorus voices
+* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it the Fuzz Factory of choruses)
 * And more to come ...
 
 ## Community contributions
