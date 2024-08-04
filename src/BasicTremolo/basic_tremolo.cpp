@@ -14,6 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Ported directly from the 'petal/tremolo' example in DaisyExamples. Knobs,
+// switches, and pins are directly accessed without enums, so look at hothouse.h
+// to decipher the mappings. Parameters are not used either; the .Process()
+// function on knobs defaults to a 0.0f -> 1.0f range.
+
+// ### It's fair to call this code 'obfuscated', but it's been left as-is. ###
+
 #include "daisysp.h"
 #include "hothouse.h"
 
