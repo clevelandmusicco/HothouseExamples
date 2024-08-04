@@ -10,10 +10,11 @@ This project is a collection of digital signal processing code examples that you
 
 ## Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master)
 
-A few examples ported as-is (bitwise XORs and all):
+A few examples ported as-is:
 
 * **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable mono chorus effect
 * **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
+* **[BasicPhaser](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicPhaser)** - Flexible phaser with 1-8 stages (poles)
 * **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Straightforward spring reverb effect
 * **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo ... as basic as it gets
 

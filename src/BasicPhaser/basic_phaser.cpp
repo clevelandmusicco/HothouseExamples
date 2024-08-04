@@ -1,5 +1,5 @@
-// BasicFlanger for Hothouse DIY DSP Platform
-// A port of the petal/flanger example from the DaisyExamples repo
+// BasicPhaser for Hothouse DIY DSP Platform
+// A port of the petal/phaser example from the DaisyExamples repo
 // Copyright (C) 2024 Cleveland Music Co. <code@clevelandmusicco.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Ported directly from the 'petal/flanger' example in DaisyExamples. Knobs,
+// Ported directly from the 'petal/phaser' example in DaisyExamples. Knobs,
 // switches, and pins are directly accessed without enums, so look at hothouse.h
 // to decipher the mappings. Parameters are not used either; the .Process()
 // function on knobs defaults to a 0.0f -> 1.0f range.
@@ -29,15 +29,15 @@ using clevelandmusicco::Hothouse;
 using daisy::AudioHandle;
 using daisy::Led;
 using daisy::SaiHandle;
-using daisysp::Flanger;
 using daisysp::fonepole;
+using daisysp::Phaser;
 
-Flanger flanger;
 Hothouse hw;
+Phaser phaser;
 Led led_bypass;
 
-float wet, vol;
-float deltarget, del;
+float wet;
+float freqtarget, freq;
 float lfotarget, lfo;
 bool bypass = true;
 
@@ -45,29 +45,32 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
+  // knobs
   wet = hw.knobs[0].Process();
-  deltarget = hw.knobs[1].Process();
-  flanger.SetFeedback(hw.knobs[2].Process());
-  float val = hw.knobs[3].Process();
-  flanger.SetLfoFreq(val * val * 10.0f);
-  lfotarget = hw.knobs[4].Process();
-  vol = hw.knobs[5].Process() * 2.0f;
+  float k = hw.knobs[1].Process();
+  phaser.SetLfoFreq(k * k * 20.f);
+  lfo = hw.knobs[2].Process();
+  k = hw.knobs[3].Process();
+  freq = k * k * 7000;  // 0 - 10 kHz, square curve
+  phaser.SetFeedback(hw.knobs[4].Process());
+
+  // simulate encoder in original example
+  phaser.SetPoles(1 + static_cast<int>(hw.knobs[5].Process() * 7.0f));
 
   // footswitch
   bypass ^= hw.switches[7].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
-    fonepole(del, deltarget, 0.0001f);  // smooth at audio rate
-    flanger.SetDelay(del);
+    fonepole(freq, freqtarget, 0.0001f);  // smooth at audio rate
+    phaser.SetFreq(freq);
 
     fonepole(lfo, lfotarget, 0.0001f);  // smooth at audio rate
-    flanger.SetLfoDepth(lfo);
+    phaser.SetLfoDepth(lfo);
 
     out[0][i] = in[0][i];
 
     if (!bypass) {
-      float sig = flanger.Process(in[0][i]);
-      out[0][i] = (sig * wet + in[0][i] * (1.0f - wet)) * vol;
+      out[0][i] = phaser.Process(in[0][i]) * wet + in[0][i] * (1.0f - wet);
     }
   }
 }
@@ -76,13 +79,15 @@ int main() {
   hw.Init();
   hw.SetAudioBlockSize(4);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+  float sample_rate = hw.AudioSampleRate();
 
-  deltarget = del = 0.0f;
-  lfotarget = lfo = 0.0f;
-  flanger.Init(hw.AudioSampleRate());
+  phaser.Init(sample_rate);
+
   wet = 0.9f;
+  freqtarget = freq = 0.0f;
+  lfotarget = lfo = 0.0f;
 
-  led_bypass.Init(hw.seed.GetPin(23), false);
+  led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);

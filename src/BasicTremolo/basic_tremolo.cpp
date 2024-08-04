@@ -21,27 +21,22 @@ using clevelandmusicco::Hothouse;
 using daisy::AudioHandle;
 using daisy::Led;
 using daisy::SaiHandle;
-using daisysp::Tremolo;
 using daisysp::Oscillator;
+using daisysp::Tremolo;
 
 Hothouse hw;
-Tremolo trem;
 Led led_bypass;
+Tremolo trem;
 
 int waveform;
 bool bypass = true;
 
-// An oasis of readable code ;) 
 int GetWaveform() {
-  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)) {
-    case Hothouse::TOGGLESWITCH_UP:
-      return Oscillator::WAVE_POLYBLEP_TRI;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      return Oscillator::WAVE_SIN;
-    case Hothouse::TOGGLESWITCH_DOWN:
-    default:
-      return Oscillator::WAVE_POLYBLEP_SQUARE;
-  }
+  // lookup array for brevity
+  static const int waveforms[] = {Oscillator::WAVE_POLYBLEP_TRI,
+                                  Oscillator::WAVE_SIN,
+                                  Oscillator::WAVE_POLYBLEP_SQUARE};
+  return waveforms[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
 }
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
@@ -52,9 +47,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   trem.SetDepth(hw.knobs[1].Process());
   trem.SetWaveform(GetWaveform());
 
+  // footswitch
   bypass ^= hw.switches[7].RisingEdge();
-  led_bypass.Set(bypass ? 0.0f : 1.0f);
-  led_bypass.Update();
 
   for (size_t i = 0; i < size; ++i) {
     out[0][i] = !bypass ? trem.Process(in[0][i]) : in[0][i];
@@ -76,7 +70,9 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever
+    hw.DelayMs(6);
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
   }
   return 0;
 }

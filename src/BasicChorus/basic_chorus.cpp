@@ -32,8 +32,8 @@ using daisy::SaiHandle;
 using daisysp::Chorus;
 using daisysp::fonepole;
 
-Hothouse hw;
 Chorus ch;
+Hothouse hw;
 Led led_bypass;
 
 float wet, vol;
@@ -53,10 +53,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   ch.SetFeedback(hw.knobs[4].Process());
   vol = hw.knobs[5].Process() * 2.0f;
 
+  // footswitch
   bypass ^= hw.switches[7].RisingEdge();
-  led_bypass.Set(bypass ? 0.0f : 1.0f);
-
-  led_bypass.Update();
 
   for (size_t i = 0; i < size; ++i) {
     fonepole(del, deltarget, 0.0001f);  // smooth at audio rate
@@ -93,7 +91,9 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever
+    hw.DelayMs(6);
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
   }
   return 0;
 }
