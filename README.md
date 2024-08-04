@@ -38,10 +38,6 @@ Also included is a `create_new_proj.py` helper script that creates a compilable,
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
 
-### A note for the ~~neckbeards~~ perfectionists
-
-The code in this project is meant to strike a balance between educational and functional. There are more elegant, concise, and sometimes "better" ways to accomplish what much of this code does. However, in the interest of accessibility and understandability, it is presented in a simple, straightforward form. If you want to improve the code in ways that make it more educational and functional, please do so! Pull requests are always welcome.
-
 ## Getting started
 
 ### Prerequisites
