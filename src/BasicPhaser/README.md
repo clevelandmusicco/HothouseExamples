@@ -4,7 +4,7 @@ Contributed by Cleveland Music Co. \<<code@clevelandmusicco.com>\>
 
 ## Description
 
-A literal port of the [petal/phaser example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/phaser). Knobs, switches, and pins are (mostly) directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state. :neckbeard:
+A literal port of the [petal/phaser example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/phaser). Knobs, switches, and pins are (mostly) directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state.
 
 ### Controls
 

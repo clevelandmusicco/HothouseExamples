@@ -4,12 +4,12 @@ Contributed by Cleveland Music Co. \<<code@clevelandmusicco.com>\>
 
 ## Description
 
-A literal port of the [petal/tremolo example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/tremolo). Knobs, switches, and pins are (mostly) directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state. :neckbeard:
+A literal port of the [petal/tremolo example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/tremolo). Knobs, switches, and pins are (mostly) directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state.
 
 The square wave is a little "clicky" in this example, even using WAVE_POLYBLEP_SQUARE. A more advanced example using an optimized square waveform that minimizes the "clicks" (caused by discontinuities in the audio) is [HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb).
 
 > [!WARNING]
-> It's fair to call this code 'obfuscated', but it's been left as-is for ... posterity? Sounds great in any case.
+> It's probably fair to call this code 'obfuscated', but it's been left as-is. Sounds great in any case.
 
 ### Controls
 

@@ -4,10 +4,10 @@ Contributed by Cleveland Music Co. \<<code@clevelandmusicco.com>\>
 
 ## Description
 
-A literal port of the [petal/flanger example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/flanger). Knobs, switches, and pins are directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state. :neckbeard:
+A literal port of the [petal/flanger example from DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master/petal/flanger). Knobs, switches, and pins are directly accessed without enums, so look at `hothouse.h` if you want to decipher the mappings. Parameters are not used; the `.Process()` function on knobs defaults to a 0.0f -> 1.0f range. And, yes, that's a bitwise XOR being used to toggle the bypass state.
 
 > [!WARNING]
-> It's fair to call this code 'obfuscated', but it's been left as-is for ... posterity? Sounds great in any case.
+> It's probably fair to call this code 'obfuscated', but it's been left as-is. Sounds great in any case.
 
 ### Controls
 
