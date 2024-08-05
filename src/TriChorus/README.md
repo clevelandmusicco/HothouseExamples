@@ -17,7 +17,7 @@ Refer to the values in the table below. As an example, if SWITCH 1 is DOWN, the 
 Rinse and repeat this math for DEPTH and DELAY.
 
 > [!WARNING]
-> Since these variation values are used as computational factors, it's easy to create ugly sounds. Starting with all the switches DOWN is recommended. Experiment, experiment, experiment!
+> Since these values are used as computational factors, it's easy to create ugly sounds. Start with all the switches DOWN and experiment, experiment, experiment!
 
 ### Controls
 
@@ -30,7 +30,7 @@ Rinse and repeat this math for DEPTH and DELAY.
 | KNOB 5 | FEEDBACK | Feedback value for all voices |
 | KNOB 6 | WET | Controls level of wet signal mixed with dry |
 | SWITCH 1 | FREQ VARIATION | **UP**: +/-20%<br/>**MIDDLE**: +/-10%<br/>**DOWN**: +/-2% |
-| SWITCH 2 | DEPTH VARIATION | **UP**: +/-50% (!!)<br/>**MIDDLE**: +/-25%<br/>**DOWN**: +/-5% |
+| SWITCH 2 | DEPTH VARIATION | **UP**: +/-40%<br/>**MIDDLE**: +/-20%<br/>**DOWN**: +/-5% |
 | SWITCH 3 | DELAY VARIATION | **UP**: +/-20%<br/>**MIDDLE**: +/-10%<br/>**DOWN**: +/-5% |
 | FOOTSWITCH 1 | Unused |  |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
