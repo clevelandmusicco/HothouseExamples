@@ -22,6 +22,7 @@ using daisy::AudioHandle;
 using daisy::Led;
 using daisy::SaiHandle;
 using daisysp::Chorus;
+using daisysp::fclamp;
 using daisysp::fonepole;
 
 const int num_voices = 3;
@@ -50,20 +51,24 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  vol = hw.knobs[Hothouse::KNOB_1].Process() * 2.0f;
+  vol = hw.knobs[Hothouse::KNOB_1].Process() * 2.0f;  // Allow output boost
+
   float k = hw.knobs[Hothouse::KNOB_2].Process();
-  float base_lfo_freq = k * k * 20.0f;
+  float base_lfo_freq = k * k * 10.0f;  // Parabolic curve capped at 10
+  base_lfo_freq = fclamp(base_lfo_freq, 0.2f, 10.0f);
   float base_lfo_depth = hw.knobs[Hothouse::KNOB_3].Process();
-  float base_del = hw.knobs[Hothouse::KNOB_4].Process();
+  float base_del = hw.knobs[Hothouse::KNOB_4].Process() * 30.0f;
+  base_del = fclamp(base_del, 1.0f, 30.0f);  // 1ms to 30ms
   float feedback = hw.knobs[Hothouse::KNOB_5].Process();
   wet = hw.knobs[Hothouse::KNOB_6].Process();
 
   // Slight variations for lfo freq, lfo depth, and delay time
   // Tweak to your use case
-  float freq_vary = GetVariation(
-      hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1), 0.2f, 0.1f, 0.02f);
+  float freq_vary =
+      GetVariation(hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1), 0.05f,
+                   0.02f, 0.01f);
   float depth_vary = GetVariation(
-      hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2), 0.4f, 0.2f, 0.05f);
+      hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2), 0.2f, 0.1f, 0.05f);
   float delay_vary = GetVariation(
       hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3), 0.2f, 0.1f, 0.05f);
 
@@ -80,7 +85,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     float sig = 0.0f;
     for (int j = 0; j < num_voices; ++j) {
       fonepole(del[j], deltarget[j], 0.0001f);  // smooth at audio rate
-      ch[j].SetDelay(del[j]);
+      ch[j].SetDelayMs(del[j]);
       fonepole(lfo[j], lfotarget[j], 0.0001f);  // smooth at audio rate
       ch[j].SetLfoDepth(lfo[j]);
 
