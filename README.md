@@ -1,4 +1,4 @@
-# Examples for the Hothouse Digital Signal Processing Pedal Kit
+# Examples for Hothouse Digital Signal Processing Pedal Kit
 
 **:wrench: [Hothouse Build Guide](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide) | :question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) | :books: [Wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki) | :globe_with_meridians: [Official Website](https://clevelandmusicco.com/)**
 
@@ -49,13 +49,13 @@ A few examples ported as-is:
 
 Clone the repo:
 
-```console
+```text
 git clone https://github.com/clevelandmusicco/HothouseExamples
 ```
 
 Init and build the [libDaisy](https://github.com/electro-smith/libDaisy.git) and [DaisySP](https://github.com/electro-smith/DaisySP.git) libraries; these are included as submodules:
 
-```console
+```text
 cd HothouseExamples
 git submodule update --init --recursive
 
@@ -67,7 +67,7 @@ make -C DaisySP
 
 To build a specific effect (replace 'HelloWorld' with the desired effect):
 
-```console
+```text
 cd src/HelloWorld
 make clean; make
 ```
@@ -78,7 +78,7 @@ The resulting `hello-world.bin` will be in `src/HelloWorld/build`.
 
 To build all of the effects in the `src` dir:
 
-```console
+```text
 # Helper script is in the repo root dir
 cd HothouseExamples
 python build_examples.py
@@ -90,26 +90,26 @@ By default, the compiled `*.bin` files will be in the `build` subdirectory of ea
 
 This might be useful if you prefer all your binaries in one directory to, for example, make them easier to find while flashing the Daisy Seed. If you want to publish the resulting `*.bin` files to a common location after compiling, pass the `--publish_dir` argument. For example, to publish all the `*.bin` files to `/development/hothouse/bin`:
 
-```console
+```text
 python build_examples.py --publish_dir /development/hothouse/bin
 ```
 
 This performs a simple copy operation after the `make` command. The original `*.bin` files will remain in the `build` subdirectory of each example. Only the `*.bin` files are copied; the `*.elf`, `*.hex`, etc. files are uncopied and untouched.
 
-> [!NOTE]
-> This feature *should* be OS independent, but it hasn't been thoroughly tested on Windows or Mac. Any issues will likely be caused by unexpected filepath delimiters. *(6 Aug 2024)*
+> [!WARNING]
+> This feature *should* be OS independent, but it hasn't been tested on Windows or Mac. Any issues will likely be caused by unexpected filepath delimiters. *(6 Aug 2024)*
 
 ### Flashing the Hothouse
 
 To flash an effect to your Hothouse, you will load a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
 
-```console
+```text
 cd src/HelloWorld
 ```
 
 Assuming you've already compiled the code, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with with the following command:
 
-```console
+```text
 # Using USB
 make program-dfu
 ```
@@ -118,7 +118,7 @@ Install the Daisy Seed into your Hothouse, power it up and off you go!
 
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (***AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
 
-```console
+```text
 # Using JTAG/SWD adaptor (like STLink)
 make program
 ```
@@ -134,7 +134,7 @@ Alternatively, you can flash the Daisy Seed using the [Daisy Web Programmer](htt
 
 Use the `create_new_proj.py` helper script to create a bare effect project in the `src` dir:
 
-```console
+```text
 python create_new_proj.py -h
 usage: create_new_proj.py [-h] --proj_name PROJ_NAME [--your_name YOUR_NAME] [--your_email YOUR_EMAIL]
 
@@ -152,7 +152,7 @@ options:
 > [!NOTE]
 > `--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
 
-```console
+```text
 # Helper script is in the repo root dir
 cd HothouseExamples
 python create_new_proj.py --proj_name MyAwesomeEffect \
@@ -162,7 +162,7 @@ python create_new_proj.py --proj_name MyAwesomeEffect \
 
 This results in a new directory under `src`:
 
-```console
+```text
 src/MyAwesomeEffect
 ├── Makefile
 ├── my_awesome_effect.cpp
@@ -197,7 +197,7 @@ void AudioCallback(AudioHandle::InputBuffer in,
 
 Build your new effect as you would any other:
 
-```console
+```text
 cd src/MyAwesomeEffect
 make clean
 make
