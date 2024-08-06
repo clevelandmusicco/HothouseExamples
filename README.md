@@ -96,7 +96,7 @@ python build_examples.py --publish_dir /development/hothouse/bin
 
 This performs a simple copy operation after the `make` command. The original `*.bin` files will remain in the `build` subdirectory of each example. Only the `*.bin` files are copied; the `*.elf`, `*.hex`, etc. files are uncopied and untouched.
 
-The `--publish_dir` argument can also be a relative path. In this case, specify a path relative to each example's subdirectory. For example, the following would publish all resulting `*.bin` files 2 diretories up from each example's subdirectory (in `/HothouseExamples/bin/`):
+The `--publish_dir` argument can also be a relative path. In this case, specify a path relative to each example's subdirectory. For example, the following would publish all resulting `*.bin` files 2 directories up from each example's subdirectory (in `/HothouseExamples/bin/`):
 
 ```text
 python build_examples.py --publish_dir ../../bin
