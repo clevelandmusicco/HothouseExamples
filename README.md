@@ -6,7 +6,9 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 <img src="/resources/hothouse-front-553px.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse-kit-553px.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
-This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish.
+This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish. Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
+
+If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
 
 ## Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master)
 
@@ -16,15 +18,15 @@ A few examples ported as-is:
 * **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
 * **[BasicMultiDelay](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicMultiDelay)** - 3 delay lines, each with tweakable time and feedback
 * **[BasicPhaser](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicPhaser)** - Flexible phaser with 1-8 stages (poles)
-* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Straightforward spring reverb effect
-* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo ... as basic as it gets
+* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Classic spring reverb effect
+* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo as simple as it gets
 
 ## Cleveland Music Co. examples
 
-* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with tweakable harmonic mode and a spring reverb effect
+* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails
-* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it the Fuzz Factory of choruses)
+* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it a sort of Fuzz Factory of chorus pedals)
 * And more to come ...
 
 ## Community contributions
@@ -33,10 +35,6 @@ A few examples ported as-is:
 
 > [!NOTE]
 > This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;many more contributions from the community!
-
-Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
-
-If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
 
 ## Getting started
 
@@ -47,7 +45,7 @@ If you're not familar with the Daisy Seed or its development environment, check 
 * **[A Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) (with a Daisy Seed installed)** - Whether you acquired it as a kit or fully-assembled, either will work fine.
 * **Python 3.x** - The commands on this page were tested with `Python 3.10.14` aliased to the local `python` command. The python scripts in this repo have not been tested with any other version.
 
-### Building the code
+### Getting and initializing the code
 
 Clone the repo:
 
@@ -65,18 +63,41 @@ make -C libDaisy
 make -C DaisySP
 ```
 
-To build all of the effects in the `src` dir:
+### Build a single example
 
-```console
-python build_examples.py
-```
-
-To (re)build a specific effect (replace 'HelloWorld' with the desired effect):
+To build a specific effect (replace 'HelloWorld' with the desired effect):
 
 ```console
 cd src/HelloWorld
 make clean; make
 ```
+
+The resulting `hello-world.bin` will be in `src/HelloWorld/build`.
+
+### Build all examples
+
+To build all of the effects in the `src` dir:
+
+```console
+# Helper script is in the repo root dir
+cd HothouseExamples
+python build_examples.py
+```
+
+By default, the compiled `*.bin` files will be in the `build` subdirectory of each example.
+
+### Publishing the binaries to another location
+
+This might be useful if you prefer all your binaries in one directory to, for example, make them easier to find while flashing the Daisy Seed. If you want to publish the resulting `*.bin` files to a common location after compiling, pass the `--publish_dir` argument. For example, to publish all the `*.bin` files to `/development/hothouse/bin`:
+
+```console
+python build_examples.py --publish_dir /development/hothouse/bin
+```
+
+This performs a simple copy operation after the `make` command. The original `*.bin` files will remain in the `build` subdirectory of each example. Only the `*.bin` files are copied; the `*.elf`, `*.hex`, etc. files are uncopied and untouched.
+
+> [!NOTE]
+> This feature *should* be OS independent, but it hasn't been thoroughly tested on Windows or Mac. Any issues will likely be caused by unexpected filepath delimiters. *(6 Aug 2024)*
 
 ### Flashing the Hothouse
 
@@ -132,6 +153,8 @@ options:
 > `--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
 
 ```console
+# Helper script is in the repo root dir
+cd HothouseExamples
 python create_new_proj.py --proj_name MyAwesomeEffect \
                           --your_name "John Developer" \
                           --your_email john.developer@email.domain
@@ -153,7 +176,7 @@ src/MyAwesomeEffect
     └── tasks.json
 ```
 
-Straight away, the code can be compiled and flashed as usual, but until you add your own code, it will just write silence to the output.
+Straight away, the code can be compiled and flashed as usual, but until you add your own code, the new effect will just write silence to the output when not bypassed. By default, `AudioCallback()` looks something like this:
 
 ```cpp
 void AudioCallback(AudioHandle::InputBuffer in, 
@@ -172,8 +195,7 @@ void AudioCallback(AudioHandle::InputBuffer in,
 }
 ```
 
-> [!NOTE]
-> Notice the `TODO` comment above! Once you've replaced the code with your own, build and flash as per normal.
+Build your new effect as you would any other:
 
 ```console
 cd src/MyAwesomeEffect
@@ -186,6 +208,8 @@ make program-dfu
 # JTAG/SWD
 make program
 ```
+
+Your new effect will also be automatically recognized by the `build_examples.py` helper script, and will be built along with all the other examples when running the script.
 
 > [!TIP]
 > The `create_new_proj.py` script copies a template project while replacing some string tokens along the way. The template project is in `resources/_template` and can be modified / extended to your liking.

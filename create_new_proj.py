@@ -6,6 +6,7 @@ Helper script to create a new, blank Hothouse effect project.
 import argparse
 import os
 import re
+from pathlib import Path
 
 
 def copy_and_replace_directory(
@@ -16,48 +17,35 @@ def copy_and_replace_directory(
     and renaming files as needed.
 
     Args:
-        src_dir (str): Path to the source directory.
-        dst_dir (str): Path to the destination directory.
+        src_dir (Path): Path to the source directory.
+        dst_dir (Path): Path to the destination directory.
         tokens_to_replace (dict): Dictionary where keys are the tokens to
-                                     be replaced in file content
-                                     and values are the replacement strings.
+                                  be replaced in file content
+                                  and values are the replacement strings.
         filenames_to_replace (dict): Dictionary where keys are the tokens to
-                                      be replaced in file names
-                                      and values are the replacement strings.
+                                     be replaced in file names
+                                     and values are the replacement strings.
     """
-    # Create a regex pattern to match any of the tokens to be replaced in content
-    content_pattern = re.compile(
-        "|".join(re.escape(key) for key in tokens_to_replace.keys())
-    )
-
-    # Create a regex pattern to match any of the tokens to be replaced in file names
+    content_pattern = re.compile("|".join(re.escape(key) for key in tokens_to_replace))
     filename_pattern = re.compile(
-        "|".join(re.escape(key) for key in filenames_to_replace.keys())
+        "|".join(re.escape(key) for key in filenames_to_replace)
     )
 
-    # Walk through the source directory
-    for root, dirs, files in os.walk(src_dir):
-        dirs.sort()
-        files.sort()
+    for root, _, files in sorted(os.walk(src_dir)):
+        rel_path = Path(root).relative_to(src_dir)
+        new_dir = dst_dir / rel_path
+        new_dir.mkdir(parents=True, exist_ok=True)
 
-        # Determine the destination directory
-        rel_path = os.path.relpath(root, src_dir)
-        new_dir = os.path.join(dst_dir, rel_path)
-        os.makedirs(new_dir, exist_ok=False)
-
-        for file in files:
-            src_file = os.path.join(root, file)
-
-            # Rename the file if needed
+        for file in sorted(files):
+            src_file = Path(root) / file
             new_filename = filename_pattern.sub(
                 lambda match: filenames_to_replace[match.group(0)], file
             )
-            dst_file = os.path.join(new_dir, new_filename)
+            dst_file = new_dir / new_filename
             print(f"Creating {dst_file} ...")
 
-            # Copy and replace tokens in the file content
-            with open(src_file, "r", encoding="utf-8") as src, open(
-                dst_file, "w", encoding="utf-8"
+            with src_file.open("r", encoding="utf-8") as src, dst_file.open(
+                "w", encoding="utf-8"
             ) as dst:
                 for line in src:
                     new_line = content_pattern.sub(
@@ -68,54 +56,55 @@ def copy_and_replace_directory(
 
 def camel_to_snake(camel_str):
     """
-    Helper function to convert CamelCase or pascalCase strings to snake_case.
+    Helper function to convert CamelCase or PascalCase strings to snake_case.
     """
-    snake_str = re.sub("([A-Z])", r"_\1", camel_str).lower()
-    return snake_str.lstrip("_")
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", camel_str).lower()
 
 
-# Create the parser
-parser = argparse.ArgumentParser()
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Create a new Hothouse effect project."
+    )
+    parser.add_argument(
+        "--proj_name",
+        type=str,
+        required=True,
+        help="Name of the new project in camelCase or PascalCase.",
+    )
+    parser.add_argument(
+        "--your_name",
+        type=str,
+        default="Your Name",
+        help="Your name for use in the license and README.",
+    )
+    parser.add_argument(
+        "--your_email",
+        type=str,
+        default="your@email",
+        help="Your email address for use in the license and README.",
+    )
+    return parser.parse_args()
 
-# Add arguments
-parser.add_argument(
-    "--proj_name",
-    type=str,
-    required=True,
-    help="Name of the new project in camelCase or PascalCase.",
-)
-parser.add_argument(
-    "--your_name",
-    type=str,
-    required=False,
-    help="Your name for use in the license and README.",
-    default="Your Name",
-)
-parser.add_argument(
-    "--your_email",
-    type=str,
-    required=False,
-    help="Your email address for use in the license and README.",
-    default="your@email",
-)
 
-# Parse the arguments
-args = parser.parse_args()
+def main():
+    args = parse_arguments()
 
-# Copy the _template project into a new project directory,
-# replacing various string tokens along the way
-SOURCE_DIR = "resources/_template"
-dest_dir = f"src/{args.proj_name}"
-tokens = {
-    "@@template_uc": f"{args.proj_name}",
-    "@@template_sc": f"{camel_to_snake(args.proj_name)}",
-    "@@your_name": f"{args.your_name}",
-    "@@your_email": f"{args.your_email}",
-}
+    src_dir = Path("resources/_template")
+    dest_dir = Path(f"src/{args.proj_name}")
+    tokens = {
+        "@@template_uc": args.proj_name,
+        "@@template_sc": camel_to_snake(args.proj_name),
+        "@@your_name": args.your_name,
+        "@@your_email": args.your_email,
+    }
 
-filenames = {
-    "_template.cpp": f"{camel_to_snake(args.proj_name)}.cpp",
-}
+    filenames = {
+        "_template.cpp": f"{camel_to_snake(args.proj_name)}.cpp",
+    }
 
-copy_and_replace_directory(SOURCE_DIR, dest_dir, tokens, filenames)
-print("Done!")
+    copy_and_replace_directory(src_dir, dest_dir, tokens, filenames)
+    print("Done!")
+
+
+if __name__ == "__main__":
+    main()
