@@ -25,56 +25,56 @@ using daisysp::Chorus;
 using daisysp::fclamp;
 using daisysp::fonepole;
 
-const int num_voices = 3;
-Chorus ch[num_voices];
+// Feel free to expirement, but 3 voices seems to work best
+const int kNumVoices = 3;
+
+// Typical values for vintage 1980s chorus effects
+constexpr float kMinLfoFreq = 0.2f;
+constexpr float kMaxLfoFreq = 10.0f;
+constexpr float kMinDelay = 1.0f;
+constexpr float kMaxDelay = 30.0f;
+
+// Arrays map to toggle switch positions like this:
+//   k*Vals[] = {UP, MIDDLE, DOWN}
+const float kFreqVals[] = {0.05f, 0.02f, 0.01f};
+const float kDepthVals[] = {0.2f, 0.1f, 0.05f};
+const float kDelayVals[] = {0.2f, 0.1f, 0.05f};
+
+Chorus ch[kNumVoices];
 Hothouse hw;
 Led led_bypass;
 
 float wet, vol;
-float deltarget[num_voices], del[num_voices];
-float lfotarget[num_voices], lfo[num_voices];
+float deltarget[kNumVoices], del[kNumVoices];
+float lfotarget[kNumVoices], lfo[kNumVoices];
 bool bypass = true;
-
-float GetVariation(Hothouse::ToggleswitchPosition pos, float up, float middle,
-                   float down) {
-  switch (pos) {
-    case Hothouse::TOGGLESWITCH_UP:
-      return up;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      return middle;
-    default:
-      return down;
-  }
-}
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  vol = hw.knobs[Hothouse::KNOB_1].Process() * 2.0f;  // Allow output boost
+  vol = hw.knobs[Hothouse::KNOB_1].Process() * 3.0f;  // Allow output boost
 
-  float k = hw.knobs[Hothouse::KNOB_2].Process();
-  float base_lfo_freq = k * k * 10.0f;  // Parabolic curve capped at 10
-  base_lfo_freq = fclamp(base_lfo_freq, 0.2f, 10.0f);
-  float base_lfo_depth = hw.knobs[Hothouse::KNOB_3].Process();
-  float base_del = hw.knobs[Hothouse::KNOB_4].Process() * 30.0f;
-  base_del = fclamp(base_del, 1.0f, 30.0f);  // 1ms to 30ms
+  float base_freq = hw.knobs[Hothouse::KNOB_2].Process();
+  base_freq = base_freq * base_freq * 10.0f;
+  base_freq = fclamp(base_freq, kMinLfoFreq, kMaxLfoFreq);
+  float base_depth = hw.knobs[Hothouse::KNOB_3].Process();
+  float base_del = hw.knobs[Hothouse::KNOB_4].Process() * kMaxDelay;
+  base_del = fclamp(base_del, kMinDelay, kMaxDelay);
   float feedback = hw.knobs[Hothouse::KNOB_5].Process();
   wet = hw.knobs[Hothouse::KNOB_6].Process();
 
-  // Slight variations for lfo freq, lfo depth, and delay time
-  // Tweak to your use case
+  // Get slight variations for lfo freq, lfo depth, and delay time
   float freq_vary =
-      GetVariation(hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1), 0.05f,
-                   0.02f, 0.01f);
-  float depth_vary = GetVariation(
-      hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2), 0.2f, 0.1f, 0.05f);
-  float delay_vary = GetVariation(
-      hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3), 0.2f, 0.1f, 0.05f);
+      kFreqVals[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
+  float depth_vary =
+      kDepthVals[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2)];
+  float delay_vary =
+      kDelayVals[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)];
 
-  for (int i = 0; i < num_voices; ++i) {
-    ch[i].SetLfoFreq(base_lfo_freq * (1.0f + freq_vary * (i - 1)));
-    lfo[i] = base_lfo_depth * (1.0f + depth_vary * (i - 1));
+  for (int i = 0; i < kNumVoices; ++i) {
+    ch[i].SetLfoFreq(base_freq * (1.0f + freq_vary * (i - 1)));
+    lfo[i] = base_depth * (1.0f + depth_vary * (i - 1));
     del[i] = base_del * (1.0f + delay_vary * (i - 1));
     ch[i].SetFeedback(feedback);
   }
@@ -83,7 +83,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
   for (size_t i = 0; i < size; ++i) {
     float sig = 0.0f;
-    for (int j = 0; j < num_voices; ++j) {
+    for (int j = 0; j < kNumVoices; ++j) {
       fonepole(del[j], deltarget[j], 0.0001f);  // smooth at audio rate
       ch[j].SetDelayMs(del[j]);
       fonepole(lfo[j], lfotarget[j], 0.0001f);  // smooth at audio rate
@@ -103,13 +103,12 @@ int main() {
   hw.SetAudioBlockSize(4);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  for (int i = 0; i < num_voices; ++i) {
+  for (int i = 0; i < kNumVoices; ++i) {
     ch[i].Init(hw.AudioSampleRate());
     deltarget[i] = del[i] = 0.0f;
     lfotarget[i] = lfo[i] = 0.0f;
   }
 
-  wet = 0.9f;
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
