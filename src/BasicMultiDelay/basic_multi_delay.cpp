@@ -18,12 +18,12 @@
 // switches, and pins are directly accessed without enums, so look at hothouse.h
 // to decipher the mappings.
 
-// ### It's fair to call this code 'obfuscated', but it's been left as-is. ###
+// It's fair to call this code 'obfuscated'; it's been left (mostly) as-is.
 
 #include "daisysp.h"
 #include "hothouse.h"
 
-#define MAX_DELAY static_cast<size_t>(48000 * 1.f)
+#define MAX_DELAY static_cast<size_t>(48000 * 1.0f)
 
 using clevelandmusicco::Hothouse;
 using daisy::AudioHandle;
@@ -58,7 +58,7 @@ struct delay {
 delay delays[3];
 Parameter params[3];
 
-float feedback;
+float feedback, volume;
 int drywet;
 
 // Bypass vars
@@ -86,23 +86,17 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     delays[i].feedback = hw.knobs[(i) + 3].Process();
   }
 
-  // With just 6 knobs, use a toggleswitch with predefined drywet values
-  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)) {
-    case Hothouse::TOGGLESWITCH_UP:
-      drywet = 100;
-      break;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      drywet = 50;
-      break;
-    case Hothouse::TOGGLESWITCH_DOWN:
-    case Hothouse::TOGGLESWITCH_UNKNOWN:
-      drywet = 33;
-  }
+  // we're out of knobs; use a toggleswitch with predefined drywet values
+  static const int drywetValues[] = {100, 50, 33};
+  drywet = drywetValues[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
+
+  // some settings result in low volume; use a toggleswitch to select from
+  // predefined volume multipliers
+  static const float volumeValues[] = {2.0f, 1.5f, 1.0f};
+  volume = volumeValues[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2)];
 
   // footswitch
-  if (hw.switches[7].RisingEdge()) {
-    bypass = !bypass;
-  }
+  bypass ^= hw.switches[7].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
     float mix = 0;
@@ -115,7 +109,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     }
 
     // apply drywet and attenuate
-    mix = fdrywet * mix * 0.3f + (1.0f - fdrywet) * in[0][i];
+    mix = fdrywet * mix * 0.333f + (1.0f - fdrywet) * in[0][i];
+
+    // Apply overall output volume control
+    if (!bypass) {
+      mix *= volume;
+    }
+
     out[0][i] = mix;
   }
 }

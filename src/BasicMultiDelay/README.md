@@ -18,8 +18,8 @@ This code is a literal port of the [petal/MultiDelay example from DaisyExamples]
 | KNOB 4 | DELAY 1 FEEDBACK |  |
 | KNOB 5 | DELAY 2 FEEDBACK |  |
 | KNOB 6 | DELAY 3 FEEDBACK |  |
-| SWITCH 1 | WET/DRY MIX | **UP** - 100% WET<br/>**MIDDLE** - 50% WET / 50% DRY<br/>**DOWN** - 66% DRY / 33% WET|
-| SWITCH 2 | Unused |  |
+| SWITCH 1 | WET/DRY MIX | **UP** - 100% WET<br/>**MIDDLE** - 50% WET / 50% DRY<br/>**DOWN** - 66% DRY / 33% WET |
+| SWITCH 2 | VOLUME BOOST | Some settings can result in low output volume; use this to compensate<br/><br/>**UP** - HI<br/>**MIDDLE** - LO<br/>**DOWN** - NONE |
 | SWITCH 3 | Unused |  |
 | FOOTSWITCH 1 | Unused |  |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
@@ -29,16 +29,9 @@ This code is a literal port of the [petal/MultiDelay example from DaisyExamples]
 Since the Hothouse only has 6 knobs and they are all used for the delay parameters, there's no great way to control the WET/DRY mix. So, this code uses SWITCH 1 with predefined mix values:
 
 ```cpp
-switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)) {
-    case Hothouse::TOGGLESWITCH_UP:
-        drywet = 100;
-        break;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-        drywet = 50;
-        break;
-    case Hothouse::TOGGLESWITCH_DOWN:
-        drywet = 33;
-}
+// we're out of knobs; use a toggleswitch with predefined drywet values
+static const int drywetValues[] = {100, 50, 33};
+drywet = drywetValues[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
 ```
 
-Tweak these values to taste. If you wanted to get super fancy, you could create a matrix of 27 possible values across all three toggle switches. :boom:
+Tweak these values to taste.
