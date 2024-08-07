@@ -53,10 +53,10 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  vol = hw.knobs[Hothouse::KNOB_1].Process() * 3.0f;  // Allow output boost
+  vol = hw.knobs[Hothouse::KNOB_1].Process() * 2.0f;  // Allow output boost
 
   float base_freq = hw.knobs[Hothouse::KNOB_2].Process();
-  base_freq = base_freq * base_freq * 10.0f;
+  base_freq = base_freq * base_freq * kMaxLfoFreq;
   base_freq = fclamp(base_freq, kMinLfoFreq, kMaxLfoFreq);
   float base_depth = hw.knobs[Hothouse::KNOB_3].Process();
   float base_del = hw.knobs[Hothouse::KNOB_4].Process() * kMaxDelay;
