@@ -157,8 +157,8 @@ class Hothouse {
 
   /** Get the current position of a toggleswitch (up, down, or middle).
   \param tsw Which toggleswitch to interogate (TOGGLESWITCH_1, TOGGLESWITCH_2,
-  or TOGGLESWITCH_3) \return TOGGLESWITCH_UP, TOGGLESWITCH_DOWN, or
-  TOGGLESWITCH_MIDDLE. \note If the toggleswitch in question is ON-ON (rather
+  or TOGGLESWITCH_3) \return TOGGLESWITCH_UP (0), TOGGLESWITCH_MIDDLE (1), or
+  TOGGLESWITCH_DOWN (2). \note If the toggleswitch in question is ON-ON (rather
   than ON-OFF-ON), TOGGLESWITCH_MIDDLE can never be the return value. Write
   your code with this in mind.
   */
