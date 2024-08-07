@@ -1,3 +1,4 @@
+// ShimmerVerb for Hothouse DIY DSP Platform
 // Copyright (C) 2024 Cleveland Music Co. <code@clevelandmusicco.com>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -13,13 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// DISCLAIMER: Experienced DSP developers will know there are much more
-// sophisticated, elegant, or "better" ways to do a lot of the things this
-// code does. However, to make it readily accessible to hackers of all
-// experience levels, the code is straightforward and easy to follow by design.
-// If you feel strongly that the former outweighs the latter, please feel
-// free to submit a pull request to get your improvements into the codebase.
-
+#include "daisysp-lgpl.h"
 #include "daisysp.h"
 #include "hothouse.h"
 
@@ -38,141 +33,70 @@ using daisysp::ReverbSc;
 ChorusEngine chorus;
 Hothouse hw;
 OnePole ar_lpf, ar_hpf, ps_lpf, ps_hpf;
-Parameter decay_param, lpf_param, mix_param, depth_param, rate_param,
-    shimmer_param;
+Parameter p_decay, p_lpf, p_mix, p_depth, p_rate, p_shimmer;
 PitchShifter ps;
 ReverbSc DSY_SDRAM_BSS reverb;
 
-// Bypass state
-Led led_bypass;
-bool bypass;
-
-// 100% wet state
-Led led_hundred_percent_wet;
-bool hundred_percent_wet;
+Led led_bypass, led_hundred_percent_wet;
+bool bypass, hundred_percent_wet;
 
 DelayLine<float, 48000> DSY_SDRAM_BSS delay;
-float delay_time;
-float feedback;
-float sample_rate;
+float delay_time, feedback, sample_rate;
 
-// Audio callback function, processes audio in real-time
+// Arrays map to toggle switch positions like this:
+//   *_values[] = {UP, MIDDLE, DOWN}
+const float kSemitoneVals[] = {19.0f, 12.0f, 7.0f};
+const float kHpfVals[] = {600.0f, 600.0f, 24.0f};
+const float kLpfVals[] = {6000.0f, 10000.0f, 22000.0f};
+const float kDelayTimeVals[] = {0.3f, 0.15f, 0.0f};
+const float kFeedbackVals[] = {0.6f, 0.3f, 0.0f};
+
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  // Toggle effect bypass LED when footswitch is pressed
-  if (hw.switches[Hothouse::FOOTSWITCH_2].FallingEdge()) {
-    bypass = !bypass;
-    // LED off when bypassed, on otherwise
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
-  }
+  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
+  hundred_percent_wet ^= hw.switches[Hothouse::FOOTSWITCH_1].RisingEdge();
 
-  // Toggle 100% wet LED when footswitch is pressed
-  if (hw.switches[Hothouse::FOOTSWITCH_1].FallingEdge()) {
-    hundred_percent_wet = !hundred_percent_wet;
-    // LED on when in "100% wet" mode, off otherwise
-    led_hundred_percent_wet.Set(hundred_percent_wet ? 1.0f : 0.0f);
-  }
+  float decay = p_decay.Process();
+  float lpf = p_lpf.Process();
+  float mix = p_mix.Process();
+  float depth = p_depth.Process();
+  float rate = p_rate.Process();
+  float shimmer = p_shimmer.Process();
 
-  // Get parameter values
-  float decay = decay_param.Process();
-  float lpf = lpf_param.Process();
-  float mix = mix_param.Process();
-  float depth = depth_param.Process();
-  float rate = rate_param.Process();
-  float shimmer = shimmer_param.Process();
-
-  // Set effect parameters
   reverb.SetFeedback(decay);
   reverb.SetLpFreq(lpf);
   chorus.SetLfoDepth(depth);
   chorus.SetLfoFreq(rate);
   chorus.SetFeedback(0);
-  ps.SetDelSize(0.085f * sample_rate);  // Delay in samples
-  ps.SetFun(0.03f);  // Adds some warbly texture to the pitch-shifting
-
-  // 4kHz cuts "robot" chatter from the pitch-shifted signal;
+  ps.SetDelSize(0.085f * sample_rate);
+  ps.SetFun(0.03f);
   ps_lpf.SetFrequency(4000.0f / sample_rate);
-
-  // Pitch shifting low frequencies is innacurate;
-  // we'll use this to filter them out
   ps_hpf.SetFrequency(600.0f / sample_rate);
 
-  // Determine pitch shift interval based on TOGGLESWITCH_1
-  float semitones = 0.0f;
-  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)) {
-    case Hothouse::TOGGLESWITCH_UP:
-      semitones = 19.0f;
-      break;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      semitones = 12.0f;
-      break;
-    case Hothouse::TOGGLESWITCH_DOWN:
-      semitones = 7.0f;
-      break;
-    default:
-      break;
-  }
-  ps.SetTransposition(semitones);
+  int sw1_pos = hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1);
+  ps.SetTransposition(kSemitoneVals[sw1_pos]);
 
-  // Set filter frequencies based on TOGGLESWITCH_2 for Abbey Road reverb trick
-  float hpf_freq, lpf_freq;
-  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2)) {
-    case Hothouse::TOGGLESWITCH_UP:
-      hpf_freq = 600.0f;
-      lpf_freq = 6000.0f;
-      break;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      hpf_freq = 600.0f;
-      lpf_freq = 10000.0f;
-      break;
-    case Hothouse::TOGGLESWITCH_DOWN:  // Fall through
-    default:
-      hpf_freq = 24.0f;
-      lpf_freq = 22000.0f;
-      break;
-  }
-  ar_hpf.SetFrequency(hpf_freq / sample_rate);
-  ar_lpf.SetFrequency(lpf_freq / sample_rate);
+  int sw2_pos = hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2);
+  ar_hpf.SetFrequency(kHpfVals[sw2_pos] / sample_rate);
+  ar_lpf.SetFrequency(kLpfVals[sw2_pos] / sample_rate);
 
-  // Determine delay settings based on TOGGLESWITCH_3
-  bool apply_delay = false;
-  switch (hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)) {
-    case Hothouse::TOGGLESWITCH_UP:
-      delay_time = 0.3f;
-      feedback = decay * 0.6f;
-      apply_delay = true;
-      break;
-    case Hothouse::TOGGLESWITCH_MIDDLE:
-      delay_time = 0.15f;
-      feedback = 0.3f;
-      apply_delay = true;
-      break;
-    case Hothouse::TOGGLESWITCH_DOWN:  // No delay
-    default:
-      break;
-  }
+  int sw3_pos = hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3);
+  delay_time = kDelayTimeVals[sw3_pos];
+  feedback = kFeedbackVals[sw3_pos];
+  bool apply_delay = delay_time > 0;
 
-  // Process audio samples
   for (size_t i = 0; i < size; i++) {
     if (bypass) {
       out[0][i] = in[0][i];
-      continue;  // Skip the rest of the loop while bypassed
+      continue;
     }
 
     float dry = in[0][i];
-
-    // Pre-reverb filtered signal
     float filtered = ar_lpf.Process(ar_hpf.Process(dry));
-
-    // Pre-pitch-shift filtered signal
     float pre_ps = ps_hpf.Process(dry);
-
-    // Post-pitch-shifted and filtered signal
     float pitch_shifted = ps_lpf.Process(ps.Process(pre_ps));
-
-    // Pre-reverb signal
     float send = (filtered + pitch_shifted * shimmer) *
                  (hundred_percent_wet ? 1.0f : mix);
     float wet;
@@ -186,44 +110,32 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
     if (depth >= 0.1f) {
       float chorused = chorus.Process(wet);
-      wet = chorused * 1.5f;  // Make up volume loss to phase
-      // The old approach sounds pretty good too ¯\_(ツ)_/¯
-      // wet = (wet + chorused * 2.0f) / 2.0f;
+      wet = chorused * 1.5f;
     }
 
     out[0][i] = hundred_percent_wet ? wet : dry + wet;
-
-    // Write back to the circular buffer
     delay.Write(wet * feedback);
   }
-
-  // Update LEDs
-  led_bypass.Update();
-  led_hundred_percent_wet.Update();
 }
 
 int main(void) {
   hw.Init();
-  hw.SetAudioBlockSize(4);  // Number of samples handled per callback
+  hw.SetAudioBlockSize(4);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   sample_rate = hw.AudioSampleRate();
 
-  // Init parameters with associated hardware controls
-  decay_param.Init(hw.knobs[Hothouse::KNOB_1], 0.3f, 0.99f, Parameter::LINEAR);
-  lpf_param.Init(hw.knobs[Hothouse::KNOB_2], 600.0f, 22000.0f,
-                 Parameter::LINEAR);
-  mix_param.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
-  depth_param.Init(hw.knobs[Hothouse::KNOB_4], 0.0f, 0.7f, Parameter::LINEAR);
-  rate_param.Init(hw.knobs[Hothouse::KNOB_5], 0.1f, 5.0f, Parameter::LINEAR);
-  shimmer_param.Init(hw.knobs[Hothouse::KNOB_6], 0.0f, 1.0f, Parameter::LINEAR);
+  p_decay.Init(hw.knobs[Hothouse::KNOB_1], 0.3f, 0.99f, Parameter::LINEAR);
+  p_lpf.Init(hw.knobs[Hothouse::KNOB_2], 600.0f, 22000.0f, Parameter::LINEAR);
+  p_mix.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
+  p_depth.Init(hw.knobs[Hothouse::KNOB_4], 0.0f, 0.7f, Parameter::LINEAR);
+  p_rate.Init(hw.knobs[Hothouse::KNOB_5], 0.1f, 5.0f, Parameter::LINEAR);
+  p_shimmer.Init(hw.knobs[Hothouse::KNOB_6], 0.0f, 1.0f, Parameter::LINEAR);
 
-  // Init effects
   chorus.Init(sample_rate);
   delay.Init();
   ps.Init(sample_rate);
   reverb.Init(sample_rate);
 
-  // Helper lambda to init filters
   auto init_filter = [](OnePole& filter, OnePole::FilterMode mode) {
     filter.Init();
     filter.SetFilterMode(mode);
@@ -234,23 +146,21 @@ int main(void) {
   init_filter(ps_lpf, OnePole::FILTER_MODE_LOW_PASS);
   init_filter(ps_hpf, OnePole::FILTER_MODE_HIGH_PASS);
 
-  // Helper lambda to init LEDs
-  auto init_led = [](Led& led, dsy_gpio_pin pin) {
-    led.Init(pin, false);
-    led.Update();
-  };
+  led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
+  led_hundred_percent_wet.Init(hw.seed.GetPin(Hothouse::LED_1), false);
 
-  init_led(led_bypass, hw.seed.GetPin(Hothouse::LED_2));
-  init_led(led_hundred_percent_wet, hw.seed.GetPin(Hothouse::LED_1));
-
-  bypass = true;  // Initial bypass state
+  bypass = true;
   hundred_percent_wet = false;
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Main loop runs indefinitely
+    hw.DelayMs(6);
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
+    led_hundred_percent_wet.Set(hundred_percent_wet ? 1.0f : 0.0f);
+    led_hundred_percent_wet.Update();
   }
 
   return 0;
