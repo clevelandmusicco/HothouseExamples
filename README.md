@@ -6,6 +6,10 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 <img src="/resources/hothouse-front-553px.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="/resources/hothouse-kit-553px.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
+| 💥 Good To Know 💥 |
+|-|
+| For the sake of simplicity, the examples in this repository are written with a focus on the use of [DaisySP classes](https://electro-smith.github.io/DaisySP/annotated.html) whenever available. There are lots of third-party libre and [open-source DSP libraries](https://search.brave.com/search?q=open+source+%28inpage%3Adsp+OR+inpage%3A%22digital+signal+processing%22%29+libraries&source=web) out there that provide more advanced processing, but using them can be complicated and daunting for the uninitiated. These examples are about demonstrating the use of the Hothouse itself with as little distraction as is reasonable.<br/><br/>That's not to say there won't be more advanced projects added at a later date, though ... looking at you, hackers. 😉 |
+
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish. Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
@@ -142,7 +146,9 @@ Use the `create_new_proj.py` helper script to create a bare effect project in th
 
 ```text
 python create_new_proj.py -h
-usage: create_new_proj.py [-h] --proj_name PROJ_NAME [--your_name YOUR_NAME] [--your_email YOUR_EMAIL]
+usage: create_new_proj.py [-h] --proj_name PROJ_NAME
+                              [--your_name YOUR_NAME]
+                              [--your_email YOUR_EMAIL]
 
 options:
   -h, --help            show this help message and exit
