@@ -4,7 +4,7 @@ Contributed by Cleveland Music Co. \<<code@clevelandmusicco.com>\>
 
 ## Description
 
-A highly-tweakable 3-voice chorus. Capable of sounding lush and spacious like a vintage 1980s chorus, but also capable of sounding totally broken or anything in between. In this way, it's sort of like the Fuzz Factory of 3-voice choruses. Since so many creative sounds can be dialed in, it takes some tweaking ton find what you want, but it's totally worth it.
+A highly-tweakable 3-voice chorus. Capable of sounding lush and spacious like a vintage 1980s chorus, but also capable of sounding totally broken or anything in between. In this way, it's sort of like the Fuzz Factory of 3-voice choruses. With so many creative sounds available, it might take some knob twisting to find what you want, but it's totally worth it.
 
 A 3-voice chorus works by creating 3 separate chorus voices, each with slightly varied values for LFO frequency, LFO depth, and delay time. This code allows you to dial in a "base" value for these 3 parameters, and then use the toggle switches to select how much variation you want for each parameter. Refer to the values in the table below. As an example, if **SWITCH 1** is in the **MIDDLE** position, the LFO frequencies of the 3 chorus voices would vary +/-2%, calculated as $`VariedFreq=BaseFreq*(1+.02*(VoiceNumber−1))`$. So, if the base value is 2.5Hz (set by **KNOB 2** in the noon position), the results would be:
 
@@ -14,7 +14,7 @@ A 3-voice chorus works by creating 3 separate chorus voices, each with slightly 
 
 Rinse and repeat this math for DEPTH and DELAY.
 
-> [!WARNING]
+> [!TIP]
 > Since these values are used as computational factors, it's easy to create ugly sounds—particularly with higher values for FREQ, DEPTH, and DELAY. Start with all the switches DOWN and experiment, and/or tweak the hard-coded values to your liking.
 
 ### Controls
