@@ -6,7 +6,7 @@ Here you'll find a few very simple Pd patches that demonstrate the use of the Ho
 
 Rather than create a separate README for each example, the control mappings and a patch diagram for each example are presented here.
 
-### `hothouse_delay.ps`
+### `hothouse_delay.pd`
 
 A simple delay with the three parameters everyone expects. The toggle (for the bypass) and horizontal sliders are for testing at design time.
 
