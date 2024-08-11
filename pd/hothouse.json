@@ -1,0 +1,79 @@
+{
+    "name": "hothouse",
+    "som": "seed",
+    "audio": {
+        "channels": 2
+    },
+    "components": {
+        "fs1": {
+            "component": "Switch",
+            "pin": 25
+        },
+        "fs2": {
+            "component": "Switch",
+            "pin": 26
+        },
+        "sw1_up": {
+            "component": "Switch",
+            "pin": 9
+        },
+        "sw1_down": {
+            "component": "Switch",
+            "pin": 10
+        },
+        "sw2_up": {
+            "component": "Switch",
+            "pin": 7
+        },
+        "sw2_down": {
+            "component": "Switch",
+            "pin": 8
+        },
+        "sw3_up": {
+            "component": "Switch",
+            "pin": 5
+        },
+        "sw3_down": {
+            "component": "Switch",
+            "pin": 6
+        },
+        "sw4": {
+            "component": "Switch",
+            "pin": 7
+        },
+        "knob1": {
+            "component": "AnalogControl",
+            "pin": 16
+        },
+        "knob2": {
+            "component": "AnalogControl",
+            "pin": 17
+        },
+        "knob3": {
+            "component": "AnalogControl",
+            "pin": 18
+        },
+        "knob4": {
+            "component": "AnalogControl",
+            "pin": 19
+        },
+        "knob5": {
+            "component": "AnalogControl",
+            "pin": 20
+        },
+        "knob6": {
+            "component": "AnalogControl",
+            "pin": 21
+        },
+        "cvout1": {
+            "component": "CVOuts"
+        },
+        "cvout2": {
+            "component": "CVOuts"
+        }
+    },
+    "aliases": {
+        "led1": "cvout2",
+        "led2": "cvout1"
+    }
+}
