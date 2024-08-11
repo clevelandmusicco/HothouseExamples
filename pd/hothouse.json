@@ -37,10 +37,6 @@
             "component": "Switch",
             "pin": 6
         },
-        "sw4": {
-            "component": "Switch",
-            "pin": 7
-        },
         "knob1": {
             "component": "AnalogControl",
             "pin": 16
