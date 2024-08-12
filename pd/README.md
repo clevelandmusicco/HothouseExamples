@@ -10,9 +10,6 @@ Rather than create a separate README for each example, the control mappings and 
 
 A simple delay with the three parameters everyone expects. The toggle (for the bypass) and horizontal sliders are for testing at design time.
 
-> [!NOTE]
-> This example demonstrates how you might handle the switching when the effect is *additive* (like reverb or delay). This makes it **DRY *OR* (DRY + WET)** switching. In this setup, when the effect is engaged, the wet signal is *added* to the dry signal. (Note the `[+~]` object just before the `[dac~]`.) The dry signal is never muted, and the effect code itself can be thought of like it's on an FX send buss.
-
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
 | KNOB 1 | TIME | The time between the dry and wet signal, and any repeats after that |
@@ -27,14 +24,14 @@ A simple delay with the three parameters everyone expects. The toggle (for the b
 | FOOTSWITCH 1 | Unused |  |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
 
+> [!NOTE]
+> This example demonstrates how you might handle the switching when the effect is *additive* (like reverb or delay). This makes it **DRY *OR* (DRY + WET)** switching. In this setup, when the effect is engaged, the wet signal is *added* to the dry signal. (Note the `[+~]` object just before the `[dac~]`.) The dry signal is never muted, and the effect code itself can be thought of like it's on an FX send buss.
+
 ![hothouse-delay](images/hothouse-delay.png)
 
 ### `hothouse-tremolo.pd`
 
 A super simple tremolo with the RATE and DEPTH controls.
-
-> [!NOTE]
-> This example shows an approach to switching between the dry signal and the wet signal. In this setup, when the effect is engaged, the dry signal is routed exclusively to the effect code. So, this is **DRY *OR* WET** switching.
 
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
@@ -49,6 +46,9 @@ A super simple tremolo with the RATE and DEPTH controls.
 | SWITCH 3 | Unused |  |
 | FOOTSWITCH 1 | Unused |  |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
+
+> [!NOTE]
+> This example shows an approach to switching between the dry signal and the wet signal. In this setup, when the effect is engaged, the dry signal is routed exclusively to the effect code. So, this is **DRY *OR* WET** switching.
 
 ![hothouse-tremolo](images/hothouse-tremolo.png)
 
