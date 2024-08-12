@@ -21,11 +21,11 @@
 #X obj 157 338 line~;
 #X msg 157 302 \$1 10;
 #X obj 437 134 adc~;
-#X obj 437 532 dac~;
+#X obj 437 552 dac~;
 #X obj 393 254 *~;
 #X obj 487 254 *~;
 #X obj 437 447 +~;
-#X obj 487 325 *~;
+#X obj 487 378 *~;
 #X obj 287 205 r~ effect_bypass;
 #X obj 514 205 r~ effect_engage;
 #X obj 657 170 change;
@@ -37,7 +37,7 @@
 #X msg 802 433 \$1 10;
 #X obj 802 472 line~;
 #X obj 657 552 s~ trem;
-#X obj 514 284 r~ trem;
+#X obj 514 338 r~ trem;
 #X connect 0 0 1 0;
 #X connect 1 0 2 0;
 #X connect 2 0 5 0;
