@@ -2,11 +2,9 @@
 
 Here you'll find a few very simple Pd patches that demonstrate the use of the Hothouse along with a custom board definition (`hothouse.json`) to be used when compiling. [Plugdata](https://github.com/plugdata-team/plugdata) (standalone) is *highly recommended* for its ease-of-use and direct flashing feature.
 
-## Control mappings
-
 Rather than create a separate README for each example, the control mappings and a patch diagram for each example are presented here.
 
-### `hothouse-delay.pd`
+## `hothouse-delay.pd`
 
 A simple delay with the three parameters everyone expects. The toggle (for the bypass) and horizontal sliders are for testing at design time.
 
@@ -29,7 +27,7 @@ A simple delay with the three parameters everyone expects. The toggle (for the b
 
 ![hothouse-delay](images/hothouse-delay.png)
 
-### `hothouse-tremolo.pd`
+## `hothouse-tremolo.pd`
 
 A super simple tremolo with the RATE and DEPTH controls.
 
@@ -52,4 +50,4 @@ A super simple tremolo with the RATE and DEPTH controls.
 
 ![hothouse-tremolo](images/hothouse-tremolo.png)
 
-### More to come
+## More to come
