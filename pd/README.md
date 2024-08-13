@@ -10,7 +10,7 @@ A simple delay with the three parameters everyone expects. The toggle (for the b
 
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
-| KNOB 1 | TIME | The time between the dry and wet signal, and any repeats after that |
+| KNOB 1 | TIME | The time between the dry and wet signal, and any repeats after that after that after that |
 | KNOB 2 | FEEDBACK | Controls the level of wet signal fed back into the delay buffer; clipped at `0.9` |
 | KNOB 3 | SEND | Sets the level of the dry signal sent to the delay buffer; think of it like an FX send on a mixer |
 | KNOB 4 | Unused |  |
@@ -29,7 +29,7 @@ A simple delay with the three parameters everyone expects. The toggle (for the b
 
 ## `hothouse-tremolo.pd`
 
-A super simple tremolo with the RATE and DEPTH controls.
+A super simple tremolo with RATE and DEPTH controls.
 
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
@@ -52,14 +52,14 @@ A super simple tremolo with the RATE and DEPTH controls.
 
 ## `hothouse-switch.pd`
 
-This example demonstrates one way to program the Hothouse toggle switches. The patch lights an LED depending on the position of SWITCH 1. In the UP position, the LED is set to 100% bright. DOWN sets the brightness to 0% (off). The MIDDLE position sets the LED to 66% brightness. There is no audio.
+This example demonstrates one way to program the Hothouse toggle switches. The patch sets an LED's brightness depending on the position of SWITCH 1. In the UP position, the LED is set to 100% bright. DOWN sets the brightness to 0% (off). The MIDDLE position sets the LED to 66% brightness. There is no audio.
 
 > [!IMPORTANT]
 The Hothouse uses 3-way toggle switches, each connected to two GPIO pins on the Daisy Seed: one pin detects the UP position, and the other detects the DOWN position. To determine if a switch is in the MIDDLE position, we rely on deductive reasoning: if neither the UP nor DOWN position is active, the switch must be in the MIDDLE position.
 >
-> Technically, using two GPIO pins means the Daisy Seed (and Pd and hvcc) sees two separate switches. The logic of a 3-way toggle is something we have to implement ourselves. It may seem obvious to some, but it bears repeating for all.
+> Technically, using two GPIO pins means the Daisy Seed (and, therefore, [pd2dsy](https://github.com/electro-smith/pd2dsy) and [hvcc](https://github.com/Wasted-Audio/hvcc/tree/develop)) sees two separate switches. The logic of a 3-way toggle is something we have to implement ourselves. It may seem obvious to some, but it bears repeating for all :neckbeard:
 
-One way to determine that a switch is in the MIDDLE position is to use the `_fall` variant receivers for the UP and DOWN positions. The `_fall` variants return a bang on a signal's falling edge (i.e. when a switch is released). So, if `sw1_up_fall` receives a message, we know that the switch is leaving the UP position, and it could only have gone to the MIDDLE position (since it is a 3-way toggle). You can apply the same logic for `sw1_down_fall`.
+One way to determine if a switch is in the MIDDLE position is to use the `_fall` variant receivers for the UP and DOWN positions. These return a bang on a signal's falling edge (i.e. when a switch is released). So, if `sw1_up_fall` receives a message, we know the switch has left the UP position, and it could only have gone to the MIDDLE position (since it is a 3-way toggle). You can apply the same logic for `sw1_down_fall`.
 
 ![hothouse-tremolo](images/hothouse-switch.png)
 
