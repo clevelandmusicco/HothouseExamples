@@ -62,3 +62,5 @@ The Hothouse uses 3-way toggle switches, each connected to two GPIO pins on the 
 One way to determine that a switch is in the MIDDLE position is to use the `_fall` variant receivers for the UP and DOWN positions. The `_fall` variants return a bang on a signal's falling edge (i.e. when a switch is released). So, if `sw1_up_fall` receives a message, we know that the switch is leaving the UP position, and it could only have gone to the MIDDLE position (since it is a 3-way toggle). You can apply the same logic for `sw1_down_fall`.
 
 ![hothouse-tremolo](images/hothouse-switch.png)
+
+For a complete list of component types, variants, and their behaviors, check out [Pd2dsy JSON](https://github.com/electro-smith/DaisyWiki/wiki/Pd2dsy-JSON#component-reference).
