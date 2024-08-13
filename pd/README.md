@@ -50,4 +50,15 @@ A super simple tremolo with the RATE and DEPTH controls.
 
 ![hothouse-tremolo](images/hothouse-tremolo.png)
 
-## More to come
+## `hothouse-switch.pd`
+
+This example demonstrates one way to program the Hothouse toggle switches. The patch lights an LED depending on the position of SWITCH 1. In the UP position, the LED is set to 100% bright. DOWN sets the brightness to 0% (off). The MIDDLE position sets the LED to 66% brightness. There is no audio.
+
+> [!IMPORTANT]
+The Hothouse uses 3-way toggle switches, each connected to two GPIO pins on the Daisy Seed: one pin detects the UP position, and the other detects the DOWN position. To determine if a switch is in the MIDDLE position, we rely on deductive reasoning: if neither the UP nor DOWN position is active, the switch must be in the MIDDLE position.
+>
+> Technically, using two GPIO pins means the Daisy Seed (and Pd and hvcc) sees two separate switches. The logic of a 3-way toggle is something we have to implement ourselves. It may seem obvious to some, but it bears repeating for all.
+
+One way to determine that a switch is in the MIDDLE position is to use the `_fall` variant receivers for the UP and DOWN positions. The `_fall` variants return a bang on a signal's falling edge (i.e. when a switch is released). So, if `sw1_up_fall` receives a message, we know that the switch is leaving the UP position, and it could only have gone to the MIDDLE position (since it is a 3-way toggle). You can apply the same logic for `sw1_down_fall`.
+
+![hothouse-tremolo](images/hothouse-switch.png)

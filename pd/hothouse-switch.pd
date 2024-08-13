@@ -1,0 +1,16 @@
+#N canvas 827 239 527 327 12;
+#X msg 713 233 1;
+#X msg 926 233 0;
+#X obj 783 303 s led1 @hv_param;
+#X obj 656 183 r sw1_up @hv_param;
+#X obj 861 183 r sw1_down @hv_param;
+#X obj 762 102 r sw1_up_fall @hv_param;
+#X obj 850 141 r sw1_down_fall @hv_param;
+#X msg 821 233 0.66;
+#X connect 0 0 2 0;
+#X connect 1 0 2 0;
+#X connect 3 0 0 0;
+#X connect 4 0 1 0;
+#X connect 5 0 7 0;
+#X connect 6 0 7 0;
+#X connect 7 0 2 0;
