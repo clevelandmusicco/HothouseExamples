@@ -59,7 +59,7 @@ The Hothouse uses 3-way toggle switches, each connected to two GPIO pins on the 
 >
 > Technically, using two GPIO pins means the Daisy Seed (and, therefore, [pd2dsy](https://github.com/electro-smith/pd2dsy) and [hvcc](https://github.com/Wasted-Audio/hvcc/tree/develop)) sees two separate switches. The logic of a 3-way toggle is something we have to implement ourselves. It may seem obvious to some, but it bears repeating for all :neckbeard:
 
-One way to determine if a switch is in the MIDDLE position is to use the `_fall` variant receivers for the UP and DOWN positions. These return a bang on a signal's falling edge (i.e. when a switch is released). So, if `sw1_up_fall` receives a message, we know the switch has left the UP position, and it could only have gone to the MIDDLE position (since it is a 3-way toggle). You can apply the same logic for `sw1_down_fall`.
+Here's one way to implement this control logic in Pd.
 
 ![hothouse-tremolo](images/hothouse-switch.png)
 
