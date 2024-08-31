@@ -73,7 +73,7 @@ An implementation of a stereo reverberation network inspired by the canonical pa
 > There are several files in the `DattorroReverb` directory. The reverb patch itself is an abstraction named `dattorro-reverb.pd`, which, in turn, uses several other abstractions. To experiment on your computer without flashing to the Hothouse, open `0-demo.pd`. The patch `hothouse-dattorro-reverb.pd` can be flashed to the Hothouse. The table below explains the control mappings.
 
 > [!IMPORTANT]
-> To flash this example to the Hothouse, you must use a sample rate of 32kHz and a blocksize of 4! If you use a higher sample rate, the patch will crash at start up.
+> To flash this example to the Hothouse, you must choose the HUGE (QSPI) patch size option. A 48kHz samplerate and 48 for blocksize should work just fine.
 
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
