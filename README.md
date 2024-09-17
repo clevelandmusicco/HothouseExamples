@@ -27,6 +27,7 @@ A few examples ported as-is:
 
 ## Cleveland Music Co. examples
 
+* **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
 * **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
 * **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails
