@@ -7,7 +7,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "STM32H750xx"
             ],
             "includePath": [
                 "${workspaceFolder}/../**",
