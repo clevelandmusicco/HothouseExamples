@@ -1,5 +1,5 @@
-// BasicSpringReverb for Hothouse DIY DSP Platform
-// A port of the petal/Verb example from the DaisyExamples repo
+// StereoReverbWithTails for Hothouse DIY DSP Platform
+// An updated version of the petal/Verb example from the DaisyExamples repo
 // Copyright (C) 2024 Cleveland Music Co.
 // <code@clevelandmusicco.com>
 //

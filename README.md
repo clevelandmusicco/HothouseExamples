@@ -27,6 +27,12 @@ A few examples ported as-is:
 
 ## Cleveland Music Co. examples
 
+### Stereo Examples (more coming soon ...)
+
+* **[StereoReverbWithTails](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/StereoReverbWithTails)** - A great-sounding reverb with pre-delay, tails, and either true stereo-to-stereo or mono-to-stereo modes
+
+### Other Examples
+
 * **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
 * **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
