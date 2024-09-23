@@ -1,6 +1,6 @@
 # StereoReverbWithTails
 
-Contributed by Cleveland Music Co. \<<code#clevelandmusicco.com>\>
+Contributed by Cleveland Music Co. \<code@clevelandmusicco.com\>
 
 ## Description
 
@@ -18,7 +18,7 @@ Also note that _SWITCH 1_ selects between mono-to-stereo processing (UP) and tru
 | KNOB 4 | Reverb PRE-DELAY | 0 to 500ms |
 | KNOB 5 | Unused |  |
 | KNOB 6 | Unused |  |
-| SWITCH 1 | Unused | **UP** - mono-to-stereo mode (left input is copied to right)<br/>**MIDDLE** - true stereo mode<br/>**DOWN** - true stereo mode |
+| SWITCH 1 | AUDIO MODE | **UP** - mono-to-stereo mode (left input is copied to right)<br/>**MIDDLE** - true stereo-to-stereo mode<br/>**DOWN** - true stereo-to-stereo mode |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
 | FOOTSWITCH 1 | Unused |  |
