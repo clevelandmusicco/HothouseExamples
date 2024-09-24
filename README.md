@@ -19,7 +19,10 @@ If you're not familar with the Daisy Seed or its development environment, check 
 ### Stereo Examples (more coming soon ...)
 
 * **[StereoReverbWithTails](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/StereoReverbWithTails)** - A great-sounding reverb with pre-delay, tails, and either true stereo-to-stereo or mono-to-stereo modes
+* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic and stereo "seasick" modes, and a stereo spring reverb effect
 * **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails (dual-mono and due for a true stereo update)
+* **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
+* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it a sort of Fuzz Factory of chorus pedals)
 
 #### Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master) (most of these are mono-to-stereo)
 
@@ -35,10 +38,6 @@ If you're not familar with the Daisy Seed or its development environment, check 
 These were written with the legacy mono version of the Hothouse in mind, so they might be qirky on the stereo version. They will be ported in the near future. (REMINDER: pull requests are welcome!)
 
 * **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
-* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
-* **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
-* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it a sort of Fuzz Factory of chorus pedals)
-* And more to come ...
 
 ## Pure Data (Pd) examples
 

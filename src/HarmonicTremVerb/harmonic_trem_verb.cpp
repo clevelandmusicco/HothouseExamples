@@ -82,14 +82,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
   for (size_t i = 0; i < size; ++i) {
     float dry = in[0][i];
-    float proc = dry;
+    float proc_l = dry, proc_r = dry;
 
     // Process audio with reverb
     if (!reverb_bypass) {
       float send = dry * p_verb_send.Value();
       float wet_l, wet_r;
       reverb.Process(send, send, &wet_l, &wet_r);
-      proc = dry + (wet_l + wet_r / 2.0f);
+      proc_l = dry + wet_l;
+      proc_r = dry + wet_r;
     }
 
     // Process audio with tremolo
@@ -103,15 +104,29 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
         return signal * (1 - osc_sig) + osc_sig * adj_factor;
       };
 
-      if (hw.switches[Hothouse::SWITCH_3_UP].Pressed()) {
-        proc = apply_trem(lpf.Process(proc), osc_sig) +
-               apply_trem(hpf.Process(proc), -osc_sig);  // Invert 180 degrees
+      float inverted_osc_sig = -osc_sig;
+
+      if (hw.switches[Hothouse::SWITCH_3_UP].Pressed() ||
+          hw.switches[Hothouse::SWITCH_3_DOWN].Pressed()) {
+        bool is_up = hw.switches[Hothouse::SWITCH_3_UP].Pressed();
+
+        proc_l =
+            apply_trem(lpf.Process(proc_l), osc_sig) +
+            apply_trem(hpf.Process(proc_l), is_up ? inverted_osc_sig : osc_sig);
+
+        proc_r =
+            apply_trem(lpf.Process(proc_r),
+                       is_up ? osc_sig : inverted_osc_sig) +
+            apply_trem(hpf.Process(proc_r), is_up ? inverted_osc_sig : osc_sig);
       } else {
-        proc = apply_trem(proc, osc_sig);
+        proc_l = apply_trem(proc_l, osc_sig);
+        proc_r = apply_trem(proc_r, osc_sig);
       }
     }
 
-    out[0][i] = proc;
+    // mono-to-stereo reverb, trem is still dual-mono
+    out[0][i] = proc_l;
+    out[1][i] = proc_r;
   }
 }
 
@@ -152,6 +167,7 @@ int main() {
     led_reverb_bypass.Update();
     led_trem_bypass.Set(trem_bypass ? 0.0f : 1.0f);
     led_trem_bypass.Update();
+    hw.CheckResetToBootloader();
   }
 
   return 0;
