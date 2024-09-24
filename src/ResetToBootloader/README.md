@@ -16,7 +16,7 @@ Contributed by Cleveland Music Co. <code@clevelandmusicco.com>
 >
 >  while (true) {
 >    hw.DelayMs(10);
->    hw.CheckResetToBootloader(); // If left footswitch is held down for 1 second, reset the Daisy Seed
+>    hw.CheckResetToBootloader(); // If left footswitch is held down for 2 seconds, reset the Daisy Seed
 >  }
 >  return 0;
 > }

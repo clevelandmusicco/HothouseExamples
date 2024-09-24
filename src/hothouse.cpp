@@ -182,22 +182,22 @@ void Hothouse::CheckResetToBootloader() {
       footswitch1_start_time = System::GetNow();
     } else if (System::GetNow() - footswitch1_start_time >= HOLD_THRESHOLD_MS) {
       
-      daisy::Led led_1, led_2;
-      led_1.Init(seed.GetPin(22), false);
-      led_2.Init(seed.GetPin(23), false);
+      daisy::Led _led_1, _led_2;
+      _led_1.Init(seed.GetPin(22), false);
+      _led_2.Init(seed.GetPin(23), false);
 
       // Alternately flash the LEDs 3 times
       for (int i = 0; i < 3; i++) {
-        led_1.Set(1);
-        led_2.Set(0);
-        led_1.Update();
-        led_2.Update();
+        _led_1.Set(1);
+        _led_2.Set(0);
+        _led_1.Update();
+        _led_2.Update();
         DelayMs(100);
 
-        led_1.Set(0);
-        led_2.Set(1);
-        led_1.Update();
-        led_2.Update();
+        _led_1.Set(0);
+        _led_2.Set(1);
+        _led_1.Update();
+        _led_2.Update();
         DelayMs(100);
       }
 
