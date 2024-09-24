@@ -130,24 +130,24 @@ To flash an effect to your Hothouse, you will load a compiled binary on to the D
 cd src/HelloWorld
 ```
 
-Assuming you've already compiled the code, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with with the following command:
+Assuming you've already compiled the code, connect the Daisy Seed to your computer with a USB cable. Then, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with the following command:
 
 ```text
 # Using USB
 make program-dfu
 ```
 
-Install the Daisy Seed into your Hothouse, power it up and off you go!
+> [!TIP]
+> If you've already flashed one of the examples in this repository, there is a way to put the Daisy Seed into bootloader mode *without pressing the RESET and BOOT buttons on the Daisy Seed:* **Hold down the left foot switch for 2 seconds**. The LEDs will alternately flash and the Daisy Seed will be ready to program with a new effect.
 
-If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (***AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!*) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
+If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
 
 ```text
 # Using JTAG/SWD adaptor (like STLink)
 make program
 ```
 
-> [!TIP]
-> An added convenience when using the JTAG debugger / programmer is that you don't need to remove and reinstall the Daisy Seed to flash it; you can easily leave the Daisy Seed installed in the Hothouse while debugging or programming.
+Flashing the Daisy Seed with the JTAG/SWD debugger takes a fraction of the time compared to the DFU USB method, and you get the added benefit of being able to debug your code while it runs on the Daisy Seed. There are a few limitations that you may eventually discover, but we're focused on the basics of using your Hothouse here!
 
 ### Daisy Web Programmer
 
