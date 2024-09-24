@@ -1,6 +1,6 @@
 # Examples for Hothouse Digital Signal Processing Pedal Kit
 
-**:wrench: Hothouse Build Guide [STEREO VERSION](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Stereo-Version)) and [MONO VERSION](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Mono-Version)) | :question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) | :books: [Wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki) | :globe_with_meridians: [Official Website](https://clevelandmusicco.com/)**
+**:wrench: Build Guide [STEREO VERSION](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Stereo-Version)) and [MONO VERSION](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Mono-Version)) | :question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) | :books: [Wiki & Examples](https://github.com/clevelandmusicco/HothouseExamples/wiki) | :globe_with_meridians: [Official Website](https://clevelandmusicco.com/)**
 
 The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) is a compact pedal kit for the [Electrosmith Daisy Seed DSP](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, and / or you can simply compile and flash any of the code in this repo to your Hothouse.
 
@@ -217,35 +217,3 @@ Any of the effect projects in the `src` directory can be opened in VS Code. Use 
 ![The MyAwesomeEffect project in VS Code](resources/images/new_proj_vscode.png)
 
 This ensures that the tasks in `tasks.json` and the debug executable in `launch.json` work properly.
-
-## Cleveland Music Co. examples
-
-### Stereo Examples (more coming soon ...)
-
-* **[StereoReverbWithTails](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/StereoReverbWithTails)** - A great-sounding reverb with pre-delay, tails, and either true stereo-to-stereo or mono-to-stereo modes
-* **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic and stereo "seasick" modes, and a stereo spring reverb effect
-* **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails (dual-mono and due for a true stereo update)
-* **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
-* **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it a sort of Fuzz Factory of chorus pedals)
-
-#### Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master) (most of these are mono-to-stereo)
-
-* **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable chorus effect
-* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
-* **[BasicMultiDelay](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicMultiDelay)** - 3 delay lines, each with tweakable time and feedback
-* **[BasicPhaser](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicPhaser)** - Flexible phaser with 1-8 stages (poles)
-* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Classic spring reverb effect
-* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo as simple as it gets
-
-## Pure Data (Pd) examples
-
-Just a handful of examples intended to show how to use the Hothouse with Pure Data/[Plugdata](https://github.com/plugdata-team/plugdata) patches and hvcc.
-
-* **[Pure Data (Pd) examples](./pd)**
-
-## Community contributions
-
-* **[TremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TremVerb)** - Tremolo / reverb effect contributed by [tele_player](https://forum.electro-smith.com/u/tele_player/summary) on the [Electrosmith Forums](https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14).
-
-> [!NOTE]
-> This repo is in its early days. Over time, it will grow with contributions from Cleveland Music Co., as well as&mdash;if all goes well&mdash;many more contributions from the community!
