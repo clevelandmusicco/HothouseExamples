@@ -10,8 +10,8 @@ This project is a collection of digital signal processing code examples that you
 
 > [!IMPORTANT]
 > Everything from this point on assumes:
-> * You have some knowledge of the [Electrosmith Daisy Seed]((https://electro-smith.com/products/daisy-seed?variant=45234245108004));
-> * You understand [installing the Daisy Development Toolchain](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment) is not something we cover here, but having it installed is a pre-requisite if you want to write your own effects code;
+> * You have some knowledge of the [Electrosmith Daisy Seed](https://electro-smith.com/products/daisy-seed?variant=45234245108004)
+> * You understand [installing the Daisy Development Toolchain](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment) is not something we cover here, but having it installed is a pre-requisite if you want to write your own effects code
 
 If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki) to get yourself bootstrapped!
 
