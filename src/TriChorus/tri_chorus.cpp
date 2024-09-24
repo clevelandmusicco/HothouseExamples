@@ -77,12 +77,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     lfo[i] = base_depth * (1.0f + depth_vary * (i - 1));
     del[i] = base_del * (1.0f + delay_vary * (i - 1));
     ch[i].SetFeedback(feedback);
+    ch[i].SetPan(0, 1); // Hard pan L and R channels
   }
 
   bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
-    float sig = 0.0f;
+    float sig_l = 0.0f, sig_r = 0.0f;
     for (int j = 0; j < kNumVoices; ++j) {
       fonepole(del[j], deltarget[j], 0.0001f);  // smooth at audio rate
       ch[j].SetDelayMs(del[j]);
@@ -91,10 +92,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
       if (!bypass) {
         ch[j].Process(in[0][i]);
-        sig += ch[j].GetLeft();
+        sig_l += ch[j].GetLeft();
+        sig_r += ch[j].GetRight();
       }
     }
-    out[0][i] = bypass ? in[0][i] : (sig * wet + in[0][i] * (1.0f - wet)) * vol;
+    // mono-to-stereo
+    out[0][i] = bypass ? in[0][i] : (sig_l * wet + in[0][i] * (1.0f - wet)) * vol;
+    out[1][i] = bypass ? in[0][i] : (sig_r * wet + in[0][i] * (1.0f - wet)) * vol;
   }
 }
 
@@ -118,6 +122,7 @@ int main() {
     hw.DelayMs(6);
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
   return 0;
 }

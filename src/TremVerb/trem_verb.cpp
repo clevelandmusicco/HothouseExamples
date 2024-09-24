@@ -1,8 +1,8 @@
 // TremVerb for Hothouse DIY DSP Platform
 // Copyright (C) 2024 Cleveland Music Co.
 // Contributed by tele_player
-// <https://forum.electro-smith.com/u/tele_player/summary> on the Electrosmith Forums
-// <https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14>
+// <https://forum.electro-smith.com/u/tele_player/summary> on the Electrosmith
+// Forums <https://forum.electro-smith.com/t/hothouse-dsp-pedal-kit/5631/14>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 // FS_1 : TREM enable
 // FS_2 : VERB enable
 
+#include "daisysp-lgpl.h"
 #include "daisysp.h"
 #include "hothouse.h"
 
@@ -105,13 +106,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       s = (s * (1.0f - vamt) + vamt * ((out_l + out_r) / 2.0f));
     }
 
-    out[0][i] = s;
+    // Quick and dirty dual-mono
+    out[0][i] = out[1][i] = s;
   }
 }
 
 int main() {
   hw.Init();
-  hw.SetAudioBlockSize(4);  // Number of samples handled per callback
+  hw.SetAudioBlockSize(48);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
   // Initialize LEDs
@@ -133,7 +135,8 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (1) {
-    ;
+    hw.DelayMs(10);
+    hw.CheckResetToBootloader();
   }
 
   return 0;
