@@ -181,6 +181,9 @@ void Hothouse::CheckResetToBootloader() {
     if (footswitch1_start_time == 0) {
       footswitch1_start_time = System::GetNow();
     } else if (System::GetNow() - footswitch1_start_time >= HOLD_THRESHOLD_MS) {
+      // Shut 'er down so the LEDs always flash
+      StopAdc();
+      StopAudio();
       
       daisy::Led _led_1, _led_2;
       _led_1.Init(seed.GetPin(22), false);
