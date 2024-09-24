@@ -4,6 +4,24 @@ Contributed by Cleveland Music Co. <code@clevelandmusicco.com>
 
 ## Description
 
+> [!TIP]
+> This functionality has now been added to the base Hothouse class. To wire it up in any of your effects, call it from the processing loop in your `main()` method. For example:
+>
+> ```cpp
+> int main() {
+>  // Init stuff omitted
+>
+>  hw.StartAdc();
+>  hw.StartAudio(AudioCallback);
+>
+>  while (true) {
+>    hw.DelayMs(10);
+>    hw.CheckResetToBootloader(); // If left footswitch is held down for 1 second, reset the Daisy Seed
+>  }
+>  return 0;
+> }
+> ```
+
 A very short example to demonstrate a simple (quick and dirty?) approach to programmatically putting the Daisy Seed into bootloader mode so it can be flashed with `dfu-util` over USB. The result is the same as pressing the BOOT and RESET buttons on the Daisy Seed as described [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb).
 
 In this code, holding down `FOOTSWITCH_1` for one second will briefly flash `LED_1` three times and reset the Daisy Seed by calling `System::ResetToBootloader()`. This can be handy while doing development work, as there's no need to physically press the Daisy Seed buttons; you can quickly prepare to flash by holding down the left footswitch.
