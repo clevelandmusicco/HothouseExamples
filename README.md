@@ -8,9 +8,14 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish. Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
-If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki).
+> [!IMPORTANT]
+> Everything from this point on assumes:
+> * You have some knowledge of the [Electrosmith Daisy Seed]((https://electro-smith.com/products/daisy-seed?variant=45234245108004));
+> * You understand [installing the Daisy Development Toolchain](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment) is not something we cover here, but having it installed is a pre-requisite if you want to write your own effects code;
 
-| 💥 Good To Know 💥 |
+If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki) to get yourself bootstrapped!
+
+| 💥 Also Good To Know 💥 |
 |-|
 | For the sake of simplicity, the examples in this repository are written with a focus on the use of [DaisySP classes](https://electro-smith.github.io/DaisySP/annotated.html) whenever available. There are lots of third-party libre and [open-source DSP libraries](https://search.brave.com/search?q=open+source+%28inpage%3Adsp+OR+inpage%3A%22digital+signal+processing%22%29+libraries&source=web) out there that provide more advanced processing, but using them can be complicated and daunting for the uninitiated. These examples are about demonstrating the use of the Hothouse itself with as little distraction as is reasonable. That's not to say there won't be more advanced projects added at a later date, though ... |
 
