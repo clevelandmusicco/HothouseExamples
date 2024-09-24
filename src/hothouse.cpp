@@ -19,6 +19,7 @@
 #include "optional"
 
 using clevelandmusicco::Hothouse;
+using daisy::System;
 
 #ifndef SAMPLE_RATE
 // #define SAMPLE_RATE DSY_AUDIO_SAMPLE_RATE
@@ -43,6 +44,8 @@ constexpr Pin PIN_KNOB_3 = daisy::seed::D18;
 constexpr Pin PIN_KNOB_4 = daisy::seed::D19;
 constexpr Pin PIN_KNOB_5 = daisy::seed::D20;
 constexpr Pin PIN_KNOB_6 = daisy::seed::D21;
+
+const uint32_t Hothouse::HOLD_THRESHOLD_MS;
 
 void Hothouse::Init(bool boost) {
   // Initialize the hardware.
@@ -173,7 +176,40 @@ Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
   }
 }
 
-// Private for simplicity of use.
+void Hothouse::CheckResetToBootloader() {
+  if (switches[Hothouse::FOOTSWITCH_1].Pressed()) {
+    if (footswitch1_start_time == 0) {
+      footswitch1_start_time = System::GetNow();
+    } else if (System::GetNow() - footswitch1_start_time >= HOLD_THRESHOLD_MS) {
+      
+      daisy::Led led_1, led_2;
+      led_1.Init(seed.GetPin(22), false);
+      led_2.Init(seed.GetPin(23), false);
+
+      // Alternately flash the LEDs 3 times
+      for (int i = 0; i < 3; i++) {
+        led_1.Set(1);
+        led_2.Set(0);
+        led_1.Update();
+        led_2.Update();
+        DelayMs(100);
+
+        led_1.Set(0);
+        led_2.Set(1);
+        led_1.Update();
+        led_2.Update();
+        DelayMs(100);
+      }
+
+      // Reset system to bootloader after LED flashing
+      System::ResetToBootloader();
+    }
+  } else {
+    // Reset the hold timer if the footswitch is released
+    footswitch1_start_time = 0;
+  }
+}
+
 Hothouse::ToggleswitchPosition Hothouse::GetLogicalSwitchPosition(Switch up,
                                                                   Switch down) {
   return up.Pressed()

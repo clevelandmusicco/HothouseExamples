@@ -164,6 +164,13 @@ class Hothouse {
   */
   ToggleswitchPosition GetToggleswitchPosition(Toggleswitch tsw);
 
+  /** Check whether FOOTSWITCH_1 (the left foot switch) has been held down for 1
+   * second and, if it has, call System::ResetToBootloader(). This has the same
+   * effect as pressing the Daisy Seed RESET and BOOT buttons to get into DFU
+   * bootloader mode. \note The LEDs will alternately flash three times before
+   * the reset. */
+  void CheckResetToBootloader();
+
   DaisySeed seed; /**< & */
 
   AnalogControl knobs[KNOB_LAST]; /**< & */
@@ -174,6 +181,9 @@ class Hothouse {
   void InitSwitches();
   void InitAnalogControls();
   ToggleswitchPosition GetLogicalSwitchPosition(Switch up, Switch down);
+
+  uint32_t footswitch1_start_time = 0;  // Store footswitch start time
+  static const uint32_t HOLD_THRESHOLD_MS = 1000;  // 1 second hold time
 
   inline uint16_t* adc_ptr(const uint8_t chn) { return seed.adc.GetPtr(chn); }
 };
