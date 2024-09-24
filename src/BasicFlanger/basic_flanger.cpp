@@ -63,11 +63,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     fonepole(lfo, lfotarget, 0.0001f);  // smooth at audio rate
     flanger.SetLfoDepth(lfo);
 
-    out[0][i] = in[0][i];
+    // Copy left input to both outputs (dual mono)
+    out[0][i] = out[1][i] = in[0][i];
 
     if (!bypass) {
       float sig = flanger.Process(in[0][i]);
-      out[0][i] = (sig * wet + in[0][i] * (1.0f - wet)) * vol;
+      out[0][i] = out[1][i] = (sig * wet + in[0][i] * (1.f - wet)) * vol;
     }
   }
 }
@@ -88,9 +89,10 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    hw.DelayMs(6);
+    hw.DelayMs(10);
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
   return 0;
 }

@@ -22,5 +22,5 @@ A literal port of the [petal/flanger example from DaisyExamples](https://github.
 | SWITCH 1 | Unused |  |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Unused |  |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |

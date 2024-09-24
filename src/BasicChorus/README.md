@@ -19,8 +19,8 @@ Ported directly from the ['petal/chorus' example in DaisyExamples](https://githu
 | KNOB 4 | DELAY | Sets delay time between dry and processed signal(s) |
 | KNOB 5 | FEEDBACK | Controls how much of the processed signal is fed back into the delay line |
 | KNOB 6 | VOLUME | Adjusts the overall volume of the output; useful when switching number of voices |
-| SWITCH 1 | VOICES | **UP** - L + R chorused signals summed<br/>**MIDDLE** - 1 voice<br/>**DOWN** - 1 voice |
+| SWITCH 1 | Unused |  |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Unused |  |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |

@@ -63,13 +63,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     fonepole(lfo, lfotarget, 0.0001f);  // smooth at audio rate
     ch.SetLfoDepth(lfo);
 
-    out[0][i] = in[0][i];
+    // Copy left input to both outputs (dual mono)
+    out[0][i] = out[1][i] = in[0][i];
 
     if (!bypass) {
       ch.Process(in[0][i]);
-      auto sig = ch.GetLeft();
-      if (hw.switches[0].Pressed()) sig += ch.GetRight();  // Sum L+R
-      out[0][i] = (sig * wet + in[0][i] * (1.0f - wet)) * vol;
+
+      out[0][i] = (ch.GetLeft() * wet + in[0][i] * (1.f - wet)) * vol;
+      out[1][i] = (ch.GetRight() * wet + in[1][i] * (1.f - wet)) * vol;
     }
   }
 }
@@ -91,9 +92,10 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    hw.DelayMs(6);
+    hw.DelayMs(10);
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
   return 0;
 }

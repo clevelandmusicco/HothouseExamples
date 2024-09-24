@@ -38,11 +38,12 @@ Tremolo trem;
 int waveform;
 bool bypass = true;
 
+// lookup array for brevity
+static const int waveforms[] = {Oscillator::WAVE_POLYBLEP_TRI,
+                                Oscillator::WAVE_SIN,
+                                Oscillator::WAVE_POLYBLEP_SQUARE};
+
 int GetWaveform() {
-  // lookup array for brevity
-  static const int waveforms[] = {Oscillator::WAVE_POLYBLEP_TRI,
-                                  Oscillator::WAVE_SIN,
-                                  Oscillator::WAVE_POLYBLEP_SQUARE};
   return waveforms[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
 }
 
@@ -57,8 +58,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   // footswitch
   bypass ^= hw.switches[7].RisingEdge();
 
-  for (size_t i = 0; i < size; ++i) {
-    out[0][i] = !bypass ? trem.Process(in[0][i]) : in[0][i];
+  for (size_t i = 0; i < size; i++) {
+    out[0][i] = out[1][i] = !bypass ? trem.Process(in[0][i]) : in[0][i];
   }
 }
 
@@ -80,6 +81,7 @@ int main() {
     hw.DelayMs(6);
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
   return 0;
 }

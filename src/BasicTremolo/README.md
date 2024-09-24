@@ -21,8 +21,8 @@ The square wave is a little "clicky" in this example, even using WAVE_POLYBLEP_S
 | KNOB 4 | Unused |  |
 | KNOB 5 | Unused |  |
 | KNOB 6 | Unused |  |
-| SWITCH 1 | WAVEFORM | **UP** - TRIANGLE<br/>**MIDDLE** - SINE<br/>**DOWN** - SQUARE |
+| SWITCH 1 | WAVEFORM | **UP** - Band-limited TRIANGLE<br/>**MIDDLE** - SINE<br/>**DOWN** - Band-limited SQUARE |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Unused |  |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |

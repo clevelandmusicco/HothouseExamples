@@ -116,7 +116,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       mix *= volume;
     }
 
-    out[0][i] = mix;
+    out[0][i] = out[1][i] = mix;
   }
 }
 
@@ -135,7 +135,8 @@ int main() {
   while (true) {
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
-    System::Delay(6);
+    System::Delay(10);
+    hw.CheckResetToBootloader();
   }
   return 0;
 }

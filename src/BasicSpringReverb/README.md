@@ -19,5 +19,8 @@ A no-frills spring reverb effect ported from the [DaisyExamples Verb petal examp
 | SWITCH 1 | Unused |  |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Unused |  |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
+
+> [!NOTE]
+> For some reason, `Hothouse::CheckResetToBootloader()` successfully resets the Daisy Seed, but it doesn't flash the left LED. So, only the right LED will flash prior to the reset. Figuring that out is a low-priority TODO.

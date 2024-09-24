@@ -27,7 +27,7 @@ using daisy::SaiHandle;
 using daisysp::ReverbSc;
 
 Hothouse hw;
-ReverbSc reverb;
+ReverbSc DSY_SDRAM_BSS reverb;
 Parameter parm_time, parm_freq, parm_send;
 Led led_bypass;
 bool bypass = true;
@@ -41,10 +41,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   reverb.SetLpFreq(parm_freq.Process());
   parm_send.Process();
 
-  if (hw.switches[hw.FOOTSWITCH_2].RisingEdge()) {
-    bypass = !bypass;
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
-  }
+  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
     dry = in[0][i];
@@ -52,13 +49,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     reverb.Process(send, send, &wetl, &wetr);
 
     if (bypass) {
-      out[0][i] = in[0][i];
+      out[0][i] = out[1][i] = in[0][i];
     } else {
-      out[0][i] = in[0][i] + (wetl + wetr) / 2;
+      out[0][i] = dry + wetl;
+      out[1][i] = dry + wetr;
     }
   }
-
-  led_bypass.Update();
 }
 
 int main() {
@@ -67,9 +63,11 @@ int main() {
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   float samplerate = hw.AudioSampleRate();
 
-  parm_time.Init(hw.knobs[hw.KNOB_1], 0.6f, 0.999f, Parameter::LOGARITHMIC);
-  parm_freq.Init(hw.knobs[hw.KNOB_2], 500.0f, 20000.0f, Parameter::LOGARITHMIC);
-  parm_send.Init(hw.knobs[hw.KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
+  parm_time.Init(hw.knobs[Hothouse::KNOB_1], 0.6f, 0.999f,
+                 Parameter::LOGARITHMIC);
+  parm_freq.Init(hw.knobs[Hothouse::KNOB_2], 500.0f, 20000.0f,
+                 Parameter::LOGARITHMIC);
+  parm_send.Init(hw.knobs[Hothouse::KNOB_3], 0.0f, 1.0f, Parameter::LINEAR);
   reverb.Init(samplerate);
 
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
@@ -78,7 +76,10 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever
+    hw.DelayMs(6);
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
   return 0;
 }
