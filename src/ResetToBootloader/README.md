@@ -4,6 +4,8 @@ Contributed by Cleveland Music Co. <code@clevelandmusicco.com>
 
 ## Description
 
+Obsolete but left for reference.
+
 > [!TIP]
 > This functionality has now been added to the base Hothouse class. To wire it up in any of your effects, call it from the processing loop in your `main()` method. For example:
 >

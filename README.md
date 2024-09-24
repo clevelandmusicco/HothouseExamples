@@ -33,12 +33,6 @@ If you're not familar with the Daisy Seed or its development environment, check 
 * **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Classic spring reverb effect
 * **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo as simple as it gets
 
-### Other Examples
-
-These were written with the legacy mono version of the Hothouse in mind, so they might be qirky on the stereo version. They will be ported in the near future. (REMINDER: pull requests are welcome!)
-
-* **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
-
 ## Pure Data (Pd) examples
 
 Just a handful of examples intended to show how to use the Hothouse with Pure Data/[Plugdata](https://github.com/plugdata-team/plugdata) patches and hvcc.
