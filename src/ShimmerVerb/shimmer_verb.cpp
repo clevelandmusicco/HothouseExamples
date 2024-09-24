@@ -89,7 +89,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 
   for (size_t i = 0; i < size; i++) {
     if (bypass) {
-      out[0][i] = in[0][i];
+      out[0][i] = out[1][i] = in[0][i];
       continue;
     }
 
@@ -99,8 +99,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     float pitch_shifted = ps_lpf.Process(ps.Process(pre_ps));
     float send = (filtered + pitch_shifted * shimmer) *
                  (hundred_percent_wet ? 1.0f : mix);
-    float wet;
 
+    // TODO: look into various filtering approaches for diffusing the
+    // pitch-shifted audio; it can be a bit "chipmunk-ish" as-is
+
+    // Quick and dirty dual-mono processing that doesn't even use the stereo
+    // output of ReverbSc...boo, hiss
+    // TODO: make the output true stereo
+    float wet;
     reverb.Process(send, send, &wet, &wet);
 
     if (apply_delay) {
@@ -114,13 +120,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     }
 
     out[0][i] = hundred_percent_wet ? wet : dry + wet;
+    out[1][i] = hundred_percent_wet ? wet : dry + wet;
     delay.Write(wet * feedback);
   }
 }
 
 int main(void) {
   hw.Init();
-  hw.SetAudioBlockSize(4);
+  hw.SetAudioBlockSize(48);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
   sample_rate = hw.AudioSampleRate();
 
@@ -161,6 +168,7 @@ int main(void) {
     led_bypass.Update();
     led_hundred_percent_wet.Set(hundred_percent_wet ? 1.0f : 0.0f);
     led_hundred_percent_wet.Update();
+    hw.CheckResetToBootloader();
   }
 
   return 0;

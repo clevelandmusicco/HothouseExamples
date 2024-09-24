@@ -19,6 +19,7 @@ If you're not familar with the Daisy Seed or its development environment, check 
 ### Stereo Examples (more coming soon ...)
 
 * **[StereoReverbWithTails](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/StereoReverbWithTails)** - A great-sounding reverb with pre-delay, tails, and either true stereo-to-stereo or mono-to-stereo modes
+* **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails (dual-mono and due for a true stereo update)
 
 #### Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master) (most of these are mono-to-stereo)
 
@@ -36,7 +37,6 @@ These were written with the legacy mono version of the Hothouse in mind, so they
 * **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
 * **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
 * **ModDelay** - Coming soon ... Modulated delay with vibrato or chorus mode, and a 5-minute looper
-* **[ShimmerVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ShimmerVerb)** - Shimmer reverb with modulated reverb tails
 * **[TriChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/TriChorus)** - Chorus effect with three voices; capable of lush 80s tones as well as totally broken sounds (making it a sort of Fuzz Factory of chorus pedals)
 * And more to come ...
 
@@ -139,6 +139,8 @@ make program-dfu
 
 > [!TIP]
 > If you've already flashed one of the examples in this repository, there is a way to put the Daisy Seed into bootloader mode *without pressing the RESET and BOOT buttons on the Daisy Seed:* **Hold down the left foot switch for 2 seconds**. The LEDs will alternately flash and the Daisy Seed will be ready to program with a new effect.
+>
+> Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-bootloader-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
 
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
 
