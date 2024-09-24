@@ -54,7 +54,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   vol = hw.knobs[5].Process() * 2.0f;
 
   // footswitch
-  bypass ^= hw.switches[7].RisingEdge();
+  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
     fonepole(del, deltarget, 0.0001f);  // smooth at audio rate
@@ -70,7 +70,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       ch.Process(in[0][i]);
 
       out[0][i] = (ch.GetLeft() * wet + in[0][i] * (1.f - wet)) * vol;
-      out[1][i] = (ch.GetRight() * wet + in[1][i] * (1.f - wet)) * vol;
+      out[1][i] = (ch.GetRight() * wet + in[0][i] * (1.f - wet)) * vol;
     }
   }
 }
