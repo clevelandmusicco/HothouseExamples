@@ -14,24 +14,24 @@ If you're not familar with the Daisy Seed or its development environment, check 
 |-|
 | For the sake of simplicity, the examples in this repository are written with a focus on the use of [DaisySP classes](https://electro-smith.github.io/DaisySP/annotated.html) whenever available. There are lots of third-party libre and [open-source DSP libraries](https://search.brave.com/search?q=open+source+%28inpage%3Adsp+OR+inpage%3A%22digital+signal+processing%22%29+libraries&source=web) out there that provide more advanced processing, but using them can be complicated and daunting for the uninitiated. These examples are about demonstrating the use of the Hothouse itself with as little distraction as is reasonable. That's not to say there won't be more advanced projects added at a later date, though ... |
 
-## Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master)
-
-A few examples ported as-is:
-
-* **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable mono chorus effect
-* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
-* **[BasicMultiDelay](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicMultiDelay)** - 3 delay lines, each with tweakable time and feedback
-* **[BasicPhaser](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicPhaser)** - Flexible phaser with 1-8 stages (poles)
-* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Classic spring reverb effect
-* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo as simple as it gets
-
 ## Cleveland Music Co. examples
 
 ### Stereo Examples (more coming soon ...)
 
 * **[StereoReverbWithTails](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/StereoReverbWithTails)** - A great-sounding reverb with pre-delay, tails, and either true stereo-to-stereo or mono-to-stereo modes
 
+#### Ported from [DaisyExamples](https://github.com/electro-smith/DaisyExamples/tree/master) (most of these are mono-to-stereo)
+
+* **[BasicChorus](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicChorus)** - Tweakable chorus effect
+* **[BasicFlanger](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicFlanger)** - Simple flanger effect with adjustable delay and feedback
+* **[BasicMultiDelay](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicMultiDelay)** - 3 delay lines, each with tweakable time and feedback
+* **[BasicPhaser](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicPhaser)** - Flexible phaser with 1-8 stages (poles)
+* **[BasicSpringReverb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicSpringReverb)** - Classic spring reverb effect
+* **[BasicTremolo](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/BasicTremolo)** - Tremolo as simple as it gets
+
 ### Other Examples
+
+These were written with the legacy mono version of the Hothouse in mind, so they might be qirky on the stereo version. They will be ported in the near future. (REMINDER: pull requests are welcome!)
 
 * **[ResetToBootloader](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/ResetToBootloader)** - Prepare the Daisy Seed to be flashed without having to press the BOOT and RESET buttons
 * **[HarmonicTremVerb](https://github.com/clevelandmusicco/HothouseExamples/tree/main/src/HarmonicTremVerb)** - Tremolo with rich harmonic mode and a spring reverb effect
