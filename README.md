@@ -133,6 +133,8 @@ make program-dfu
 > [!TIP]
 > If you've already flashed one of the examples in this repository, there is a way to put the Daisy Seed into bootloader mode *without pressing the RESET and BOOT buttons on the Daisy Seed:* **Hold down the left foot switch for 2 seconds**. The LEDs will alternately flash and the Daisy Seed will be ready to program with a new effect.
 >
+> ![reset-gif](https://github.com/user-attachments/assets/ecc2f62b-7adb-42c4-8da9-a02bfdb50be0)
+> 
 > Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-bootloader-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
 
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
