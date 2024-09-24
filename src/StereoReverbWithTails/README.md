@@ -21,5 +21,5 @@ Also note that _SWITCH 1_ selects between mono-to-stereo processing (UP) and tru
 | SWITCH 1 | AUDIO MODE | **UP** - mono-to-stereo mode (left input is copied to right)<br/>**MIDDLE** - true stereo-to-stereo mode<br/>**DOWN** - true stereo-to-stereo mode |
 | SWITCH 2 | Unused |  |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Unused |  |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |

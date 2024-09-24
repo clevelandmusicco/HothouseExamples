@@ -46,7 +46,7 @@ void AudioCallback(AudioHandle::InterleavingInputBuffer in,
   float dry_l, dry_r, wet_l, wet_r, send_l, send_r, pre_delayed_l,
       pre_delayed_r;
 
-  hw.ProcessDigitalControls();
+  hw.ProcessAllControls();
   verb.SetFeedback(v_time.Process());
   verb.SetLpFreq(v_freq.Process());
   v_send.Process();
@@ -74,7 +74,7 @@ void AudioCallback(AudioHandle::InterleavingInputBuffer in,
     dry_l = in[i];
     dry_r = in[i + 1];
 
-    // Mono-to-stereo logic
+    // Mono-to-stereo mode?
     if (mono_to_stereo) {
       dry_r = dry_l;
     }
@@ -108,7 +108,7 @@ void AudioCallback(AudioHandle::InterleavingInputBuffer in,
 
 int main(void) {
   hw.Init();
-  hw.SetAudioBlockSize(4);
+  hw.SetAudioBlockSize(48);
   sample_rate = hw.AudioSampleRate();
 
   v_time.Init(hw.knobs[Hothouse::KNOB_1], 0.6f, 0.999f, Parameter::LOGARITHMIC);
@@ -131,5 +131,6 @@ int main(void) {
     hw.DelayMs(10);
     led_bypass.Set(bypass ? 0.0f : 1.0f);
     led_bypass.Update();
+    hw.CheckResetToBootloader();
   }
 }

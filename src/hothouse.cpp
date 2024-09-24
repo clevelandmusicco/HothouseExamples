@@ -53,7 +53,7 @@ void Hothouse::Init(bool boost) {
   seed.Init(boost);
   InitSwitches();
   InitAnalogControls();
-  SetAudioBlockSize(4);
+  SetAudioBlockSize(48);
 }
 
 void Hothouse::DelayMs(size_t del) { seed.DelayMs(del); }
@@ -192,13 +192,13 @@ void Hothouse::CheckResetToBootloader() {
         _led_2.Set(0);
         _led_1.Update();
         _led_2.Update();
-        DelayMs(100);
+        System::Delay(100);
 
         _led_1.Set(0);
         _led_2.Set(1);
         _led_1.Update();
         _led_2.Update();
-        DelayMs(100);
+        System::Delay(100);
       }
 
       // Reset system to bootloader after LED flashing
