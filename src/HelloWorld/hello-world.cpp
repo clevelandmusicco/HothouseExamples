@@ -74,9 +74,9 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   // just pass the input to the output in either state
   for (size_t i = 0; i < size; ++i) {
     if (bypass) {
-      out[0][i] = in[0][i];
+      out[0][i] = out[1][i] = in[0][i];
     } else {
-      out[0][i] = in[0][i];  // TODO: replace with something awesome
+      out[0][i] = out[1][i] = in[0][i];  // TODO: replace with something awesome
     }
   }
 }
@@ -97,7 +97,9 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever and ever
+    hw.DelayMs(10);
+
+    hw.CheckResetToBootloader();
   }
   return 0;
 }
