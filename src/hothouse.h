@@ -166,9 +166,9 @@ class Hothouse {
 
   /** Check whether FOOTSWITCH_1 (the left foot switch) has been held down for 2
    * seconds and, if it has, call System::ResetToBootloader(). This has the same
-   * effect as pressing the Daisy Seed RESET and BOOT buttons to get into DFU
-   * bootloader mode. \note The LEDs will alternately flash three times before
-   * the reset. */
+   * effect as pressing the Daisy Seed RESET and BOOT buttons to get into
+   * flashable (DFU)) mode. \note The LEDs will alternately flash three times
+   * before the reset. */
   void CheckResetToBootloader();
 
   DaisySeed seed; /**< & */

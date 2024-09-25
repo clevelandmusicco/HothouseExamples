@@ -30,5 +30,5 @@ Rinse and repeat this math for DEPTH and DELAY.
 | SWITCH 1 | FREQ VARIATION | **UP**: +/-5%<br/>**MIDDLE**: +/-2%<br/>**DOWN**: +/-1% |
 | SWITCH 2 | DEPTH VARIATION | **UP**: +/-20%<br/>**MIDDLE**: +/-10%<br/>**DOWN**: +/-5% |
 | SWITCH 3 | DELAY VARIATION | **UP**: +/-20%<br/>**MIDDLE**: +/-10%<br/>**DOWN**: +/-5% |
-| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to "flashable mode" (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |

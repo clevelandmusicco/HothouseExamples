@@ -21,7 +21,7 @@ This code is a literal port of the [petal/MultiDelay example from DaisyExamples]
 | SWITCH 1 | WET/DRY MIX | **UP** - 100% WET<br/>**MIDDLE** - 50% WET / 50% DRY<br/>**DOWN** - 66% DRY / 33% WET |
 | SWITCH 2 | VOLUME BOOST | Some settings can result in low output volume; use this to compensate<br/><br/>**UP** - HI<br/>**MIDDLE** - LO<br/>**DOWN** - NONE |
 | SWITCH 3 | Unused |  |
-| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to "flashable mode" (DFU) |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
 
 ## Implementation notes

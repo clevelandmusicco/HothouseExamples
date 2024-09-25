@@ -19,5 +19,5 @@ A simple program that doesn't do anything but turn some LEDs off and on. However
 | SWITCH 1 | LED 1 Setting | **UP** - LED 1 is on<br/>**MIDDLE** - LED 1 is off<br/>**DOWN** - LED 1 is on |
 | SWITCH 2 | Unused | **UP** - <br/>**MIDDLE** - <br/>**DOWN** -  |
 | SWITCH 3 | Unused | **UP** - <br/>**MIDDLE** - <br/>**DOWN** -  |
-| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
+| FOOTSWITCH 1 | Reset | If held down for 2 seconds, the Daisy Seed will reset to "flashable mode" (DFU) |
 | FOOTSWITCH 2 | Bypass toggle | Whether bypassed or not, the code simply passes the input signal to the output, but LED 2 toggles off and on |

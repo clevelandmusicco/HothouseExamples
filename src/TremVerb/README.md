@@ -19,7 +19,7 @@ A tremolo reverb effect not terribly unlike a famous digital trem/verb pedal nam
 | SWITCH 1 | Tremolo wave shape | **UP** - SAW<br/>**MIDDLE** - SIN<br/>**DOWN** - SQUARE |
 | SWITCH 2 | Unused | |
 | SWITCH 3 | Unused | |
-| FOOTSWITCH 1 | Tremolo enable/bypass | When enabled, LED 1 pulses with the rate and depth of the tremolo effect; If held down for 2 seconds, the Daisy Seed will reset to bootloader mode (DFU) |
+| FOOTSWITCH 1 | Tremolo enable/bypass | When enabled, LED 1 pulses with the rate and depth of the tremolo effect; If held down for 2 seconds, the Daisy Seed will reset to "flashable mode" (DFU) |
 | FOOTSWITCH 2 | Reverb enable/bypass |  |
 
 ## Modification Ideas
