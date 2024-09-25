@@ -172,20 +172,20 @@ src/MyAwesomeEffect
     └── tasks.json
 ```
 
-Straight away, the code can be compiled and flashed as usual, but until you add your own code, the new effect will just write silence to the output when not bypassed. By default, `AudioCallback()` looks something like this:
+Straight away, the code can be compiled and flashed as usual, but until you add your own code, the new effect will just write silence to the output when not bypassed. By default, `AudioCallback()` looks something like this (note the `TODO` comment):
 
 ```cpp
-void AudioCallback(AudioHandle::InputBuffer in, 
-                  AudioHandle::OutputBuffer out,
-                  size_t size) {
-
-  // Stuff omitted for brevity...
+void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
+                   size_t size) {
+  // Stuff omitted for brevity
 
   for (size_t i = 0; i < size; ++i) {
-    if (bypass) {
-      out[0][i] = in[0][i];
-    } else {
-      out[0][i] = 0.0f;  // TODO: replace silence with something awesome
+    // Copy left input to both outputs
+    out[0][i] = out[1][i] = in[0][i];
+
+    if (!bypass) {
+      // TODO: replace silence with something awesome
+      out[0][i] = out[1][i] = 0.0f;
     }
   }
 }
