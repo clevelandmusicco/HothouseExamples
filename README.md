@@ -96,7 +96,7 @@ To flash an effect to your Hothouse, you will load a compiled binary on to the D
 cd src/HelloWorld
 ```
 
-Assuming you've already compiled the code, connect the Daisy Seed to your computer with a USB cable. Then, enter bootloader mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with the following command:
+Assuming you've already compiled the code, connect the Daisy Seed to your computer with a USB cable. Then, enter flashable mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with the following command:
 
 ```text
 # Using USB
@@ -104,14 +104,14 @@ make program-dfu
 ```
 
 > [!TIP]
-> If you've already flashed one of the examples in this repository, there is a way to put the Daisy Seed into bootloader mode *without pressing the RESET and BOOT buttons on the Daisy Seed:* **Hold down the left foot switch for 2 seconds**. The LEDs will alternately flash and the Daisy Seed will be ready to program with a new effect.
+> If you've already flashed one of the examples in this repository, there is a way to put the Daisy Seed into flashable mode *without pressing the RESET and BOOT buttons on the Daisy Seed:* **HOLD DOWN THE LEFT FOOTSWITCH FOR 2 SECONDS**. The LEDs will alternately flash and the Daisy Seed will be ready to program with a new effect.
 >
 > ![reset-gif](https://github.com/user-attachments/assets/ecc2f62b-7adb-42c4-8da9-a02bfdb50be0)  
 > *Don't be jealous of my limited edition knobbage* :wink:
 >
 > Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-bootloader-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
 
-If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter bootloader mode on the Daisy Seed. Simply run this command with your debugger attached:
+If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter flashable mode on the Daisy Seed. Simply run this command with your debugger attached:
 
 ```text
 # Using JTAG/SWD adaptor (like STLink)
