@@ -8,7 +8,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "STM32H750xx"
+                "STM32H750xx",
+                "USE_DAISYSP_LGPL"
             ],
             "includePath": [
                 "${workspaceFolder}/../**",

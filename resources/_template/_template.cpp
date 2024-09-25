@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Needed for some VS Code configs; uncomment if ReverbSc
-// and other LGPL stuff is not recognized by Intellisense ¯\_(ツ)_/¯
-// #include "daisysp-lgpl.h"
 #include "daisysp.h"
 #include "hothouse.h"
 
@@ -35,28 +32,23 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  // Toggle effect bypass LED when footswitch is pressed
-  if (hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge()) {
-    bypass = !bypass;
-    // LED off when bypassed, on otherwise
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
-  }
-
-  // Update the LEDs
-  led_bypass.Update();
+  // Toggle bypass when FOOTSWITCH_2 is pressed
+  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
-    if (bypass) {
-      out[0][i] = in[0][i];
-    } else {
-      out[0][i] = 0.0f;  // TODO: replace silence with something awesome
+    // Copy left input to both outputs (dual-mono)
+    out[0][i] = out[1][i] = in[0][i];
+
+    if (!bypass) {
+      // TODO: replace silence with something awesome
+      out[0][i] = out[1][i] = 0.0f;
     }
   }
 }
 
 int main() {
   hw.Init();
-  hw.SetAudioBlockSize(4);  // Number of samples handled per callback
+  hw.SetAudioBlockSize(48);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
@@ -65,7 +57,14 @@ int main() {
   hw.StartAudio(AudioCallback);
 
   while (true) {
-    // Do nothing forever
+    hw.DelayMs(10);
+
+    // Toggle effect bypass LED when footswitch is pressed
+    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Update();
+
+    // Call System::ResetToBootloader() if FOOTSWITCH_1 is pressed for 2 seconds
+    hw.CheckResetToBootloader();
   }
   return 0;
 }
