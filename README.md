@@ -109,7 +109,7 @@ make program-dfu
 > ![reset-gif](https://github.com/user-attachments/assets/ecc2f62b-7adb-42c4-8da9-a02bfdb50be0)  
 > *Don't be jealous of my limited edition knobbage* :wink:
 >
-> Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-bootloader-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
+> Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-flashable-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
 
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter flashable mode on the Daisy Seed. Simply run this command with your debugger attached:
 
