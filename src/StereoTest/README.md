@@ -19,7 +19,7 @@ This code generates pure tones across the stereo field, so you can identify prob
 | KNOB 5 | Unused |  |
 | KNOB 6 | Unused |  |
 | SWITCH 1 | OUTPUT CHANNEL | **UP** - LEFT<br/>**MIDDLE** - LEFT & RIGHT<br/>**DOWN** - RIGHT |
-| SWITCH 2 | Unused | **UP** - <br/>**MIDDLE** - <br/>**DOWN** -  |
-| SWITCH 3 | Unused | **UP** - <br/>**MIDDLE** - <br/>**DOWN** -  |
+| SWITCH 2 | Unused |  |
+| SWITCH 3 | Unused |  |
 | FOOTSWITCH 1 | Reset | Holding down for 2 seconds will flash the LEDs three times and put the Daisy Seed in "flashable mode" |
 | FOOTSWITCH 2 | Bypass | The bypassed signal is buffered |
