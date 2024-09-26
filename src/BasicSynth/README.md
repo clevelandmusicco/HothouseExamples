@@ -11,7 +11,7 @@ Super basic monophonic synthesizer example with multiple waveforms, Moog-style f
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
 | KNOB 1 | FILTER | Moog ladder filter from 20Hz to 20kHz |
-| KNOB 2 | RESONANCE | Watch out for self-oscillations! |
+| KNOB 2 | RESONANCE | Watch out for self-oscillations and remember low frequencies with high resonance tend to boost a lot of energy (which could cause nasty clipping)! |
 | KNOB 3 | ATTACK | 0.001 sec to 0.25 sec |
 | KNOB 4 | DECAY | 0.05 sec to 2 secs |
 | KNOB 5 | Unused |  |
