@@ -40,3 +40,7 @@ client 28: 'Daisy Seed Built In' [type=kernel,card=3]
     0 'Daisy Seed Built In MIDI 1'
 newkular@linux-dev:~$ aconnect 24:0 28:0
 ```
+
+![image](https://github.com/user-attachments/assets/b7f176ae-36c5-4c80-88aa-8601bdd60fe0)  
+*Or you can use the QjackCtl Graph*
+
