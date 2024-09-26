@@ -115,6 +115,9 @@ int main() {
           break;
       }
     }
+
+    hw.DelayMs(10);
+    hw.CheckResetToBootloader();
   }
   return 0;
 }
