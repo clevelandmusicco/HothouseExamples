@@ -32,13 +32,13 @@ If you're not familar with the Daisy Seed or its development environment, check 
 
 Clone the repo:
 
-```text
+```console
 git clone https://github.com/clevelandmusicco/HothouseExamples
 ```
 
 Init and build the [libDaisy](https://github.com/electro-smith/libDaisy.git) and [DaisySP](https://github.com/electro-smith/DaisySP.git) libraries; these are included as submodules:
 
-```text
+```console
 cd HothouseExamples
 git submodule update --init --recursive
 
@@ -50,7 +50,7 @@ make -C DaisySP
 
 To build a specific effect (replace 'HelloWorld' with the desired effect):
 
-```text
+```console
 cd src/HelloWorld
 make clean; make
 ```
@@ -61,8 +61,7 @@ The resulting `hello-world.bin` will be in `src/HelloWorld/build`.
 
 To build all of the effects in the `src` dir:
 
-```text
-# Helper script is in the repo root dir
+```console
 cd HothouseExamples
 python build_examples.py
 ```
@@ -73,7 +72,7 @@ By default, the compiled `*.bin` files will be in the `build` subdirectory of ea
 
 This might be useful if you prefer all your binaries in one directory to, for example, make them easier to find while flashing the Daisy Seed. If you want to publish the resulting `*.bin` files to a common location after compiling, pass the `--publish_dir` argument. For example, to publish all the `*.bin` files to `/development/hothouse/bin`:
 
-```text
+```console
 python build_examples.py --publish_dir /development/hothouse/bin
 ```
 
@@ -81,7 +80,7 @@ This performs a simple copy operation after the `make` command. The original `*.
 
 The `--publish_dir` argument can also be a relative path. In this case, specify a path relative to each example's subdirectory. For example, the following would publish all resulting `*.bin` files 2 directories up from each example's subdirectory (in `/HothouseExamples/bin/`):
 
-```text
+```console
 python build_examples.py --publish_dir ../../bin
 ```
 
@@ -92,14 +91,15 @@ python build_examples.py --publish_dir ../../bin
 
 To flash an effect to your Hothouse, you will load a compiled binary on to the Daisy Seed. `cd` into the desired effect directory:
 
-```text
+```console
 cd src/HelloWorld
 ```
 
+#### USB (DFU)
+
 Assuming you've already compiled the code, connect the Daisy Seed to your computer with a USB cable. Then, enter flashable mode on your Daisy Seed (see pic [here](https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#4a-flashing-the-daisy-via-usb)) and flash with the following command:
 
-```text
-# Using USB
+```console
 make program-dfu
 ```
 
@@ -111,10 +111,11 @@ make program-dfu
 >
 > Read more about this in the [FAQ section of the wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions#q-how-can-i-put-the-daisy-seed-into-flashable-dfu-mode-without-pressing-the-buttons-inside-the-hothouse).
 
+#### JTAG/SWD Debugger
+
 If you're using a [JTAG/SWD debugger](https://electro-smith.com/products/st-link-v3-mini-debugger) (**AND WE HIGHLY RECOMMEND YOU DO** if you're doing development work!) there's no need to enter flashable mode on the Daisy Seed. Simply run this command with your debugger attached:
 
-```text
-# Using JTAG/SWD adaptor (like STLink)
+```console
 make program
 ```
 
@@ -128,7 +129,7 @@ Alternatively, you can flash the Daisy Seed using the [Daisy Web Programmer](htt
 
 Use the `create_new_proj.py` helper script to create a bare effect project in the `src` dir:
 
-```text
+```console
 python create_new_proj.py -h
 usage: create_new_proj.py [-h] --proj_name PROJ_NAME
                               [--your_name YOUR_NAME]
@@ -148,8 +149,7 @@ options:
 > [!NOTE]
 > `--your_name` and `--your_email` are optional. If they are omitted, "Your Name" and "your@email" will be used in the new project code.
 
-```text
-# Helper script is in the repo root dir
+```console
 cd HothouseExamples
 python create_new_proj.py --proj_name MyAwesomeEffect \
                           --your_name "John Developer" \
@@ -191,17 +191,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
 }
 ```
 
-Build your new effect as you would any other:
+Build your new effect as you would any other (`program-dfu` for USB and `program` for JTAG/SWD):
 
-```text
+```console
 cd src/MyAwesomeEffect
 make clean
 make
 
-# USB
 make program-dfu
 
-# JTAG/SWD
 make program
 ```
 
