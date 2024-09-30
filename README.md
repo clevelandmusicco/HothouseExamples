@@ -13,3 +13,11 @@ If you're not familar with the Daisy Seed or its development environment, check 
 | 💥 Also Good To Know 💥 |
 |-|
 | For the sake of simplicity, the examples in this repository are written with a focus on the use of [DaisySP classes](https://electro-smith.github.io/DaisySP/annotated.html) whenever available. There are lots of third-party libre and [open-source DSP libraries](https://search.brave.com/search?q=open+source+%28inpage%3Adsp+OR+inpage%3A%22digital+signal+processing%22%29+libraries&source=web) out there that provide more advanced processing, but using them can be complicated and daunting for the uninitiated. These examples are about demonstrating the use of the Hothouse itself with as little distraction as is reasonable. That's not to say there won't be more advanced projects added at a later date, though ... |
+
+## Getting started
+
+* [**Current Hothouse Build Guide**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Stereo-Version)) - The official build documentation for the current hardware version of the Hothouse. Whether you have a kit or a pre-assembled pedal, this page walks you through getting the Hothouse ready for programming.
+* [**10-Minute Quick Start**](https://github.com/clevelandmusicco/HothouseExamples/wiki/10%E2%80%90Minute-Quick-Start) - Once you've got an assembled Hothouse pedal in-hand, this is your next stop.
+* [**List of Hothouse Examples**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Hothouse-Examples) - A definitive list of the examples in this repository, loosely-organized with brief descriptions.
+* [**Frequently Asked Questions**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) - A growing list of questions and answers. Check here first if you're having trouble figuring something out.
+* [**Hothouse Wiki**](https://github.com/clevelandmusicco/HothouseExamples/wiki) - Always the most definitive and update-to-date documentation for the Hothouse platform.
