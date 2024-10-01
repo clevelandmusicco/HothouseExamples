@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// ### Uncomment if IntelliSense can't resolve DaisySP-LGPL classes ###
+// #include "daisysp-lgpl.h"
+
 #include "daisysp.h"
 #include "hothouse.h"
 
@@ -36,10 +39,10 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
   for (size_t i = 0; i < size; ++i) {
-    // Copy left input to both outputs (dual-mono)
-    out[0][i] = out[1][i] = in[0][i];
-
-    if (!bypass) {
+    if (bypass) {
+      // Copy left input to both outputs (mono-to-dual-mono)
+      out[0][i] = out[1][i] = in[0][i];
+    } else {
       // TODO: replace silence with something awesome
       out[0][i] = out[1][i] = 0.0f;
     }
