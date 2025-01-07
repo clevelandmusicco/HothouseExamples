@@ -1,6 +1,6 @@
 # Flick
 
-Contributed by [joulupukki](https://forum.electro-smith.com/u/joulupukki/summary), GitHub: [joulupukki](https://github.com/joulupukki)
+Contributed by Boyd Timothy, GitHub: [joulupukki](https://github.com/joulupukki)
 
 This is a reverb, tremolo, and delay pedal. The original goal of this pedal was to displace the Strymon Flint (Reverb and Tremolo) and the AionFX Elysium (Ambient Delay) to save space on my small pedal board.
 
