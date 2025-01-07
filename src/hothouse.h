@@ -73,6 +73,17 @@ class Hothouse {
     TOGGLESWITCH_3,
   };
 
+  struct FootswitchCallbacks {
+    /** Called when a single footswitch press is detected. */
+    void (*HandleNormalPress)(Switches footswitch);
+
+    /** Called when a double footswitch press is detected. */
+    void (*HandleDoublePress)(Switches footswitch);
+
+    /** Called when a long footswitch press is detected. */
+    void (*HandleLongPress)(Switches footswitch);
+  };
+
   // Constructor and Destructor
   Hothouse() = default;
   ~Hothouse() = default;
@@ -171,6 +182,14 @@ class Hothouse {
    * before the reset. */
   void CheckResetToBootloader();
 
+  /** Register/Deregister footswitch press callbacks. This provides an
+   * alternative way of handling foot switch presses and allows effects to make
+   * use of double and long presses.
+   * \param callbacks A pointer to the struct that defines the callbacks or NULL
+   * to deregister all callbacks.
+   */
+  void RegisterFootswitchCallbacks(FootswitchCallbacks *callbacks);
+
   DaisySeed seed; /**< & */
 
   AnalogControl knobs[KNOB_LAST]; /**< & */
@@ -181,11 +200,19 @@ class Hothouse {
   void InitSwitches();
   void InitAnalogControls();
   ToggleswitchPosition GetLogicalSwitchPosition(Switch up, Switch down);
+  void ProcessFootswitchPresses(Switches footswitch);
 
-  uint32_t footswitch1_start_time = 0;  // Store footswitch start time
+  uint32_t footswitch_start_time[2] = {0, 0};  // Store footswitch start time
+  uint32_t footswitch_last_press_time[2] = {0, 0};
+  bool footswitch_last_state[2] = {false, false};
+  uint8_t footswitch_press_count[2] = {0, 0};
+  bool footswitch_long_press_triggered[2] = {false, false};
   static const uint32_t HOLD_THRESHOLD_MS = 2000;  // 2 second hold time
+  static const uint32_t DOUBLE_PRESS_THRESHOLD_MS = 600;
 
   inline uint16_t* adc_ptr(const uint8_t chn) { return seed.adc.GetPtr(chn); }
+
+  FootswitchCallbacks *footswitchCallbacks = NULL;
 };
 
 }  // namespace clevelandmusicco

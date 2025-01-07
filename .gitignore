@@ -3,3 +3,4 @@ __MACOSX/
 _MACOSX/
 .cortex-debug.registers.state.json
 .cortex-debug.peripherals.state.json
+.DS_Store
