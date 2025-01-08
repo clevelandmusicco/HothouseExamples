@@ -118,6 +118,8 @@ void Hothouse::ProcessDigitalControls() {
   for (size_t i = 0; i < SWITCH_LAST; i++) {
     switches[i].Debounce();
   }
+  ProcessFootswitchPresses(FOOTSWITCH_1);
+  ProcessFootswitchPresses(FOOTSWITCH_2);
 }
 
 void Hothouse::InitSwitches() {
@@ -178,9 +180,9 @@ Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
 
 void Hothouse::CheckResetToBootloader() {
   if (switches[Hothouse::FOOTSWITCH_1].Pressed()) {
-    if (footswitch1_start_time == 0) {
-      footswitch1_start_time = System::GetNow();
-    } else if (System::GetNow() - footswitch1_start_time >= HOLD_THRESHOLD_MS) {
+    if (footswitch_start_time[0] == 0) {
+      footswitch_start_time [0]= System::GetNow();
+    } else if (System::GetNow() - footswitch_start_time[0] >= HOLD_THRESHOLD_MS) {
       // Shut 'er down so the LEDs always flash
       StopAdc();
       StopAudio();
@@ -209,7 +211,7 @@ void Hothouse::CheckResetToBootloader() {
     }
   } else {
     // Reset the hold timer if the footswitch is released
-    footswitch1_start_time = 0;
+    footswitch_start_time[0] = 0;
   }
 }
 
@@ -218,4 +220,59 @@ Hothouse::ToggleswitchPosition Hothouse::GetLogicalSwitchPosition(Switch up,
   return up.Pressed()
              ? TOGGLESWITCH_UP
              : (down.Pressed() ? TOGGLESWITCH_DOWN : TOGGLESWITCH_MIDDLE);
+}
+
+void Hothouse::RegisterFootswitchCallbacks(FootswitchCallbacks *callbacks) {
+  footswitchCallbacks = callbacks;
+}
+
+// Watches for normal, double, and long presses of the footswitches.
+void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
+  if (footswitchCallbacks == NULL) {
+    return; // Nothing to do if callbacks have not been registered
+  }
+  bool is_pressed = switches[footswitch].RisingEdge();
+  int footswitch_index = footswitch == Hothouse::FOOTSWITCH_1 ? 0 : 1;
+
+  uint32_t now = System::GetNow();
+
+  if (is_pressed == true && footswitch_last_state[footswitch_index] == false) {
+    // Footswitch is pressed
+    footswitch_start_time[footswitch_index] = now;
+
+    if ((now - footswitch_last_press_time[footswitch_index]) <= DOUBLE_PRESS_THRESHOLD_MS) {
+      footswitch_press_count[footswitch_index]++;
+    } else {
+      footswitch_press_count[footswitch_index] = 1;
+    }
+
+    footswitch_last_press_time[footswitch_index] = now;
+    footswitch_long_press_triggered[footswitch_index] = false; // Reset long press trigger when pressed
+  }
+
+  uint32_t press_duration = now - footswitch_start_time[footswitch_index];
+
+  if (is_pressed == true && press_duration >= HOLD_THRESHOLD_MS && !footswitch_long_press_triggered[footswitch_index]) {
+    // Footswitch is being held down
+    if (footswitchCallbacks->HandleLongPress != NULL) {
+      footswitchCallbacks->HandleLongPress(footswitch);
+    }
+    footswitch_long_press_triggered[footswitch_index] = true; // Ensure long press is only triggered once
+  }
+
+  if (is_pressed == false && footswitch_last_state[footswitch_index] == true) {
+    // Button released
+    if (!footswitch_long_press_triggered[footswitch_index]) {
+      if (footswitch_press_count[footswitch_index] >= 2) {
+        if (footswitchCallbacks->HandleDoublePress != NULL) {
+          footswitchCallbacks->HandleDoublePress(footswitch);
+        }
+        footswitch_press_count[footswitch_index] = 0;
+      } else if (press_duration < HOLD_THRESHOLD_MS && footswitchCallbacks->HandleNormalPress != NULL) {
+        footswitchCallbacks->HandleNormalPress(footswitch);
+      }
+    }
+  }
+
+  footswitch_last_state[footswitch_index] = is_pressed;
 }
