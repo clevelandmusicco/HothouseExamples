@@ -2,16 +2,15 @@
 
 Contributed by Boyd Timothy, GitHub: [joulupukki](https://github.com/joulupukki)
 
-This is a reverb, tremolo, and delay pedal. The original goal of this pedal was to displace the Strymon Flint (Reverb and Tremolo) and the AionFX Elysium (Ambient Delay) to save space on my small pedal board.
+This is a reverb, tremolo, and delay pedal. The original goal of this pedal was to displace the Strymon Flint (Reverb and Tremolo) and a delay pedal to save space on a small pedal board.
 
 ### Effects
 
-**Platerra Reverb:** This is a plate reverb based on the Dattorro reverb. It's also available in this project in the [src/Platerra/](src/Platerra/) subdirectory.
+**Platerra Reverb:** This is a plate reverb based on the Dattorro reverb.
 
-**Tremolo:** Sine wave based tremolo meant to mimic tube bias tremolo found
-on some Fender amps. It's nice and smooth just like you'd expect.
+**Tremolo:** Tremolo with smooth sine wave, triangle, and square wave settings.
 
-**Delay:** Standard Daisy Seed digital delay.
+**Delay:** Basic digital delay.
 
 ### Demo
 
