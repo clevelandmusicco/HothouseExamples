@@ -2,7 +2,7 @@
 
 **:wrench: [Hothouse Build Guide](https://github.com/clevelandmusicco/HothouseExamples/wiki/Cleveland-Music-Co.-Hothouse-DIY-Digital-Signal-Processing-Pedal-Kit-Build-Guide-(Stereo-Version)) | :rocket: [10-Minute Quick Start](https://github.com/clevelandmusicco/HothouseExamples/wiki/10%E2%80%90Minute-Quick-Start) | :page_facing_up: [Code Examples](https://github.com/clevelandmusicco/HothouseExamples/wiki/Hothouse-Examples) | :books: [Wiki](https://github.com/clevelandmusicco/HothouseExamples/wiki) | :question: [FAQ](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions)**
 
-The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) is a compact pedal kit for the [Electrosmith Daisy Seed](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, either by compiling and flashing any of the code in this repository, or by using the [Daisy Web Programmer](https://electro-smith.github.io/Programmer/) with the binaries from [our latest release](https://github.com/clevelandmusicco/HothouseExamples/releases).
+The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-digital-signal-processing-platform-kit/) is a compact pedal kit for the [Electrosmith Daisy Seed](https://electro-smith.com/products/daisy-seed). You can use the Hothouse to easily get your Daisy Seed DSP projects off the breadboard and onto your pedalboard, either by compiling and flashing any of the code in this repository, or by using the [Daisy Web Programmer](https://electro-smith.github.io/Programmer/) with the binaries from [our latest release](https://github.com/clevelandmusicco/HothouseExamples/releases). And of course, you can also [write your own DSP code](https://github.com/clevelandmusicco/HothouseExamples/wiki/Creating-your-own-effects) for the Hothouse.
 
 <img src="./resources/hothouse-front-553px.png" alt="Cleveland Music Co. Hothouse Pedal" style="height:400px; width:400px;"/><img src="./resources/hothouse-kit-553px.png" alt="Cleveland Music Co. Hothouse Kit" style="height:400px; width:400px;"/>
 
@@ -19,6 +19,13 @@ If you're not familar with the Daisy Seed or its development environment, check 
 * [**About "Stereo" and "Mono" Audio Modes**](https://github.com/clevelandmusicco/HothouseExamples/wiki/About-%22Stereo%22-and-%22Mono%22-Audio-Modes) - _Mono-to-mono? Mono-to-stereo?_ What's all this then? Read about audio modes supported by the Hothouse and see code that implements each mode.
 * [**Using the `build_examples.py` helper script**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Using-the-build_examples.py-helper-script) - A brief explanation of how to use the helper script and why you might want to.
 * [**Frequently Asked Questions**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) - A growing list of questions and answers. Check here first if you're having trouble figuring something out.
+
+## Third-Party Support
+
+The Hothouse platform is supported by several popular DSP projects.
+
+* [Faust](https://github.com/grame-cncm/faust) - Programming Language for Audio Applications and Plugins. The [faust2hothouse tool](https://github.com/grame-cncm/faust/tree/master-dev/architecture/hothouse) compiles a Faust DSP program for the Hothouse. The script produces a folder containing the C++ source code and a Makefile to compile it. It even implements MIDI over USB!
+* [plugdata](https://plugdata.org/) - A visual programming environment for audio experimentation, prototyping and education. [plugdata is a free/open-source visual programming environment](https://github.com/plugdata-team/plugdata) based on pure-data. It allows you to create and manipulate audio systems using visual elements, rather than writing code. Exporting your Pd patch directly to the Hothouse is possible with plugdata, which uses [HVCC](https://github.com/Wasted-Audio/hvcc) and the [plugdata-heavy-toolchain](https://github.com/plugdata-team/plugdata-heavy-toolchain) to make the magic happen. Just select the Hothouse from the target board dropdown and you're off to the races!
 
 | 💥 Also Good To Know 💥 |
 |-|
