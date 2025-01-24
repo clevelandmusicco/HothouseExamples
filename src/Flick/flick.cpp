@@ -251,8 +251,8 @@ void load_settings() {
   verb.setDecay(plateDecay);
   verb.setTankDiffusion(plateTankDiffusion);
   verb.setTankFilterHighCutFrequency(plateTankDampHigh);
-  verb.setTankModSpeed(plateTankModSpeed);
-  verb.setTankModDepth(plateTankModDepth);
+  verb.setTankModSpeed(plateTankModSpeed * 8);
+  verb.setTankModDepth(plateTankModDepth * 15);
   verb.setTankModShape(plateTankModShape);
 }
 
@@ -410,15 +410,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     //
 
     // Switch 1 - Tank Mod Speed
-    static const float tank_mod_speed_values[] = {1.0f, 0.5f, 0.1f};
+    static const float tank_mod_speed_values[] = {0.5f, 0.25f, 0.1f};
     plateTankModSpeed = tank_mod_speed_values[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)];
 
     // Switch 2 - Tank Mod Depth
-    static const float tank_mod_depth_values[] = {1.0f, 0.5f, 0.1f};
+    static const float tank_mod_depth_values[] = {0.5f, 0.25f, 0.1f};
     plateTankModDepth = tank_mod_depth_values[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2)];
 
     // Switch 3 - Tank Mod Shape
-    static const float tank_mod_shape_values[] = {1.0f, 0.5f, 0.1f};
+    static const float tank_mod_shape_values[] = {0.5f, 0.25f, 0.1f};
     plateTankModShape = tank_mod_shape_values[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3)];
 
     verb.setDecay(plateDecay);
@@ -426,8 +426,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     verb.setInputFilterHighCutoffPitch(plateInputDampHigh);
     verb.setTankFilterHighCutFrequency(plateTankDampHigh);
 
-    verb.setTankModSpeed(plateTankModSpeed);
-    verb.setTankModDepth(plateTankModDepth);
+    verb.setTankModSpeed(plateTankModSpeed * 8);
+    verb.setTankModDepth(plateTankModDepth * 15);
     verb.setTankModShape(plateTankModShape);
     verb.setPreDelay(platePreDelay);    
   }
