@@ -461,12 +461,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     verb.setPreDelay(platePreDelay);    
   }
 
+  // TODO: Eventually support stereo input and other combinations.
+  // For now, this is configured for mono input and stereo output.
   for (size_t i = 0; i < size; ++i) {
     float dry_L = in[0][i];
-    float dry_R = in[1][i];
+    // float dry_R = in[1][i]; // Ignore stereo input for now
     float s_L, s_R;
     s_L = dry_L;
-    s_R = dry_R;
+    // s_R = dry_R;
+    s_R = dry_L; // For mono input, use the same signal for both channels
 
     if (!bypass_delay) {
       float mixL = 0;
