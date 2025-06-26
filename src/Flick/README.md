@@ -51,6 +51,18 @@ Updated demo video (6 January 2025):
 | FOOTSWITCH 1 | **CANEL** & Exit | Discards parameter changes and exits Reverb Edit Mode.<br/>Long press for DFU mode. |
 | FOOTSWITCH 2 | **SAVE** & Exit | Saves all parameters and exits Reverb Edit Mode. |
 
+### Controls (Mono-Stereo Edit Mode)
+
+To enter Mono-Stereo Edit Mode, **press and hold** **Footswitch #1** when powering the pedal. The LED lights will alternatively blink slowly and the reverb effect will automatically be turned on so you can hear the affects of the adjustments.
+
+*Both LEDs flash alternatively when in Mono-Stereo Edit mode.*
+
+| CONTROL | DESCRIPTION | NOTES |
+|-|-|-|
+| SWITCH 3 | Mono-Stereo Mode | **LEFT** - Mono in, Mono Out<br/>**MIDDLE** - Mono in, Stereo Out<br/>**RIGHT** - Stereo In, Stereo Out |
+| FOOTSWITCH 1 | **CANCEL** & Exit | Discards parameter changes and exits Mono-Stereo Edit Mode.<br/>Long press for DFU mode. |
+| FOOTSWITCH 2 | **SAVE** & Exit | Saves all parameters and exits Mono-Stereo Edit Mode. |
+
 ### Factory Reset (Restore default reverb parameters)
 
 To enter factory reset mode, **press and hold** **Footswitch #2** when powering the pedal. The LED lights will alternatively blink slowly.
