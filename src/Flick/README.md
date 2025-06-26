@@ -59,7 +59,7 @@ To enter Mono-Stereo Edit Mode, **press and hold** **Footswitch #1** when poweri
 
 | CONTROL | DESCRIPTION | NOTES |
 |-|-|-|
-| SWITCH 3 | Mono-Stereo Mode | **LEFT** - Mono in, Mono Out<br/>**MIDDLE** - Mono in, Stereo Out<br/>**RIGHT** - Stereo In, Stereo Out |
+| SWITCH 3 | Mono-Stereo Mode | **UP** - Stereo In, Stereo Out<br/>**MIDDLE** - Mono in, Stereo Out<br/>**DOWN** - Mono in, Mono Out |
 | FOOTSWITCH 1 | **CANCEL** & Exit | Discards parameter changes and exits Mono-Stereo Edit Mode.<br/>Long press for DFU mode. |
 | FOOTSWITCH 2 | **SAVE** & Exit | Saves all parameters and exits Mono-Stereo Edit Mode. |
 
