@@ -45,7 +45,7 @@ Hothouse hw;
 enum PedalMode {
   PEDAL_MODE_NORMAL,
   PEDAL_MODE_EDIT_REVERB,     // Edit mode activated by double-press of the left foot switch
-  PEDAL_MODE_EDIT_MONO_STEREO // Edit mode activated by long-press of the right foot switch
+  PEDAL_MODE_EDIT_MONO_STEREO // Edit mode activated by holding Footswitch 1 at power-up
 };
 
 enum MonoStereoMode {                       // Controlled by Toggle Switch 3
@@ -381,6 +381,8 @@ void handle_double_press(Hothouse::Switches footswitch) {
 }
 
 void handle_long_press(Hothouse::Switches footswitch) {
+  // This doesn't work currently on the Hothouse, but leaving it here in case
+  // long press is supported in the future.
   if (footswitch == Hothouse::FOOTSWITCH_2) {
     // If the right footswitch is long-pressed, enter mono-stereo config.
     pedal_mode = PEDAL_MODE_EDIT_MONO_STEREO;
