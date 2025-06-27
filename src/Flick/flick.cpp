@@ -210,6 +210,8 @@ float leftInput = 0.;
 float rightInput = 0.;
 float leftOutput = 0.;
 float rightOutput = 0.;
+float reverbDryScaleFactor = 1.0;
+float reverbReverseScaleFactor = 1.0;
 
 float inputAmplification = 1.0; // This isn't really used yet
 
@@ -232,6 +234,20 @@ bool is_factory_reset_mode = false;
 /// 2: User must rotate knob_1 to 100% to advance to the next stage.
 /// 3: User must rotate knob_1 to 0% to complete the factory reset.
 int factory_reset_stage = 0;
+
+inline void update_reverb_scales(MonoStereoMode mode) {
+  switch (mode) {
+    case MS_MODE_MIMO:
+      reverbDryScaleFactor = 5.0f; // Make the signal stronger for MIMO mode
+      reverbReverseScaleFactor = 0.2f;
+      break;
+    case MS_MODE_MISO:
+    case MS_MODE_SISO:
+      reverbDryScaleFactor = 2.5f; // MISO and SISO modes
+      reverbReverseScaleFactor = 0.4f;
+      break;
+  }
+}
 
 void load_settings() {
 
@@ -256,6 +272,7 @@ void load_settings() {
   plateTankModShape = LocalSettings.tankModShape;
   platePreDelay = LocalSettings.preDelay;
   mono_stereo_mode = static_cast<MonoStereoMode>(LocalSettings.monoStereoMode);
+  update_reverb_scales(mono_stereo_mode);
 
   verb.setPreDelay(platePreDelay);
   verb.setInputFilterHighCutoffPitch(plateInputDampHigh);
@@ -321,6 +338,7 @@ void restore_mono_stereo_settings() {
   Settings &LocalSettings = SavedSettings.GetSettings();
 
   mono_stereo_mode = static_cast<MonoStereoMode>(LocalSettings.monoStereoMode);
+  update_reverb_scales(mono_stereo_mode);
 }
 
 void handle_normal_press(Hothouse::Switches footswitch) {
@@ -381,10 +399,13 @@ void handle_double_press(Hothouse::Switches footswitch) {
 }
 
 void handle_long_press(Hothouse::Switches footswitch) {
-  // This doesn't work currently on the Hothouse, but leaving it here in case
-  // long press is supported in the future.
   if (footswitch == Hothouse::FOOTSWITCH_2) {
     // If the right footswitch is long-pressed, enter mono-stereo config.
+
+    // Turn on reverb and turn off the other effects
+    bypass_verb = false;
+    bypass_delay = true;
+    bypass_trem = true;
     pedal_mode = PEDAL_MODE_EDIT_MONO_STEREO;
   }
 }
@@ -532,6 +553,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       default:
         mono_stereo_mode = MS_MODE_MIMO; // Mono In, Mono Out
     }
+    update_reverb_scales(mono_stereo_mode);
   }
 
   for (size_t i = 0; i < size; ++i) {
@@ -578,15 +600,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // enabled again it will already have the current input signal already
     // being processed.
     
-    // Dattorro seems to want to have values between -10 and 10 so times by 10
-    // leftInput = hardLimit100_(s_L) * 10.0f;
-    // rightInput = hardLimit100_(s_R) * 10.0f;
-
-    // For now, send in double the amount of input to the reverb which seems
-    // to work a little better. Sending in 10x was making the reverb be WAY
-    // too loud.
-    leftInput = hardLimit100_(s_L) * 2.0f;
-    rightInput = hardLimit100_(s_R) * 2.0f;
+    leftInput = hardLimit100_(s_L) * reverbDryScaleFactor;
+    rightInput = hardLimit100_(s_R) * reverbDryScaleFactor;
 
     verb.process(leftInput * minus18dBGain * minus20dBGain * (1.0f + inputAmplification * 7.0f) * clearPopCancelValue,
                   rightInput * minus18dBGain * minus20dBGain * (1.0f + inputAmplification * 7.0f) * clearPopCancelValue);
@@ -594,8 +609,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     if (!bypass_verb) {
       // leftOutput = ((leftInput * plateDry * 0.1) + (verb.getLeftOutput() * plateWet * clearPopCancelValue));
       // rightOutput = ((rightInput * plateDry * 0.1) + (verb.getRightOutput() * plateWet * clearPopCancelValue));
-      leftOutput = ((leftInput * plateDry * 0.5) + (verb.getLeftOutput() * plateWet * clearPopCancelValue));
-      rightOutput = ((rightInput * plateDry * 0.5) + (verb.getRightOutput() * plateWet * clearPopCancelValue));
+      leftOutput = ((leftInput * plateDry * reverbReverseScaleFactor) + (verb.getLeftOutput() * plateWet * clearPopCancelValue));
+      rightOutput = ((rightInput * plateDry * reverbReverseScaleFactor) + (verb.getRightOutput() * plateWet * clearPopCancelValue));
 
       s_L = leftOutput;
       s_R = rightOutput;
@@ -692,11 +707,7 @@ int main() {
 
   hw.StartAdc();
   hw.ProcessAllControls();
-  static bool enter_mono_stereo_edit_mode = false;
-  if (hw.switches[Hothouse::FOOTSWITCH_1].RawState()) {
-    // If FOOTSWITCH_1 is pressed go into mono-stereo edit mode
-    enter_mono_stereo_edit_mode = true;
-  } else if (hw.switches[Hothouse::FOOTSWITCH_2].RawState()) {
+  if (hw.switches[Hothouse::FOOTSWITCH_2].RawState()) {
     is_factory_reset_mode = true;
   } else {
     hw.StartAudio(AudioCallback);
@@ -752,21 +763,11 @@ int main() {
         pedal_mode = PEDAL_MODE_NORMAL;
         is_factory_reset_mode = false;
       }
-    } else if (enter_mono_stereo_edit_mode && !hw.switches[Hothouse::FOOTSWITCH_1].RawState()) {
-      // If we need to enter mono-stereo edit mode, wait for the footswitch to
-      // no longer be pressed before entering (because otherwise it'll
-      // immediately exit because of the footswitch normal press handler).
-    
-      enter_mono_stereo_edit_mode = false;
-      pedal_mode = PEDAL_MODE_EDIT_MONO_STEREO;
-      // Make sure that reverb is ON in edit mode so changes can be heard
-      bypass_verb = false;
-      hw.StartAudio(AudioCallback);
     }
     hw.DelayMs(10);
 
     // Call System::ResetToBootloader() if FOOTSWITCH_1 is pressed for 2 seconds
-    if (!enter_mono_stereo_edit_mode) {
+    if (pedal_mode == PEDAL_MODE_NORMAL) {
       hw.CheckResetToBootloader();
     }
   }
