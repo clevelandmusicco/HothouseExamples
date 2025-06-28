@@ -16,7 +16,7 @@ This is a reverb, tremolo, and delay pedal. The original goal of this pedal was 
 
 The hardware used in this feature walkthrough video is build with Funbox hardware but the Hothouse version works the same (28 June 2025):
 
-[![Demo Video](https://img.youtube.com/vi/7bptk5pUuak/0.jpg)](https://www.youtube.com/watch?v=7bptk5pUuak)
+[![Demo Video](https://img.youtube.com/vi/pWW68mqj2iQ/0.jpg)](https://www.youtube.com/watch?v=pWW68mqj2iQ)
 
 Updated demo video (6 January 2025):
 
