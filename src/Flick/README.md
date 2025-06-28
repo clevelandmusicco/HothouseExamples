@@ -14,6 +14,10 @@ This is a reverb, tremolo, and delay pedal. The original goal of this pedal was 
 
 ### Demo
 
+The hardware used in this feature walkthrough video is build with Funbox hardware but the Hothouse version works the same (28 June 2025):
+
+[![Demo Video](https://img.youtube.com/vi/pWW68mqj2iQ/0.jpg)](https://www.youtube.com/watch?v=pWW68mqj2iQ)
+
 Updated demo video (6 January 2025):
 
 [![Demo Video](https://img.youtube.com/vi/RR4Hccq0VbE/0.jpg)](https://www.youtube.com/watch?v=RR4Hccq0VbE)
@@ -32,7 +36,7 @@ Updated demo video (6 January 2025):
 | SWITCH 2 | Tremolo Waveform | **UP** - Square<br/>**MIDDLE** - Triangle<br/>**DOWN** - Sine |
 | SWITCH 3 | Trem & Delay Makeup Gain | **UP** - Plus<br/>**MIDDLE** - Normal<br/>**DOWN** - None |
 | FOOTSWITCH 1 | Reverb On/Off | Normal press toggles reverb on/off.<br/>Double press toggles reverb edit mode (see below).<br/>Long press for DFU mode. |
-| FOOTSWITCH 2 | Delay/Tremolo On/Off | Normal press toggles delay.<br/>Double press toggles tremolo.<br/><br/>**LED:**<br/>- 100% when only relay is active<br/>- 40% pulsing when only tremolo is active<br/>- 100% pulsing when both are active |
+| FOOTSWITCH 2 | Delay/Tremolo On/Off | Normal press toggles delay.<br/>Double press toggles tremolo.<br/>Long press for **Mono-Stereo Edit mode** (see below).<br/><br/>**LED:**<br/>- 100% when only relay is active<br/>- 40% pulsing when only tremolo is active<br/>- 100% pulsing when both are active |
 
 ### Controls (Reverb Edit Mode)
 *Both LEDs flash when in edit mode.*
@@ -50,6 +54,16 @@ Updated demo video (6 January 2025):
 | SWITCH 3 | Tank Mod Shape | **UP** - High<br/>**MIDDLE** - Medium<br/>**DOWN** - Low |
 | FOOTSWITCH 1 | **CANEL** & Exit | Discards parameter changes and exits Reverb Edit Mode.<br/>Long press for DFU mode. |
 | FOOTSWITCH 2 | **SAVE** & Exit | Saves all parameters and exits Reverb Edit Mode. |
+
+### Controls (Mono-Stereo Edit Mode)
+
+*Both LEDs flash alternatively when in Mono-Stereo Edit mode.*
+
+| CONTROL | DESCRIPTION | NOTES |
+|-|-|-|
+| SWITCH 3 | Mono-Stereo Mode | **UP** - Stereo In, Stereo Out<br/>**MIDDLE** - Mono in, Stereo Out<br/>**DOWN** - Mono in, Mono Out |
+| FOOTSWITCH 1 | **CANCEL** & Exit | Discards parameter changes and exits Mono-Stereo Edit Mode.<br/>Long press for DFU mode. |
+| FOOTSWITCH 2 | **SAVE** & Exit | Saves all parameters and exits Mono-Stereo Edit Mode. |
 
 ### Factory Reset (Restore default reverb parameters)
 

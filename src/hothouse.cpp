@@ -252,7 +252,7 @@ void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
 
   uint32_t press_duration = now - footswitch_start_time[footswitch_index];
 
-  if (is_pressed == true && press_duration >= HOLD_THRESHOLD_MS && !footswitch_long_press_triggered[footswitch_index]) {
+  if (switches[footswitch].Pressed() && press_duration >= HOLD_THRESHOLD_MS && !footswitch_long_press_triggered[footswitch_index]) {
     // Footswitch is being held down
     if (footswitchCallbacks->HandleLongPress != NULL) {
       footswitchCallbacks->HandleLongPress(footswitch);
