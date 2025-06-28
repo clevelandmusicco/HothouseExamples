@@ -14,6 +14,10 @@ This is a reverb, tremolo, and delay pedal. The original goal of this pedal was 
 
 ### Demo
 
+The hardware used in this feature walkthrough video is build with Funbox hardware but the Hothouse version works the same (28 June 2025):
+
+[![Demo Video](https://img.youtube.com/vi/7bptk5pUuak/0.jpg)](https://www.youtube.com/watch?v=7bptk5pUuak)
+
 Updated demo video (6 January 2025):
 
 [![Demo Video](https://img.youtube.com/vi/RR4Hccq0VbE/0.jpg)](https://www.youtube.com/watch?v=RR4Hccq0VbE)
@@ -32,7 +36,7 @@ Updated demo video (6 January 2025):
 | SWITCH 2 | Tremolo Waveform | **UP** - Square<br/>**MIDDLE** - Triangle<br/>**DOWN** - Sine |
 | SWITCH 3 | Trem & Delay Makeup Gain | **UP** - Plus<br/>**MIDDLE** - Normal<br/>**DOWN** - None |
 | FOOTSWITCH 1 | Reverb On/Off | Normal press toggles reverb on/off.<br/>Double press toggles reverb edit mode (see below).<br/>Long press for DFU mode. |
-| FOOTSWITCH 2 | Delay/Tremolo On/Off | Normal press toggles delay.<br/>Double press toggles tremolo.<br/><br/>**LED:**<br/>- 100% when only relay is active<br/>- 40% pulsing when only tremolo is active<br/>- 100% pulsing when both are active<br/>Long press for Mono-Stereo Edit mode (see below). |
+| FOOTSWITCH 2 | Delay/Tremolo On/Off | Normal press toggles delay.<br/>Double press toggles tremolo.<br/>Long press for **Mono-Stereo Edit mode** (see below).<br/><br/>**LED:**<br/>- 100% when only relay is active<br/>- 40% pulsing when only tremolo is active<br/>- 100% pulsing when both are active |
 
 ### Controls (Reverb Edit Mode)
 *Both LEDs flash when in edit mode.*
