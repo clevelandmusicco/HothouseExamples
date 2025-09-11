@@ -39,14 +39,6 @@ using daisysp::Oscillator;
 Hothouse hw;
 DelayLine<float, MAX_DELAY> DSY_SDRAM_BSS DELAY_LINES[N_DELAYS];
 
-// grabbed from the Distorion example in Daisy Petal.
-float softClip(float in)
-{
-    if(in > 0)
-        return 1 - expf(-in);
-    return -1 + expf(in);
-}
-
 struct delay_s {
   DelayLine<float, MAX_DELAY> *del;
   float currentDelay;
