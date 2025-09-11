@@ -52,16 +52,15 @@ struct delay_s {
   // LFO for delay time modulation
   Oscillator *lfo;
 
-  float Process(float in, bool erase) {
+  float Process(float in) {
     del->SetDelay(currentDelay + (lfo->Process() * 48));
     float read = del->Read();
-    float actual_fb = erase ? 0.0f : feedback;    
     
     // apply the filters
     read = fb_lpf->Process(fb_hpf->Process(read));
     
     // write back with softclip
-    del->Write(daisysp::SoftClip((actual_fb * read) + in));
+    del->Write(daisysp::SoftClip((feedback * read) + in));
     lastVal = read;
     return read;
   }
@@ -155,9 +154,9 @@ void AudioCallback(AudioHandle::InputBuffer in,
     float in_samp = in[0][i] * CURRENT_INPUT_SCALE;
     
     // manually unrolled the mixing loop
-    float sig = DELAYS[0].Process(in_samp + (CROSS_FEEDBACK * DELAYS[1].lastVal), ERASING);
+    float sig = DELAYS[0].Process(in_samp + (CROSS_FEEDBACK * DELAYS[1].lastVal));
     mix += sig;
-    sig = DELAYS[1].Process(in_samp + (CROSS_FEEDBACK * DELAYS[0].lastVal), ERASING);
+    sig = DELAYS[1].Process(in_samp + (CROSS_FEEDBACK * DELAYS[0].lastVal));
     mix += sig;
 
     // reduce the volume of the delay lines
