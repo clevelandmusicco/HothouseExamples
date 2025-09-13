@@ -1,0 +1,55 @@
+# Mars Hothouse Binary Distribution Package v1.0
+
+This package contains the binary distribution of Mars Neural Amplifier Simulator ported to the Hothouse platform.
+
+## Package Contents
+
+- `binaries/` - Mars Hothouse application binary
+- `documentation/` - Installation guide with complete setup instructions
+- `source_attribution/` - License and attribution information
+- `support/` - Web programmer links and resources
+
+## Quick Start
+
+1. Read the installation guide: `documentation/MarsHothouseBinaryInstallationGuide.pdf`
+2. Open the Daisy Web Programmer: https://electro-smith.github.io/Programmer/
+3. Install the bootloader (one-time setup)
+4. Install the Mars Hothouse binary
+
+## What is Mars?
+
+Mars is a neural network-based guitar amplifier and effects processor featuring:
+- 3 amp models (Matchless SC30, Klon, Mesa Boogie IIB)
+- Cabinet simulation with impulse responses
+- Musical delay with multiple modes
+- Professional tone filtering
+
+## System Requirements
+
+- Hothouse hardware with DaisySeed
+- Chrome or Edge browser (for web programmer)
+- USB-C cable
+
+## Support
+
+For detailed installation instructions and troubleshooting, see:
+`documentation/MarsHothouseBinaryInstallationGuide.pdf`
+
+For web programmer information and links, see:
+`support/web_programmer_links.txt`
+
+## Attribution
+
+**Original Project:** Mars Neural Amplifier Simulator by GuitarML  
+**Repository:** https://github.com/GuitarML/FunBox  
+**Hothouse Port:** chris@futr.tv  
+**Port Date:** September 13, 2025  
+
+## License
+
+This software is distributed under the MIT License with Attribution requirement.
+See `source_attribution/` folder for complete license and attribution details.
+
+## Version History
+
+- v1.0 (September 13, 2025) - Initial binary release for Hothouse platform

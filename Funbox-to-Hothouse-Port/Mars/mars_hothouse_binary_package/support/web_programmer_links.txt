@@ -1,0 +1,38 @@
+Daisy Web Programmer - Essential Links
+=======================================
+
+MAIN WEB PROGRAMMER URL:
+https://electro-smith.github.io/Programmer/
+
+This is the official Electro-Smith web-based programmer for Daisy Seed devices.
+Compatible with Chrome and Edge browsers (requires WebUSB support).
+
+BOOTLOADER INFORMATION:
+The web programmer includes the official Daisy bootloader (v6.3) which can be
+installed directly through the web interface. Users do not need to download
+the bootloader separately.
+
+INSTALLATION PROCESS:
+1. Bootloader Tab - Install official Daisy bootloader (one-time setup)
+2. Program Tab - Upload Mars Hothouse binary file
+
+BROWSER REQUIREMENTS:
+- Google Chrome (recommended)
+- Microsoft Edge
+- Any browser with WebUSB API support
+- Note: Firefox and Safari do not currently support WebUSB
+
+TROUBLESHOOTING RESOURCES:
+- Electro-Smith Forum: https://forum.electro-smith.com/
+- Daisy Wiki: https://github.com/electro-smith/DaisyWiki
+- libDaisy Documentation: https://electro-smith.github.io/libDaisy/
+- Bootloader Reference: https://electro-smith.github.io/libDaisy/md_doc_2md_2__a7___getting-_started-_daisy-_bootloader.html
+
+ALTERNATIVE PROGRAMMING METHODS:
+While the web programmer is recommended for ease of use, advanced users can also use:
+- dfu-util (command line tool)
+- STLink programmer
+- SD card loading (if bootloader installed)
+
+For binary-only distribution, users should exclusively use the web programmer
+for the simplest installation experience.
