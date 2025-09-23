@@ -1,0 +1,8 @@
+/.vscode
+/build*
+/cmake-build*
+__pycache__
+/docs
+.DS_Store
+/.idea
+/.venv
