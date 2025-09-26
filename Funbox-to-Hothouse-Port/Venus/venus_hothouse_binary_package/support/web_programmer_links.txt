@@ -1,0 +1,20 @@
+Daisy Web Programmer:
+https://electro-smith.github.io/Programmer/
+
+Hothouse Examples Repository:
+https://github.com/clevelandmusicco/HothouseExamples
+
+DaisySeed Documentation:
+https://electro-smith.github.io/libDaisy/
+
+DaisySP Audio Library:
+https://electro-smith.github.io/DaisySP/
+
+Hothouse Hardware Information:
+https://www.clevelandmusicco.com/hothouse
+
+Community Support Forum:
+https://forum.electro-smith.com/
+
+USB DFU Troubleshooting:
+https://github.com/electro-smith/DaisyWiki/wiki/1.-Setting-Up-Your-Development-Environment#dfu-setup

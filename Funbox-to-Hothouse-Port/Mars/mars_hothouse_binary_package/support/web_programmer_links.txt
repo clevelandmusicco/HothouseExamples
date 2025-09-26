@@ -1,0 +1,14 @@
+Daisy Web Programmer:
+https://electro-smith.github.io/Programmer/
+
+Hothouse Examples Repository:
+https://github.com/clevelandmusicco/HothouseExamples
+
+DaisySeed Documentation:
+https://electro-smith.github.io/libDaisy/
+
+Community Support Forum:
+https://forum.electro-smith.com/
+
+GuitarML Original Project:
+https://github.com/GuitarML/Funbox
