@@ -2,6 +2,13 @@
 // Buzzbox Octa Squawker - Aggressive Fuzz with Envelope Filter and Octave
 // Phase 8 - Complete control redesign with context-dependent knobs
 // FIX: Added FS2 volume compensation when fuzz is bypassed
+// FIX: Adjusted ADSR sustain to 0.75 for smoother autowah transition
+// FIX: Increased octave levels to 2.5f for better volume
+// FIX: Added 8kHz master lowpass filter to eliminate all aliasing
+// FIX: Added 400Hz HPF on autowah detector for even frequency response
+// FIX: Swapped autowah Knob 5/6 for consistency (Knob 6 = threshold/gate)
+// FIX: Lowered autowah minimum threshold to 0.01 for better high-note triggering
+// FIX: Autowah threshold at 0 = gate always open (static resonant filter mode)
 
 #include "daisy_seed.h"
 #include "daisysp.h"
@@ -24,8 +31,10 @@ Hothouse hw;
 
 // Audio processing objects
 Tone tone;
+Tone master_lowpass;  // 8kHz anti-aliasing filter
 Adsr autowah_adsr;
 Svf autowah_svf;
+ATone autowah_detector_hpf;  // High-pass filter for envelope detection (evens out frequency response)
 EnvelopeFollower envelopeFollower;
 
 // Octave processing objects
@@ -132,13 +141,13 @@ void updateSwitch3() {
                 autowah_adsr.SetAttackTime(attack_time);
                 autowah_adsr.SetReleaseTime(release_time);
             }
-            // Knob 5: Threshold (trigger sensitivity)
+            // Knob 5: Filter Range (shifts base 300-2000Hz range)
             if (knob_touched[4]) {
-                autowah_threshold = knobValues[4];
+                autowah_range = knobValues[4];
             }
-            // Knob 6: Filter Range (shifts base 300-2000Hz range)
+            // Knob 6: Threshold (trigger sensitivity)
             if (knob_touched[5]) {
-                autowah_range = knobValues[5];
+                autowah_threshold = knobValues[5];
             }
             break;
             
@@ -266,12 +275,19 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
         
         // STAGE 2: Autowah BEFORE fuzz (if placement is UP and enabled)
         if (autowah_enabled && autowah_placement == 0) {
-            // Envelope detection
-            float envelope = envelopeFollower.Process(signal);
+            // High-pass filter for envelope detection (removes bass dominance)
+            float detection_signal = autowah_detector_hpf.Process(signal);
+            float envelope = envelopeFollower.Process(detection_signal);
             
-            // Gate ADSR based on envelope level and threshold
-            float gate_level = 0.05f + (autowah_threshold * 0.15f); // 0.05 to 0.20
-            bool gate = (envelope > gate_level);
+            // Gate ADSR based on envelope level and threshold (lowered for HPF compensation)
+            // When threshold is at 0, gate is always open (static filter at sustain level)
+            bool gate;
+            if (autowah_threshold > 0.01f) {
+                float gate_level = 0.01f + (autowah_threshold * 0.11f); // 0.01 to 0.12
+                gate = (envelope > gate_level);
+            } else {
+                gate = true;  // Gate always open - static filter
+            }
             float adsr_out = autowah_adsr.Process(gate);
             
             // Map ADSR output to filter frequency with range control
@@ -279,6 +295,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
             // Range knob shifts this: CCW = 100-1100Hz, CW = 300-3000Hz
             float range_min = 100.0f + (autowah_range * 200.0f);  // 100-300Hz
             float range_max = 1100.0f + (autowah_range * 1900.0f); // 1100-3000Hz
+            
             float filter_freq = range_min + (adsr_out * (range_max - range_min));
             
             autowah_svf.SetFreq(filter_freq);
@@ -302,8 +319,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
                 octave.update(sample);
                 
                 // Mix up and down octaves with individual level controls
-                float octave_signal = octave.up1() * octave_up_level * 1.5f + 
-                                     octave.down1() * octave_down_level * 1.5f;
+                float octave_signal = octave.up1() * octave_up_level * 2.5f + 
+                                     octave.down1() * octave_down_level * 2.5f;
                 
                 auto out_chunk = interpolate(octave_signal);
                 for (size_t j = 0; j < out_chunk.size(); ++j) {
@@ -375,17 +392,25 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
         
         // STAGE 5: Autowah AFTER fuzz (if placement is MIDDLE and enabled)
         if (autowah_enabled && autowah_placement == 1) {
-            // Envelope detection
-            float envelope = envelopeFollower.Process(signal);
+            // High-pass filter for envelope detection (removes bass dominance)
+            float detection_signal = autowah_detector_hpf.Process(signal);
+            float envelope = envelopeFollower.Process(detection_signal);
             
-            // Gate ADSR based on envelope level and threshold
-            float gate_level = 0.05f + (autowah_threshold * 0.15f);
-            bool gate = (envelope > gate_level);
+            // Gate ADSR based on envelope level and threshold (lowered for HPF compensation)
+            // When threshold is at 0, gate is always open (static filter at sustain level)
+            bool gate;
+            if (autowah_threshold > 0.01f) {
+                float gate_level = 0.01f + (autowah_threshold * 0.11f); // 0.01 to 0.12
+                gate = (envelope > gate_level);
+            } else {
+                gate = true;  // Gate always open - static filter
+            }
             float adsr_out = autowah_adsr.Process(gate);
             
             // Map ADSR output to filter frequency with range control
             float range_min = 100.0f + (autowah_range * 200.0f);
             float range_max = 1100.0f + (autowah_range * 1900.0f);
+            
             float filter_freq = range_min + (adsr_out * (range_max - range_min));
             
             autowah_svf.SetFreq(filter_freq);
@@ -398,17 +423,25 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
         
         // STAGE 6: Autowah AFTER everything (if placement is DOWN and enabled)
         if (autowah_enabled && autowah_placement == 2) {
-            // Envelope detection
-            float envelope = envelopeFollower.Process(signal);
+            // High-pass filter for envelope detection (removes bass dominance)
+            float detection_signal = autowah_detector_hpf.Process(signal);
+            float envelope = envelopeFollower.Process(detection_signal);
             
-            // Gate ADSR based on envelope level and threshold
-            float gate_level = 0.05f + (autowah_threshold * 0.15f);
-            bool gate = (envelope > gate_level);
+            // Gate ADSR based on envelope level and threshold (lowered for HPF compensation)
+            // When threshold is at 0, gate is always open (static filter at sustain level)
+            bool gate;
+            if (autowah_threshold > 0.01f) {
+                float gate_level = 0.01f + (autowah_threshold * 0.11f); // 0.01 to 0.12
+                gate = (envelope > gate_level);
+            } else {
+                gate = true;  // Gate always open - static filter
+            }
             float adsr_out = autowah_adsr.Process(gate);
             
             // Map ADSR output to filter frequency with range control
             float range_min = 100.0f + (autowah_range * 200.0f);
             float range_max = 1100.0f + (autowah_range * 1900.0f);
+            
             float filter_freq = range_min + (adsr_out * (range_max - range_min));
             
             autowah_svf.SetFreq(filter_freq);
@@ -419,12 +452,16 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
             signal = autowah_svf.Band() * 2.0f;  // Autowah makeup gain
         }
         
-        // STAGE 6.5: FS2 Makeup Gain (NEW FIX)
+        // STAGE 6.5: FS2 Makeup Gain
         // Compensate for volume loss from autowah bandpass and octave processing
         // Only apply when FS2 effects are active and fuzz is bypassed
         if ((autowah_enabled || octave_enabled) && !fuzz_enabled) {
             signal *= 2.0f;  // Makeup gain for FS2 effects
         }
+        
+        // STAGE 6.75: Master Anti-Aliasing Lowpass Filter
+        // 8kHz lowpass removes all aliasing from octave/fuzz while preserving musical content
+        signal = master_lowpass.Process(signal);
         
         // STAGE 7: Dry/Wet Mix (Knob 2)
         const float mix = knobValues[1];
@@ -447,17 +484,27 @@ int main(void) {
     float samplerate = hw.AudioSampleRate();
     tone.Init(samplerate);
     
+    // Initialize master lowpass for anti-aliasing at 8kHz
+    master_lowpass.Init(samplerate);
+    master_lowpass.SetFreq(8000.0f);
+    
     // Initialize ADSR for autowah envelope
     autowah_adsr.Init(samplerate);
     autowah_adsr.SetAttackTime(0.1f);
     autowah_adsr.SetTime(ADSR_SEG_DECAY, 0.15f);
     autowah_adsr.SetReleaseTime(0.2f);
-    autowah_adsr.SetSustainLevel(0.3f);
+    autowah_adsr.SetSustainLevel(0.75f);  // 75% sustain for smooth transition
     
     // Initialize SVF for autowah filter
     autowah_svf.Init(samplerate);
     autowah_svf.SetFreq(800.0f);
     autowah_svf.SetRes(0.7f);
+    
+    // Initialize high-pass filter for autowah envelope detection
+    // Removes bass frequencies to even out detection across frequency range
+    autowah_detector_hpf.Init(samplerate);
+    float detector_hpf_freq = 400.0f;  // Remove sub-400Hz from detection
+    autowah_detector_hpf.SetFreq(detector_hpf_freq);
     
     envelopeFollower.Init(samplerate, 5.0f, 50.0f); // Default medium sensitivity
     
@@ -486,9 +533,9 @@ int main(void) {
     // Initialize effect parameters
     drive_amount = 0.5f;
     tone_freq = 800.0f;
-    gate_threshold = 0.0f;
+    gate_threshold = 0.1f;         // 10% gate threshold (light noise gate)
     autowah_speed = 0.5f;
-    autowah_threshold = 0.5f;
+    autowah_threshold = 0.1f;      // 10% threshold for easy triggering
     autowah_range = 0.5f;
     octave_up_level = 0.5f;
     octave_down_level = 0.5f;

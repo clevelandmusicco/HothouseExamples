@@ -1,6 +1,7 @@
 // buzzbox_hothouse.h
 // Buzzbox Octa Squawker - Aggressive Fuzz with Envelope Filter and Octave
 // Phase 8 - Complete control redesign with context-dependent knobs
+// FIX: Added anti-aliasing filter for octave processing
 
 #pragma once
 #ifndef BUZZBOX_HOTHOUSE_H
@@ -144,6 +145,39 @@ private:
     float envelope_level_;
     float attack_coeff_;
     float release_coeff_;
+};
+
+// =============================================================================
+// ANTI-ALIASING FILTER FOR OCTAVE PROCESSING
+// =============================================================================
+
+class AntiAliasingFilter {
+public:
+    AntiAliasingFilter() : x1_(0.0f), y1_(0.0f), coeff_(0.0f) {}
+    
+    void Init(float samplerate, float cutoff_freq) {
+        // Simple one-pole lowpass: y[n] = a * x[n] + (1-a) * y[n-1]
+        // cutoff = samplerate / (2 * pi * RC), solve for coefficient
+        float rc = 1.0f / (2.0f * M_PI * cutoff_freq);
+        float dt = 1.0f / samplerate;
+        coeff_ = dt / (rc + dt);
+    }
+    
+    float Process(float input) {
+        // One-pole lowpass filter
+        y1_ = coeff_ * input + (1.0f - coeff_) * y1_;
+        return y1_;
+    }
+    
+    void Reset() {
+        x1_ = 0.0f;
+        y1_ = 0.0f;
+    }
+
+private:
+    float coeff_;
+    float x1_;
+    float y1_;
 };
 
 // =============================================================================
