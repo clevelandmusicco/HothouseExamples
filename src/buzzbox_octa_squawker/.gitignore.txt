@@ -1,0 +1,64 @@
+# Build directories
+build/
+*.o
+*.d
+*.elf
+*.bin
+*.map
+*.hex
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Compiled object files
+*.a
+*.la
+*.lo
+*.obj
+
+# Dependency files
+*.dep
+
+# Debug files
+*.dSYM/
+*.su
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+
+# Python (if using build scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# ARM compiler generated
+*.lst
+*.axf
+
+# Tags and symbols
+tags
+TAGS
+cscope.*
+*.taghl
+
+# Backup files
+*~.nib
+*.orig

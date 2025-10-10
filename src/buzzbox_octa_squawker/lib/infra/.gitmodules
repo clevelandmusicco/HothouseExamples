@@ -1,0 +1,9 @@
+[submodule "external/filesystem"]
+	path = external/filesystem
+	url = https://github.com/gulrak/filesystem.git
+[submodule "external/string-view-lite"]
+	path = external/string-view-lite
+	url = https://github.com/martinmoene/string-view-lite.git
+[submodule "external/optional-lite"]
+	path = external/optional-lite
+	url = https://github.com/martinmoene/optional-lite.git
