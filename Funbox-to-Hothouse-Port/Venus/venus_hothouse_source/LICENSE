@@ -1,0 +1,70 @@
+MIT License
+
+Copyright (c) 2024 Keith Bloemer (GuitarML)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+HOTHOUSE PORT ATTRIBUTION
+
+This Hothouse hardware port was created by:
+Chris Brandt (chris@futr.tv)
+
+Port Date: September 17, 2025
+
+The Hothouse port maintains the original MIT License and includes attribution
+requirements for both the original author (Keith Bloemer) and the porter
+(Chris Brandt).
+
+When distributing or modifying this software, you must:
+1. Include this complete license file
+2. Credit the original author: Keith Bloemer (GuitarML)
+3. Credit the Hothouse porter: Chris Brandt (chris@futr.tv)
+4. Reference the original repository: https://github.com/GuitarML/FunBox/tree/main/software/Venus
+
+---
+
+ADDITIONAL LIBRARIES
+
+This project uses the following libraries:
+
+Hothouse Hardware Library
+Copyright (C) 2024 Cleveland Music Co.
+Licensed under GNU General Public License v3.0
+Repository: https://github.com/clevelandmusicco/HothouseExamples
+
+libDaisy
+Copyright (c) 2021 Electrosmith
+Licensed under MIT License
+Repository: https://github.com/electro-smith/libDaisy
+
+DaisySP
+Copyright (c) 2020 Electrosmith
+Licensed under MIT License (with LGPL option for some modules)
+Repository: https://github.com/electro-smith/DaisySP
+
+ShyFFT (FFT Implementation)
+Embedded FFT library for spectral processing
+[Specify license if known]
+
+Custom STFT Framework
+Part of the original Venus implementation
+Copyright (c) 2024 Keith Bloemer (GuitarML)
+Licensed under MIT License
