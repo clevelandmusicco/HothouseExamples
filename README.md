@@ -20,6 +20,10 @@ If you're not familar with the Daisy Seed or its development environment, check 
 * [**Using the `build_examples.py` helper script**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Using-the-build_examples.py-helper-script) - A brief explanation of how to use the helper script and why you might want to.
 * [**Frequently Asked Questions**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) - A growing list of questions and answers. Check here first if you're having trouble figuring something out.
 
+## Open Source Hardware
+
+The Hothouse has been released as [Open Source Hardware](https://oshwa.org/resources/open-source-hardware-definition/) distributed under a [Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/). If you're an avid DIYer familiar with the process of PCB fabrication using gerber, BOM, and CPL/Centroid files, you can find everything you need in my [open-source-pedals repo](https://github.com/clevelandmusicco/open-source-pedals). Whether you buy a retail kit or you get the boards fabricated and source the parts yourself, all the code in the HothouseExamples repo should work.
+
 ## Third-Party Support
 
 The Hothouse platform is supported by several popular DSP projects.
