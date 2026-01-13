@@ -8,7 +8,7 @@ The [Cleveland Music Co. Hothouse](https://clevelandmusicco.com/hothouse-diy-dig
 
 This project is a collection of digital signal processing code examples that you can use to get started with the Hothouse. In the `src` directory are ready-to-compile effects you can flash to your Hothouse or modify as you wish. Also included is a `create_new_proj.py` helper script that creates a compilable, VS Code-ready "scaffolding" project for writing your own effects for the Hothouse.
 
-If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki) to get yourself bootstrapped! Also be sure to bookmark the [Daisy Forum](https://forum.electro-smith.com/) and join the [Discord server](https://discord.gg/SuCtUsbD) to hang out with like-minded people committed to collective learning.
+If you're not familar with the Daisy Seed or its development environment, check out the [Electrosmith Daisy Ecosystem Wiki](https://github.com/electro-smith/DaisyWiki/wiki) to get yourself bootstrapped! Also be sure to bookmark the [Daisy Forum](https://forum.electro-smith.com/) and join the [Discord server](https://discord.com/invite/ByHBnMtQTR) to hang out with like-minded people committed to collective learning.
 
 ## Getting started
 
@@ -22,7 +22,7 @@ If you're not familar with the Daisy Seed or its development environment, check 
 
 ## Open Source Hardware
 
-The Hothouse has been released as [Open Source Hardware](https://oshwa.org/resources/open-source-hardware-definition/) distributed under a [Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/). If you're an avid DIYer familiar with the process of PCB fabrication using gerber, BOM, and CPL/Centroid files, you can find everything you need in my [open-source-pedals repo](https://github.com/clevelandmusicco/open-source-pedals). Whether you buy a retail kit or you get the boards fabricated and source the parts yourself, all the code in the HothouseExamples repo should work.
+The Hothouse is released as [Open Source Hardware](https://oshwa.org/resources/open-source-hardware-definition/) distributed under a [Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/). If you're an avid DIYer familiar with the process of PCB fabrication using gerber, BOM, and CPL/Centroid files, you can find everything you need in my [open-source-pedals repo](https://github.com/clevelandmusicco/open-source-pedals). Whether you buy a retail kit or you get the boards fabricated and source the parts yourself, all the code in the HothouseExamples repo should work.
 
 ## Third-Party Support
 
