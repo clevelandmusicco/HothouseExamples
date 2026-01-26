@@ -42,14 +42,8 @@ float noiseAmount = 0.0f;
 float tapeMix = 0.5f;
 float filterKnob = 0.5f;
 
-enum FilterMode {
-  FILTER_LOWPASS,
-  FILTER_OFF,
-  FILTER_HIGHPASS
-};
-
-FilterMode filterMode = FILTER_OFF;
-float filterFreq = 1000.0f;
+float lowpassFilterFreq = 1000.0f;
+float highpassFilterFreq = 1000.0f;
 
 // Wow and Flutter LFOs
 Oscillator wowLFO;
@@ -66,8 +60,10 @@ StkPitchShift pitchShifterR(1024);
 WhiteNoise noise;
 
 // Filters (state variable filters for LP/HP)
-Svf filterL;
-Svf filterR;
+Svf lowpassFilterL;
+Svf lowpassFilterR;
+Svf highpassFilterL;
+Svf highpassFilterR;
 
 // Dry buffer for mixing
 float dryBufferL[48];
@@ -92,33 +88,29 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   const float deadZone = 0.02f;  // Small dead zone around center
   float filterBlend = 0.0f;  // 0.0 = lowpass, 1.0 = highpass
   
+  lowpassFilterFreq = 22000.0f;  // Max frequency when not in lowpass mode
   if (filterKnob < (0.5f - deadZone)) {
     // Lowpass mode: 0.0-0.48 maps to 300Hz-22kHz
-    filterMode = FILTER_LOWPASS;
     float normalized = filterKnob / (0.5f - deadZone);  // 0.0-1.0
     // Use power curve to emphasize low frequency range (300Hz-1kHz)
     float curved = normalized * normalized;  // Square for more low-freq emphasis
-    filterFreq = 300.0f * FastMath::pow(22000.0f / 300.0f, curved);
-    filterBlend = 0.0f;
-  } else if (filterKnob > (0.5f + deadZone)) {
-    // Highpass mode: 0.52-1.0 maps to 20Hz-2000Hz
-    filterMode = FILTER_HIGHPASS;
-    float normalized = (filterKnob - 0.5f - deadZone) / (0.5f - deadZone);  // 0.0-1.0
-    filterFreq = 20.0f * FastMath::pow(2000.0f / 20.0f, normalized);
-    filterBlend = 1.0f;
-  } else {
-    // Center position: crossfade between lowpass and highpass
-    filterMode = FILTER_OFF;
-    filterFreq = 1000.0f;  // Neutral frequency for transition
-    // Blend from 0.0 to 1.0 across the dead zone
-    filterBlend = (filterKnob - (0.5f - deadZone)) / (2.0f * deadZone);
+    lowpassFilterFreq = 300.0f * FastMath::pow(22000.0f / 300.0f, curved); 
   }
   
+  highpassFilterFreq = 20.0f;  // Min frequency when not in highpass mode
+  if (filterKnob > (0.5f + deadZone)) {
+    // Highpass mode: 0.52-1.0 maps to 20Hz-2000Hz
+    float normalized = (filterKnob - 0.5f - deadZone) / (0.5f - deadZone);  // 0.0-1.0
+    highpassFilterFreq = 20.0f * FastMath::pow(2000.0f / 20.0f, normalized);
+    
+  } 
+  
   // Update filter parameters (always, to avoid clicks)
-  filterL.SetFreq(filterFreq);
-  filterR.SetFreq(filterFreq);
-  filterL.SetRes(0.1f);  // Low resonance to avoid ringing
-  filterR.SetRes(0.1f);
+  lowpassFilterL.SetFreq(lowpassFilterFreq);
+  lowpassFilterR.SetFreq(lowpassFilterFreq);
+  highpassFilterL.SetFreq(highpassFilterFreq);
+  highpassFilterR.SetFreq(highpassFilterFreq);
+  
 
   for (size_t i = 0; i < size; ++i) {
     if (bypass) {
@@ -175,18 +167,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       }
       
       // Apply filtering (always process and use output to avoid clicks)
-      filterL.Process(wetL);
-      filterR.Process(wetR);
-      
-      // Always blend between lowpass and highpass outputs
-      float lowL = filterL.Low();
-      float lowR = filterR.Low();
-      float highL = filterL.High();
-      float highR = filterR.High();
-      
-      wetL = lowL * (1.0f - filterBlend) + highL * filterBlend;
-      wetR = lowR * (1.0f - filterBlend) + highR * filterBlend;
-      
+      lowpassFilterL.Process(wetL);
+      lowpassFilterR.Process(wetR);
+      wetL = lowpassFilterL.Low();
+      wetR = lowpassFilterR.Low();
+      highpassFilterL.Process(wetL);
+      highpassFilterR.Process(wetR);
+      wetL = highpassFilterL.High();
+      wetR = highpassFilterR.High();
+
       // Apply dry/wet mix
       out[0][i] = wetL * tapeMix + dryBufferL[i] * (1.0f - tapeMix);
       out[1][i] = wetR * tapeMix + dryBufferR[i] * (1.0f - tapeMix);
@@ -226,12 +215,18 @@ int main() {
   noise.Init();
   
   // Initialize filters
-  filterL.Init(sampleRate);
-  filterR.Init(sampleRate);
-  filterL.SetFreq(1000.0f);
-  filterR.SetFreq(1000.0f);
-  filterL.SetRes(0.1f);
-  filterR.SetRes(0.1f);
+  lowpassFilterL.Init(sampleRate);
+  lowpassFilterR.Init(sampleRate);
+  lowpassFilterL.SetFreq(1000.0f);
+  lowpassFilterR.SetFreq(1000.0f);
+  lowpassFilterL.SetRes(0.1f);
+  lowpassFilterR.SetRes(0.1f);
+  highpassFilterL.Init(sampleRate);
+  highpassFilterR.Init(sampleRate);
+  highpassFilterL.SetFreq(1000.0f);
+  highpassFilterR.SetFreq(1000.0f);
+  highpassFilterL.SetRes(0.1f);
+  highpassFilterR.SetRes(0.1f);
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
