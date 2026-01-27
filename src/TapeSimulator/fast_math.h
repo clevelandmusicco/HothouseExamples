@@ -122,21 +122,25 @@ inline float pow2(float x) {
 
 // Fast general power: x^y = 2^(y * log2(x))
 // For pitch shift: use pow2(semitones / 12.0f) directly instead
-inline float pow(float base, float exp) {
-  if (base <= 0.0f) return 0.0f;
+inline float log2(float x) {
+  if (x <= 0.0f) return -1000.0f;  // Return large negative for invalid input
   
   // log2(x) approximation using bit manipulation and polynomial
   union { float f; int32_t i; } v;
-  v.f = base;
+  v.f = x;
   int32_t e = (v.i >> 23) - 127;
   v.i = (v.i & 0x007FFFFF) | 0x3F800000;
   
   // Polynomial approximation for log2(1+x) where x in [0,1]
-  float x = v.f - 1.0f;
-  float log2_frac = x * (2.885390f + x * (-1.44269f + x * 0.5571f));
-  float log2_x = static_cast<float>(e) + log2_frac;
+  float frac = v.f - 1.0f;
+  float log2_frac = frac * (2.885390f + frac * (-1.44269f + frac * 0.5571f));
   
-  return pow2(exp * log2_x);
+  return static_cast<float>(e) + log2_frac;
+}
+
+inline float pow(float base, float exp) {
+  if (base <= 0.0f) return 0.0f;
+  return pow2(exp * log2(base));
 }
 
 } // namespace FastMath

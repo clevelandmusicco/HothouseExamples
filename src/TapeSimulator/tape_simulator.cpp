@@ -124,8 +124,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       float wetL = in[0][i];
       float wetR = in[1][i];
       
-      // Process wow and flutter (pitch modulation)
-      
+      // Process wow and flutter (pitch modulation) - always process to avoid clicks
       // Calculate combined pitch modulation with nested modulation for wow
       float wowModulator = wowModulatorLFO.Process();
       float wowFreqVariation = 0.7f + (wowModulator * 0.4f);
@@ -151,10 +150,9 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       wetL = pitchShifterL.Process(wetL);
       wetR = pitchShifterR.Process(wetR);
       
-      
       // Apply tape saturation using fast tanh
       if (saturationAmount > 0.001f) {
-        float drive = 1.0f + (saturationAmount * 19.0f);
+        float drive = 1.0f + (saturationAmount * 299.0f);
         wetL = FastMath::tanh(wetL * drive) / drive;
         wetR = FastMath::tanh(wetR * drive) / drive;
       }
