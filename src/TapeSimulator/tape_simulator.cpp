@@ -138,7 +138,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       }
       
       float wowMod = wowLFO.Process() * wowAmount * 0.04f;
-      float flutterMod = flutterLFO.Process() * flutterAmount * 0.006f;
+      float flutterMod = flutterLFO.Process() * flutterAmount * 0.02f;
       float targetPitchShift = 1.0f + wowMod + flutterMod;
       
       // Apply exponential smoothing (one-pole lowpass) to reduce zipper noise
@@ -154,7 +154,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       
       // Apply tape saturation using fast tanh
       if (saturationAmount > 0.001f) {
-        float drive = 1.0f + (saturationAmount * 9.0f);
+        float drive = 1.0f + (saturationAmount * 19.0f);
         wetL = FastMath::tanh(wetL * drive) / drive;
         wetR = FastMath::tanh(wetR * drive) / drive;
       }
