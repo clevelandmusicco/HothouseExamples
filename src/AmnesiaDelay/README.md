@@ -8,12 +8,12 @@ A BBD-style delay loosely modeled on the Electro-Harmonix Deluxe Memory Man. Thi
 
 | Control       | Function                                                                                  |
 | ------------- | ----------------------------------------------------------------------------------------- |
-| KNOB 1        | **BLEND** — equal-power crossfade between dry and wet. Noon = equal levels.               |
-| KNOB 2        | **FEEDBACK** — number of repeats. Maxed out, runs into (gentle) self-oscillation.         |
-| KNOB 3        | **DELAY** — delay time, ~30 ms (CCW) to ~550 ms (CW), log taper.                          |
-| KNOB 4        | **DEPTH** — modulation depth applied to the delay-time read tap.                          |
-| KNOB 5        | **RATE** — modulation rate. CCW = chorus (slow); CW = vibrato (fast).                     |
-| KNOB 6        | **CLOCK NOISE** — BBD clock leakage and bias-drift hiss. CCW = clean; CW = wonky DMM.     |
+| KNOB 1        | **BLEND** -- equal-power crossfade between dry and wet. Noon = equal levels.               |
+| KNOB 2        | **FEEDBACK** -- number of repeats. Maxed out, runs into (gentle) self-oscillation.         |
+| KNOB 3        | **DELAY** -- delay time, ~30 ms (CCW) to ~550 ms (CW), log taper.                          |
+| KNOB 4        | **DEPTH** -- modulation depth applied to the delay-time read tap.                          |
+| KNOB 5        | **RATE** -- modulation rate. CCW = chorus (slow); CW = vibrato (fast).                     |
+| KNOB 6        | **CLOCK NOISE** -- BBD clock leakage and bias-drift hiss. CCW = clean; CW = wonky DMM.     |
 | FOOTSWITCH 2  | Engage / bypass.                                                                          |
 
 ## Some recommended settings
@@ -22,7 +22,7 @@ A BBD-style delay loosely modeled on the Electro-Harmonix Deluxe Memory Man. Thi
 * For a "Doppler" vibrato, push **RATE** clockwise and turn **BLEND** fully wet.
 * For runaway oscillation, push **FEEDBACK** to the right end of its travel.
 * For pitch-bent eerie effects, sweep the **DELAY** knob while playing, especially with high **FEEDBACK**.
-* **CLOCK NOISE** is meant to simulate an old, drifted DMM. It's subtle at lower **BLEND** and shorter **DELAY** settings; crank both of those knobs to really hear the hiss and whine. Silly? Sure. But that 6th knob was just gagging for something to do. 😉
+* **CLOCK NOISE** is meant to simulate an old, drifted DMM. It's subtle at lower **BLEND** and shorter **DELAY** settings; crank both of those knobs to really hear the hiss and whine. Silly? Sure. But that 6th knob was just gagging for something to do 🫢
 
 ## Notes for DSP learners
 

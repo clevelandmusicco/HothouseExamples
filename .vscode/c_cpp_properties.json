@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/home/rocket/Dev/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-gcc"
+        }
+    ],
+    "version": 4
+}

@@ -16,7 +16,8 @@
 //
 // -----------------------------------------------------------------------------
 // A simulated BBD-style delay loosely modeled on the Electro-Harmonix Deluxe
-// Memory Man.
+// Memory Man. No affiliation with Electro-Harmonix. Just an educational
+// example.
 //
 // Controls (mono, single-engine):
 //   KNOB 1 - BLEND       Equal-power dry/wet crossfade. Noon = equal levels.
@@ -58,9 +59,7 @@ using daisysp::fclamp;
 using daisysp::fonepole;
 using daisysp::WhiteNoise;
 
-// -----------------------------------------------------------------------------
-// Globals
-// -----------------------------------------------------------------------------
+// --- Globals ---
 
 Hothouse hw;
 
@@ -76,21 +75,11 @@ Parameter p_depth;
 Parameter p_rate;
 Parameter p_clock;
 
-// One-pole low-pass filter cascade used to darken the wet signal in a
-// BBD-like way. Each stage gives ~6 dB/oct, so cascading kBbdLpfStages of
-// them yields a steeper rolloff (roughly 6*N dB/oct in the stopband). Real
-// BBD pedals use 4th-to-6th-order elliptic anti-alias filters around 3 kHz;
-// we approximate that character at a fraction of the CPU cost.
-//
-// We roll our own one-pole rather than using daisysp::Tone, because Tone
-// lives in DaisySP-LGPL. It's also a useful thing for a learner to see
-// written out: a single coefficient `a` and a single sample of state `z`,
-// with transfer function
-//
-//     H(z) = (1 - a) / (1 - a * z^-1)
-//
-// where a = exp(-2π fc / fs) places the -3 dB point at fc Hz. As a → 1 the
-// filter clamps shut (DC only); as a → 0 it passes everything.
+// One-pole LPF cascade for BBD tone darkening. Each stage rolls off ~6 dB/oct;
+// four in series approximates the anti-alias filter character of the real chip.
+// We skip daisysp::Tone (it lives in the LGPL half of DaisySP) and roll our
+// own: one coefficient a = exp(-2*pi*fc/fs), one state sample. As a -> 1 it
+// cuts to DC only; as a -> 0 it passes everything through.
 struct OnePoleLpf {
   float a = 0.0f;  // pole coefficient
   float z = 0.0f;  // y[n-1]
@@ -139,7 +128,7 @@ Smoothed s_blend{0.5f, 0.5f, 0.0008f};
 Smoothed s_feedback{0.3f, 0.3f, 0.0008f};
 Smoothed s_delay{4800.0f, 4800.0f, 0.0001f};  // samples
 Smoothed s_depth{0.0f, 0.0f, 0.0008f};
-Smoothed s_rate{0.5f, 0.5f, 0.0008f};         // Hz
+Smoothed s_rate{0.5f, 0.5f, 0.0008f};  // Hz
 Smoothed s_clock{0.0f, 0.0f, 0.0008f};
 
 // Sample rate, populated in main() after hardware init.
@@ -149,15 +138,13 @@ float sample_rate = 48000.0f;
 Led led_bypass;
 bool bypass = true;
 
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
+// --- Helpers ---
 
 // Equal-power crossfade gains. Maps x in [0, 1] to a (dry, wet) pair lying on
 // the unit circle (cos^2 + sin^2 = 1), so total POWER stays constant across
 // the sweep. A linear crossfade would dip ~3 dB at noon; this does not.
 static inline void EqualPowerGains(float x, float* dry_gain, float* wet_gain) {
-  const float angle = x * (kTwoPi * 0.25f); 
+  const float angle = x * (kTwoPi * 0.25f);
   *dry_gain = cosf(angle);
   *wet_gain = sinf(angle);
 }
@@ -179,9 +166,7 @@ static inline void AdvancePhase(float* phase, float inc) {
   }
 }
 
-// -----------------------------------------------------------------------------
-// Audio callback
-// -----------------------------------------------------------------------------
+// --- Audio callback ---
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
@@ -219,18 +204,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     s_rate.Tick();
     s_clock.Tick();
 
-    // -------------------------------------------------------------------
-    // 1. LFO  (smooth sine, no wavetable, no reset)
-    // -------------------------------------------------------------------
+    // --- 1. LFO (smooth sine, no wavetable, no reset) ---
     // The phase accumulator advances continuously and is fed directly to
     // sinf() each sample. No table lookup, no quantisation, no sawtooth
     // shape mucking about under the modulation.
     AdvancePhase(&lfo_phase, kTwoPi * s_rate.current / sample_rate);
     const float lfo = sinf(lfo_phase);
 
-    // -------------------------------------------------------------------
-    // 2. Modulated read tap
-    // -------------------------------------------------------------------
+    // --- 2. Modulated read tap ---
     // Center delay (in samples) plus an LFO-driven offset. Cap the
     // modulation amplitude so the read pointer can never go negative or
     // off the end of the buffer.
@@ -240,15 +221,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     constexpr float kMaxModSamples = 240.0f;
     const float mod_samples = s_depth.current * kMaxModSamples;
     float read_samples = s_delay.current + mod_samples * lfo;
-    read_samples = fclamp(read_samples, 1.0f,
-                          static_cast<float>(kMaxDelaySamples) - 2.0f);
+    read_samples =
+        fclamp(read_samples, 1.0f, static_cast<float>(kMaxDelaySamples) - 2.0f);
 
     delay_line.SetDelay(read_samples);
     float wet = delay_line.Read();
 
-    // -------------------------------------------------------------------
-    // 3. BBD darkening (anti-alias / capacitor degradation)
-    // -------------------------------------------------------------------
+    /// --- 3. BBD darkening (anti-alias / capacitor degradation) ---
     // Real BBDs lose high frequencies on every charge transfer; longer
     // delays mean slower clocks, lower Nyquist, and even darker tone.
     // We approximate this by tying the cutoff to the delay setting.
@@ -257,16 +236,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // four 1-pole sections produces the lush, dark repeats the DMM is
     // famous for (and helpfully tames any feedback runaway too).
     const float darkening_ratio = s_delay.current / kMaxDelaySamples;
-    const float bbd_cutoff = fclamp(8000.0f - 6400.0f * darkening_ratio,
-                                    1500.0f, 8000.0f);
+    const float bbd_cutoff =
+        fclamp(8000.0f - 6400.0f * darkening_ratio, 1500.0f, 8000.0f);
     for (int s = 0; s < kBbdLpfStages; ++s) {
       bbd_lpf[s].SetCutoff(bbd_cutoff, sample_rate);
       wet = bbd_lpf[s].Process(wet);
     }
 
-    // -------------------------------------------------------------------
-    // 4. BBD clock-noise model
-    // -------------------------------------------------------------------
+    // --- 4. BBD clock-noise model ---
     // The MN3005's clock runs at f_c = stages / (2 * delay_seconds).
     // At max delay (~550 ms) this lands around 3.7 kHz - audible whine.
     // At min delay (~30 ms) it sits well above hearing, but folds back
@@ -290,9 +267,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     wet += clock_tone * clock_amount * 0.0035f;
     wet += hiss * clock_amount * darkening_ratio * 0.001f;
 
-    // -------------------------------------------------------------------
-    // 5. Feedback write
-    // -------------------------------------------------------------------
+    // --- 5. Feedback write ---
     // Soft-clip the signal heading back into the delay line. This lets
     // the user crank FEEDBACK past unity for runaway oscillation while
     // keeping the buffer values bounded (no NaNs, no DC explosion). The
@@ -301,9 +276,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     const float into_delay = SoftClip(dry + wet * s_feedback.current);
     delay_line.Write(into_delay);
 
-    // -------------------------------------------------------------------
-    // 6. Equal-power dry/wet blend
-    // -------------------------------------------------------------------
+    // --- 6. Equal-power dry/wet blend ---
     float dry_gain;
     float wet_gain;
     EqualPowerGains(s_blend.current, &dry_gain, &wet_gain);
@@ -314,9 +287,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   }
 }
 
-// -----------------------------------------------------------------------------
-// Main
-// -----------------------------------------------------------------------------
+// --- Main ---
 
 int main() {
   hw.Init();
