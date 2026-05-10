@@ -13,9 +13,7 @@ HOTHOUSE_DIR = ..
 C_INCLUDES += -I$(HOTHOUSE_DIR)
 CPP_SOURCES += $(HOTHOUSE_DIR)/hothouse.cpp
 
-# Use DaisySP-LGPL components if you ever need them (e.g. ReverbSc).
-# USE_DAISYSP_LGPL = 1
-
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
+include ../Makefile
