@@ -4,5 +4,6 @@
     "editor.formatOnSave": true,
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
-    }
+    },
+    "search.useGlobalIgnoreFiles": true
 }
