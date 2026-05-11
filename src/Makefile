@@ -2,7 +2,7 @@
 # easy to script on various OSes
 
 # HACK: there are more elegant ways to do this, but it's simple
-# and it works for an unsophiticated binary publishing hook
+# and it works for an unsophisticated binary publishing hook
 
 # Define the file to copy and the destination directory
 # We know that BUILD_DIR and TARGET are already set

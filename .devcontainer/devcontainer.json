@@ -1,0 +1,32 @@
+{
+    // Dev Container definition for HothouseExamples.
+    //
+    // This project is intended for Hothouse pedal owners who want a consistent
+    // way to build the example DSP effects without hand-installing the Arm
+    // embedded toolchain.
+    "name": "HothouseExamples",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    // VS Code mounts the opened repository under /workspaces by default.
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    // Use the standard non-root user provided by the Dev Container base image.
+    "remoteUser": "vscode",
+    // On Linux hosts, VS Code can update the remote user's UID/GID to match the
+    // host user, helping avoid root-owned build artifacts in the mounted checkout.
+    "updateRemoteUserUID": true,
+    // Run once after the container is created and the source tree is mounted.
+    //
+    // This belongs here, not in the Dockerfile, because the repository is mounted
+    // by VS Code rather than cloned into the image.
+    "postCreateCommand": "git submodule update --init --recursive && make -j$(nproc) -C libDaisy && make -j$(nproc) -C DaisySP",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    }
+}

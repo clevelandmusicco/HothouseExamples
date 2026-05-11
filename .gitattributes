@@ -1,0 +1,10 @@
+# Normalize line endings across Windows, macOS, and Linux checkouts.
+# This helps keep Makefiles, shell scripts, and C/C++ sources buildable inside
+# the Linux Dev Container even when edited on Windows.
+
+* text=auto eol=lf
+
+# Windows command/script files should remain CRLF when present.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
