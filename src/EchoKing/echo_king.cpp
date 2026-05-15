@@ -1,20 +1,20 @@
 // EchoKing for Cleveland Music Co. Hothouse DIY DSP Platform
-// Digital model of the Maestro Echoplex family: EP-1, EP-2, and EP-3
+// DSP models of the Maestro Echoplex family: EP-1, EP-2, and EP-3
 // Copyright (C) 2026 Cleveland Music Co. <code@clevelandmusicco.com>
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+// The full text of the GNU GENERAL PUBLIC LICENSE Version 2 is included in the
+// gpl-2.0.txt file.
+//
 // The Maestro Echoplex was a tape loop echo unit first produced around 1959.
 // The EP-1 and EP-2 used tube preamps (12AX7); the EP-3 switched to solid
 // state. Three things define the sound: the preamp (always in the signal path,
