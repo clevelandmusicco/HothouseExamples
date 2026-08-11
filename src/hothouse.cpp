@@ -16,9 +16,11 @@
 
 #include "hothouse.h"
 
-#include "optional"
+#include <math.h>
 
 using clevelandmusicco::Hothouse;
+using clevelandmusicco::HothouseParameter;
+using daisy::MidiUsbTransport;
 using daisy::System;
 
 #ifndef SAMPLE_RATE
@@ -44,6 +46,31 @@ constexpr Pin PIN_KNOB_3 = daisy::seed::D18;
 constexpr Pin PIN_KNOB_4 = daisy::seed::D19;
 constexpr Pin PIN_KNOB_5 = daisy::seed::D20;
 constexpr Pin PIN_KNOB_6 = daisy::seed::D21;
+
+// CC map for the 6 knobs, one per index. 14-19 sit in MIDI's undefined
+// controller range (no collision with mod wheel/volume/pan/etc). File
+// scope, not a class member: array statics ODR-fail on this toolchain.
+constexpr uint8_t kKnobCcNumber[Hothouse::KNOB_LAST] = {14, 15, 16, 17, 18, 19};
+
+// Raw knob delta (0-1 range) that counts as the physical pot being "touched"
+// and reclaiming control from a MIDI CC override.
+constexpr float kKnobCcTouchThreshold = 0.01f;
+
+// CC map continues contiguously: one per toggleswitch, then one per
+// footswitch. Same undefined range as the knobs.
+constexpr uint8_t kToggleswitchCcNumber[Hothouse::TOGGLESWITCH_LAST] = {20, 21,
+                                                                        22};
+constexpr uint8_t kFootswitchCcNumber[2] = {23, 24};
+
+// Standard MIDI button convention: CC >= this value reads as "pressed".
+constexpr uint8_t kFootswitchCcOnThreshold = 64;
+
+// CC 0-127 split into thirds, ascending to match TOGGLESWITCH_UP/MIDDLE/DOWN.
+static Hothouse::ToggleswitchPosition QuantizeToggleswitchCc(uint8_t value) {
+  if (value < 43) return Hothouse::TOGGLESWITCH_UP;
+  if (value < 86) return Hothouse::TOGGLESWITCH_MIDDLE;
+  return Hothouse::TOGGLESWITCH_DOWN;
+}
 
 const uint32_t Hothouse::HOLD_THRESHOLD_MS;
 
@@ -105,14 +132,80 @@ void Hothouse::StopAdc() { seed.adc.Stop(); }
 void Hothouse::ProcessAnalogControls() {
   for (size_t i = 0; i < KNOB_LAST; i++) {
     knobs[i].Process();
+
+    if (knob_cc_active_[i]) {
+      // Baseline is frozen at hand-off (see the else branch below), so a
+      // slow turn still accumulates real distance: a normal turn moves
+      // the pot well under 1% of range within a single ~1ms audio block.
+      float delta = knobs[i].Value() - knob_cc_last_raw_[i];
+      if (delta > kKnobCcTouchThreshold || delta < -kKnobCcTouchThreshold) {
+        // Physical knob moved, so it reclaims control from the CC override.
+        knob_cc_active_[i] = false;
+        knob_cc_last_raw_[i] = knobs[i].Value();
+      }
+    } else {
+      knob_cc_last_raw_[i] = knobs[i].Value();
+    }
   }
 }
 
 float Hothouse::GetKnobValue(Knob k) {
   size_t idx;
   idx = k < KNOB_LAST ? k : KNOB_1;
+  if (knob_cc_active_[idx]) {
+    return knob_cc_value_[idx];
+  }
   return knobs[idx].Value();
 }
+
+void Hothouse::StartMidi() {
+  MidiUsbHandler::Config midi_cfg;
+  midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
+  midi_.Init(midi_cfg);
+}
+
+void Hothouse::ProcessMidi() {
+  midi_.Listen();
+  while (midi_.HasEvents()) {
+    auto msg = midi_.PopEvent();
+    switch (msg.type) {
+      case daisy::ControlChange: {
+        auto cc = msg.AsControlChange();
+        for (size_t i = 0; i < KNOB_LAST; i++) {
+          if (cc.control_number == kKnobCcNumber[i]) {
+            knob_cc_value_[i] = cc.value / 127.0f;
+            knob_cc_active_[i] = true;
+          }
+        }
+        for (size_t i = 0; i < TOGGLESWITCH_LAST; i++) {
+          if (cc.control_number == kToggleswitchCcNumber[i]) {
+            toggle_cc_value_[i] = QuantizeToggleswitchCc(cc.value);
+            toggle_cc_active_[i] = true;
+          }
+        }
+        for (size_t i = 0; i < 2; i++) {
+          if (cc.control_number == kFootswitchCcNumber[i]) {
+            footswitch_cc_pressed_[i] = cc.value >= kFootswitchCcOnThreshold;
+          }
+        }
+      } break;
+      case daisy::ProgramChange: {
+        program_number_ = msg.AsProgramChange().program;
+      } break;
+      default:
+        if (midi_event_callback_ != NULL) {
+          midi_event_callback_(msg);
+        }
+        break;
+    }
+  }
+}
+
+void Hothouse::RegisterMidiEventCallback(MidiEventCallback callback) {
+  midi_event_callback_ = callback;
+}
+
+int16_t Hothouse::GetProgramNumber() { return program_number_; }
 
 void Hothouse::ProcessDigitalControls() {
   for (size_t i = 0; i < SWITCH_LAST; i++) {
@@ -160,22 +253,40 @@ void Hothouse::InitAnalogControls() {
 // Public convenience function to get position of toggleswitches 1-3.
 Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
     Toggleswitch tsw) {
+  ToggleswitchPosition physical;
   switch (tsw) {
     case (TOGGLESWITCH_1):
-      return GetLogicalSwitchPosition(switches[SWITCH_1_UP],
-                                      switches[SWITCH_1_DOWN]);
+      physical = GetLogicalSwitchPosition(switches[SWITCH_1_UP],
+                                          switches[SWITCH_1_DOWN]);
+      break;
     case (TOGGLESWITCH_2):
-      return GetLogicalSwitchPosition(switches[SWITCH_2_UP],
-                                      switches[SWITCH_2_DOWN]);
+      physical = GetLogicalSwitchPosition(switches[SWITCH_2_UP],
+                                          switches[SWITCH_2_DOWN]);
+      break;
     case (TOGGLESWITCH_3):
-      return GetLogicalSwitchPosition(switches[SWITCH_3_UP],
-                                      switches[SWITCH_3_DOWN]);
+      physical = GetLogicalSwitchPosition(switches[SWITCH_3_UP],
+                                          switches[SWITCH_3_DOWN]);
+      break;
     default:
       seed.PrintLine(
           "ERROR: Unexpected value provided for Toggleswitch 'tsw'. "
           "Returning TOGGLESWITCH_UNKNOWN by default.");
       return TOGGLESWITCH_UNKNOWN;
   }
+
+  // Discrete state doesn't drift block-to-block like a knob's raw ADC
+  // value, so (unlike GetKnobValue) comparing directly here is enough.
+  if (toggle_cc_active_[tsw] && physical != toggle_last_physical_[tsw]) {
+    toggle_cc_active_[tsw] = false;
+  }
+  toggle_last_physical_[tsw] = physical;
+
+  return toggle_cc_active_[tsw] ? toggle_cc_value_[tsw] : physical;
+}
+
+bool Hothouse::GetFootswitchPressed(Switches footswitch) {
+  int idx = footswitch == FOOTSWITCH_1 ? 0 : 1;
+  return switches[footswitch].Pressed() || footswitch_cc_pressed_[idx];
 }
 
 void Hothouse::CheckResetToBootloader() {
@@ -275,4 +386,38 @@ void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
   }
 
   footswitch_last_state[footswitch_index] = is_pressed;
+}
+
+// --- HothouseParameter ---
+
+void HothouseParameter::Init(Hothouse &hw, Hothouse::Knob knob, float min,
+                              float max, Parameter::Curve curve) {
+  hw_ = &hw;
+  knob_ = knob;
+  pmin_ = min;
+  pmax_ = max;
+  curve_ = curve;
+  lmin_ = logf(min < 0.0000001f ? 0.0000001f : min);
+  lmax_ = logf(max);
+}
+
+float HothouseParameter::Process() {
+  float in = hw_->GetKnobValue(knob_);
+  switch (curve_) {
+    case Parameter::LINEAR:
+      val_ = (in * (pmax_ - pmin_)) + pmin_;
+      break;
+    case Parameter::EXPONENTIAL:
+      val_ = ((in * in) * (pmax_ - pmin_)) + pmin_;
+      break;
+    case Parameter::LOGARITHMIC:
+      val_ = expf((in * (lmax_ - lmin_)) + lmin_);
+      break;
+    case Parameter::CUBE:
+      val_ = ((in * (in * in)) * (pmax_ - pmin_)) + pmin_;
+      break;
+    default:
+      break;
+  }
+  return val_;
 }

@@ -15,13 +15,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "daisy_seed.h"
-#include "optional"
 
 using daisy::AdcChannelConfig;
 using daisy::AnalogControl;
 using daisy::AudioHandle;
 using daisy::DaisySeed;
 using daisy::Led;
+using daisy::MidiEvent;
+using daisy::MidiUsbHandler;
+using daisy::Parameter;
 using daisy::Pin;
 using daisy::SaiHandle;
 using daisy::Switch;
@@ -71,6 +73,7 @@ class Hothouse {
     TOGGLESWITCH_1,
     TOGGLESWITCH_2,
     TOGGLESWITCH_3,
+    TOGGLESWITCH_LAST, /**< & */
   };
 
   struct FootswitchCallbacks {
@@ -171,9 +174,17 @@ class Hothouse {
   or TOGGLESWITCH_3) \return TOGGLESWITCH_UP (0), TOGGLESWITCH_MIDDLE (1), or
   TOGGLESWITCH_DOWN (2). \note If the toggleswitch in question is ON-ON (rather
   than ON-OFF-ON), TOGGLESWITCH_MIDDLE can never be the return value. Write
-  your code with this in mind.
+  your code with this in mind. \note Also blends in a MIDI CC override the
+  same way GetKnobValue() does; see hothouse.cpp.
   */
   ToggleswitchPosition GetToggleswitchPosition(Toggleswitch tsw);
+
+  /** \param footswitch Which footswitch to check (FOOTSWITCH_1/2).
+   * \return true if physically pressed OR its MIDI CC override is currently
+   * "on" (CC value >= 64, the standard MIDI button convention). Doesn't
+   * feed RegisterFootswitchCallbacks or CheckResetToBootloader, since MIDI
+   * shouldn't be able to trigger DFU reset. */
+  bool GetFootswitchPressed(Switches footswitch);
 
   /** Check whether FOOTSWITCH_1 and FOOTSWITCH_2 have both been held down
    * simultaneously for 2 seconds and, if so, call System::ResetToBootloader().
@@ -189,6 +200,32 @@ class Hothouse {
    * to deregister all callbacks.
    */
   void RegisterFootswitchCallbacks(FootswitchCallbacks *callbacks);
+
+  /** Signature for MIDI messages Hothouse doesn't consume itself (anything
+   * other than ControlChange/ProgramChange, e.g. NoteOn/NoteOff). */
+  using MidiEventCallback = void (*)(MidiEvent event);
+
+  /** Init and start listening for MIDI over USB (device mode: the host
+   * computer enumerates the Hothouse as a class-compliant USB MIDI port). */
+  void StartMidi();
+
+  /** Drain pending MIDI messages; call once per main loop iteration.
+   * ControlChange/ProgramChange update internal state, everything else
+   * forwards to the registered MidiEventCallback. Sole drain point;
+   * don't touch midi_ elsewhere, or the two consumers will starve. */
+  void ProcessMidi();
+
+  /** Register/deregister the callback for MIDI messages not handled by the
+   * built-in CC/PC logic. Pass NULL to deregister.
+   * \param callback Function to call for each unconsumed MIDI event.
+   */
+  void RegisterMidiEventCallback(MidiEventCallback callback);
+
+  /** Most recently received MIDI Program Change number.
+   * \return 0-127 if a Program Change has been received since boot, -1
+   * otherwise. (Not std::optional: this toolchain builds with
+   * -std=gnu++14, and libstdc++'s <optional> compiles out under it.) */
+  int16_t GetProgramNumber();
 
   DaisySeed seed; /**< & */
 
@@ -214,6 +251,50 @@ class Hothouse {
   inline uint16_t* adc_ptr(const uint8_t chn) { return seed.adc.GetPtr(chn); }
 
   FootswitchCallbacks *footswitchCallbacks = NULL;
+
+  MidiUsbHandler midi_;
+  MidiEventCallback midi_event_callback_ = NULL;
+  float knob_cc_value_[KNOB_LAST] = {};
+  float knob_cc_last_raw_[KNOB_LAST] = {};
+  bool knob_cc_active_[KNOB_LAST] = {};
+  ToggleswitchPosition toggle_cc_value_[TOGGLESWITCH_LAST] = {};
+  ToggleswitchPosition toggle_last_physical_[TOGGLESWITCH_LAST] = {};
+  bool toggle_cc_active_[TOGGLESWITCH_LAST] = {};
+  bool footswitch_cc_pressed_[2] = {};
+  int16_t program_number_ = -1;
+};
+
+/** Drop-in replacement for daisy::Parameter that reads through
+ * Hothouse::GetKnobValue() instead of an AnalogControl's ADC pointer
+ * directly, so it picks up MIDI CC overrides for free. Curve math matches
+ * daisy::Parameter exactly (see libDaisy/src/hid/parameter.cpp). */
+class HothouseParameter {
+ public:
+  HothouseParameter() = default;
+  ~HothouseParameter() = default;
+
+  /** \param hw The Hothouse instance owning the knob.
+   * \param knob Which knob to read.
+   * \param min Bottom of range (when input is 0.0).
+   * \param max Top of range (when input is 1.0).
+   * \param curve Scaling curve for the input->output transformation.
+   */
+  void Init(Hothouse &hw, Hothouse::Knob knob, float min, float max,
+            Parameter::Curve curve);
+
+  /** Processes the input signal; call once per audio block. */
+  float Process();
+
+  /** Current value without processing another sample. */
+  inline float Value() { return val_; }
+
+ private:
+  Hothouse *hw_ = nullptr;
+  Hothouse::Knob knob_ = Hothouse::KNOB_1;
+  float pmin_ = 0.0f, pmax_ = 0.0f;
+  float lmin_ = 0.0f, lmax_ = 0.0f;
+  float val_ = 0.0f;
+  Parameter::Curve curve_ = Parameter::LINEAR;
 };
 
 }  // namespace clevelandmusicco
