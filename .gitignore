@@ -5,3 +5,6 @@ _MACOSX/
 .cortex-debug.peripherals.state.json
 .DS_Store
 .vscode/*
+
+# Per-effect scratch dev logs; branch state, not part of an example
+DEVLOG.md

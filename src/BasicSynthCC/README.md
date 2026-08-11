@@ -23,10 +23,13 @@ Experimental fork of BasicSynth demonstrating baked-in MIDI CC support. Same mon
 | SWITCH 3 | 22 | Unused (received, not acted on) |
 | FOOTSWITCH 1 | 23 | Unused (received, not acted on) |
 | FOOTSWITCH 2 | 24 | Unused (received, not acted on) |
+| (bypass) | 25 | Unused here; whole-pedal bypass, >= 64 engaged, < 64 bypassed |
 
 CC numbers are drawn from MIDI 1.0's undefined controller range so they won't collide with mod wheel, volume, pan, expression, sustain, etc. Channel is omni, so CC/PC on any channel is accepted. Anything outside the map above, Program Change included, is passed to the callback registered with `hw.RegisterMidiEventCallback()`, so an effect can still define CCs of its own. Program Change is also latched and readable via `hw.GetProgramNumber()`, though this example doesn't act on it.
 
-Footswitch CC state is available via `hw.GetFootswitchPressed()` (held) and `hw.GetFootswitchRisingEdge()` (momentary, for the `bypass ^= ...` idiom most effects use). This example calls neither, since a monophonic synth has no bypass or path-select concept. Note that neither feeds `CheckResetToBootloader()`'s DFU-reset gesture: MIDI shouldn't be able to trigger a firmware reset.
+Footswitch CC state is available via `hw.GetFootswitchPressed()` (held) and `hw.GetFootswitchRisingEdge()` (momentary), and also feeds the normal/double/long-press callbacks from `hw.RegisterFootswitchCallbacks()`. All of them model a stomp, so a CC has to drop below 64 before it can assert again; set your controller to momentary, not latching, or a long press will never complete. Effects should read the footswitches through these rather than `hw.switches[FOOTSWITCH_n]`, which is physical-only and silently ignores CC 23/24. This example uses none of them, since a monophonic synth has no bypass or path-select concept.
+
+Whole-pedal bypass is CC 25, separate from the footswitch CCs and absolute rather than momentary: >= 64 engages, < 64 bypasses, and repeating a value is a no-op. `Hothouse` owns that state (`GetBypass()` / `SetBypass()` / `ToggleBypass()`) so MIDI and the footswitch can't disagree about it; see `src/LibreVerb` for the pattern. This example has no bypass concept either, so CC 25 is received and stored but never read. Note that neither feeds `CheckResetToBootloader()`'s DFU-reset gesture: MIDI shouldn't be able to trigger a firmware reset.
 
 ### Controls
 

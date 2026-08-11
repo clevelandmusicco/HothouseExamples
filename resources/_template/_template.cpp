@@ -27,16 +27,18 @@ using daisy::SaiHandle;
 
 Hothouse hw;
 
-// Bypass vars
 Led led_bypass;
-bool bypass = true;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
                    size_t size) {
   hw.ProcessAllControls();
 
-  // Toggle bypass when FOOTSWITCH_2 is pressed
-  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
+  // Toggle bypass when FOOTSWITCH_2 is pressed. Use the accessor, not
+  // hw.switches[] -- the accessor also picks up MIDI CC 24.
+  if (hw.GetFootswitchRisingEdge(Hothouse::FOOTSWITCH_2)) {
+    hw.ToggleBypass();
+  }
+  const bool bypass = hw.GetBypass();
 
   for (size_t i = 0; i < size; ++i) {
     if (bypass) {
@@ -54,16 +56,24 @@ int main() {
   hw.SetAudioBlockSize(48);  // Number of samples handled per callback
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
+  // Enables the built-in MIDI CC map (CC 14-25). Claims the internal USB
+  // peripheral, so drop this line if you'd rather have seed.StartLog().
+  hw.StartMidi();
+  hw.SetBypass(true);
+
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
+  // 1 ms, not the usual 10, so a dense CC stream can't back up in the USB
+  // MIDI FIFO; ProcessMidi() is the only place the queue gets drained.
   while (true) {
-    hw.DelayMs(10);
+    hw.ProcessMidi();
+    hw.DelayMs(1);
 
     // Toggle effect bypass LED when footswitch is pressed
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    led_bypass.Set(hw.GetBypass() ? 0.0f : 1.0f);
     led_bypass.Update();
 
     // Call System::ResetToBootloader() if FOOTSWITCH_1 is pressed for 2 seconds

@@ -22,6 +22,8 @@
 //   - Modulated comb read taps (Lexicon-style chorused tail)
 //   - Plate / Hall / Cathedral "size" presets
 //   - Mono / Stereo / Wide stereo modes
+//   - MIDI CC control of every knob and toggleswitch (CC 14-22), plus bypass
+//     (CC 25)
 //
 // References:
 //   Freeverb original by Jezar at Dreampoint:
@@ -39,6 +41,7 @@
 #include "hothouse.h"
 
 using clevelandmusicco::Hothouse;
+using clevelandmusicco::HothouseParameter;
 using daisy::AudioHandle;
 using daisy::Led;
 using daisy::Parameter;
@@ -74,7 +77,6 @@ DelayLine<float, kPreDelayBufSize> DSY_SDRAM_BSS g_pre_delay;
 
 Hothouse hw;
 Led led_bypass;
-bool bypass = true;
 
 float sample_rate = 48000.0f;
 float sr_scale = 48000.0f / kSrRef;
@@ -85,7 +87,9 @@ Allpass ap_L[kNumAllpasses];
 Allpass ap_R[kNumAllpasses];
 DcBlock dc_in;
 
-Parameter p_mix, p_decay, p_predelay, p_highs, p_lows, p_mod;
+// HothouseParameter rather than daisy::Parameter: it reads knobs through
+// Hothouse::GetKnobValue(), which is where the CC override gets blended in.
+HothouseParameter p_mix, p_decay, p_predelay, p_highs, p_lows, p_mod;
 
 // LFO state. Per-channel phase so L and R can move independently.
 // Each comb in a channel uses the same channel phase plus a fixed per-comb
@@ -185,8 +189,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   s_lows.target = p_lows.Process();
   s_mod.target = p_mod.Process();
 
-  // FOOTSWITCH 2 = bypass (canonical Hothouse pattern).
-  bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
+  // FOOTSWITCH 2 = bypass (canonical Hothouse pattern). The accessor also
+  // catches CC 24; CC 25 sets the state outright. See hothouse.h.
+  if (hw.GetFootswitchRisingEdge(Hothouse::FOOTSWITCH_2)) {
+    hw.ToggleBypass();
+  }
+  const bool bypass = hw.GetBypass();
 
   // Toggle positions.
   const int sw1 =
@@ -343,24 +351,30 @@ int main() {
 
   dc_in.Init(sample_rate);
 
-  p_mix.Init(hw.knobs[Hothouse::KNOB_1], 0.0f, 1.0f, Parameter::LINEAR);
-  p_decay.Init(hw.knobs[Hothouse::KNOB_2], 0.0f, 1.0f, Parameter::LINEAR);
+  p_mix.Init(&hw, Hothouse::KNOB_1, 0.0f, 1.0f, Parameter::LINEAR);
+  p_decay.Init(&hw, Hothouse::KNOB_2, 0.0f, 1.0f, Parameter::LINEAR);
   // Pre-delay: 1 sample to 250 ms (in samples). Log taper so most of the
   // travel is on short pre-delays, where small changes are most audible.
-  p_predelay.Init(hw.knobs[Hothouse::KNOB_3], 1.0f, sample_rate * 0.250f,
+  p_predelay.Init(&hw, Hothouse::KNOB_3, 1.0f, sample_rate * 0.250f,
                   Parameter::LOGARITHMIC);
-  p_highs.Init(hw.knobs[Hothouse::KNOB_4], 0.0f, 1.0f, Parameter::LINEAR);
-  p_lows.Init(hw.knobs[Hothouse::KNOB_5], 0.0f, 1.0f, Parameter::LINEAR);
-  p_mod.Init(hw.knobs[Hothouse::KNOB_6], 0.0f, 1.0f, Parameter::LINEAR);
+  p_highs.Init(&hw, Hothouse::KNOB_4, 0.0f, 1.0f, Parameter::LINEAR);
+  p_lows.Init(&hw, Hothouse::KNOB_5, 0.0f, 1.0f, Parameter::LINEAR);
+  p_mod.Init(&hw, Hothouse::KNOB_6, 0.0f, 1.0f, Parameter::LINEAR);
+
+  hw.StartMidi();
+  hw.SetBypass(true);  // Boot bypassed, like every other example here.
 
   led_bypass.Init(hw.seed.GetPin(Hothouse::LED_2), false);
 
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
+  // 1 ms rather than the usual 10 so a dense CC stream can't back up in the
+  // USB MIDI FIFO; ProcessMidi() is the only place the queue gets drained.
   while (true) {
-    hw.DelayMs(10);
-    led_bypass.Set(bypass ? 0.0f : 1.0f);
+    hw.ProcessMidi();
+    hw.DelayMs(1);
+    led_bypass.Set(hw.GetBypass() ? 0.0f : 1.0f);
     led_bypass.Update();
 
     // Hold *BOTH* footswitches for 2 s to reset to bootloader.

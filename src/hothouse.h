@@ -179,21 +179,44 @@ class Hothouse {
   */
   ToggleswitchPosition GetToggleswitchPosition(Toggleswitch tsw);
 
-  /** \param footswitch Which footswitch to check (FOOTSWITCH_1 or
+  /** Level read for footswitch functions that are held, e.g. a freeze or a
+   * momentary boost. Use this and GetFootswitchRisingEdge() rather than
+   * switches[FOOTSWITCH_n] directly; the raw Switch is physical-only, so an
+   * effect reading it silently ignores the footswitch's MIDI CC.
+   * \param footswitch Which footswitch to check (FOOTSWITCH_1 or
    * FOOTSWITCH_2; anything else logs an error and returns false).
    * \return true if physically held OR its MIDI CC override is currently
-   * "on" (CC value >= 64, the standard MIDI button convention). Doesn't
-   * feed RegisterFootswitchCallbacks or CheckResetToBootloader, since MIDI
-   * shouldn't be able to trigger DFU reset. */
+   * "on" (CC value >= 64, the standard MIDI button convention). */
   bool GetFootswitchPressed(Switches footswitch);
 
-  /** Momentary-press equivalent of GetFootswitchPressed(), for the
-   * `bypass ^= ...` idiom most effects use.
+  /** Edge read for footswitch functions that latch, e.g. the `bypass ^= ...`
+   * idiom most effects use. Same physical-OR-CC rule as
+   * GetFootswitchPressed().
    * \param footswitch Which footswitch to check (FOOTSWITCH_1 or
    * FOOTSWITCH_2; anything else logs an error and returns false).
    * \return true for one ProcessDigitalControls() cycle after either the
    * physical switch or its MIDI CC crosses into the pressed state. */
   bool GetFootswitchRisingEdge(Switches footswitch);
+
+  /** Whole-pedal bypass state, owned here so MIDI and the footswitch can't
+   * disagree about it. CC 25 sets it absolutely (>= 64 engaged, < 64
+   * bypassed); the effect flips it from the footswitch. Nothing in this class
+   * mutes audio on its own -- the effect still decides what "bypassed" means
+   * for its own signal path.
+   * \return true when the pedal should pass the dry signal through. */
+  bool GetBypass();
+
+  /** Set the bypass state outright, e.g. an effect's power-on default.
+   * \note Call from main() before StartAudio(), or from inside the audio
+   * callback. Calling it from the main loop while audio is running races the
+   * CC adoption in ProcessDigitalControls().
+   * \param bypassed true to bypass, false to engage. */
+  void SetBypass(bool bypassed);
+
+  /** Flip the bypass state; the footswitch half of the pair, e.g.
+   *   if (hw.GetFootswitchRisingEdge(FOOTSWITCH_2)) hw.ToggleBypass();
+   * \note Same calling-context rule as SetBypass(). */
+  void ToggleBypass();
 
   /** Check whether FOOTSWITCH_1 and FOOTSWITCH_2 have both been held down
    * simultaneously for 2 seconds and, if so, call System::ResetToBootloader().
@@ -204,7 +227,9 @@ class Hothouse {
 
   /** Register/Deregister footswitch press callbacks. This provides an
    * alternative way of handling foot switch presses and allows effects to make
-   * use of double and long presses.
+   * use of double and long presses. Fed by physical stomps and by the
+   * footswitch MIDI CCs alike, so a long press needs the CC to sit above 64
+   * for the duration -- set the controller to momentary, not latching.
    * \param callbacks A pointer to the struct that defines the callbacks or NULL
    * to deregister all callbacks.
    */
@@ -238,7 +263,11 @@ class Hothouse {
   DaisySeed seed; /**< & */
 
   AnalogControl knobs[KNOB_LAST]; /**< & */
-  Switch switches[SWITCH_LAST];   /**< & */
+
+  /** Raw, physical-only switch state. For the footswitches, prefer
+   * GetFootswitchPressed() / GetFootswitchRisingEdge(); for the toggles,
+   * GetToggleswitchPosition(). Those blend in MIDI CC, these don't. */
+  Switch switches[SWITCH_LAST];
 
  private:
   void SetHidUpdateRates();
@@ -277,6 +306,8 @@ class Hothouse {
   volatile uint8_t toggle_cc_seq_[TOGGLESWITCH_LAST] = {};
   volatile bool footswitch_cc_pressed_[2] = {};
   volatile uint8_t footswitch_cc_edge_seq_[2] = {};
+  volatile bool bypass_cc_bypassed_ = false;
+  volatile uint8_t bypass_cc_seq_ = 0;
   volatile int16_t program_number_ = -1;
 
   // ISR-side only: last sequence number consumed, plus the derived state the
@@ -289,6 +320,10 @@ class Hothouse {
   bool toggle_cc_active_[TOGGLESWITCH_LAST] = {};
   uint8_t footswitch_cc_edge_seen_[2] = {};
   bool footswitch_cc_rising_edge_[2] = {};
+  uint8_t bypass_cc_seen_ = 0;
+
+  // ISR-owned, but read from the main loop (LED updates), so volatile.
+  volatile bool bypassed_ = false;
 };
 
 /** Drop-in replacement for daisy::Parameter that reads through

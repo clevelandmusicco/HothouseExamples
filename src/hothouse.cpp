@@ -64,7 +64,12 @@ constexpr uint8_t kToggleswitchCcNumber[Hothouse::TOGGLESWITCH_LAST] = {20, 21,
                                                                         22};
 constexpr uint8_t kFootswitchCcNumber[2] = {23, 24};
 
-// Standard MIDI button convention: CC >= this value reads as "pressed".
+// Whole-pedal bypass. Its own CC rather than a footswitch one, because a host
+// wants to set bypass outright; the footswitch CCs model momentary presses.
+constexpr uint8_t kBypassCcNumber = 25;
+
+// Standard MIDI button convention: CC >= this value reads as "pressed"
+// (and, for kBypassCcNumber, as "engaged").
 constexpr uint8_t kFootswitchCcOnThreshold = 64;
 
 // CC 0-127 split into thirds, ascending to match TOGGLESWITCH_UP/MIDDLE/DOWN.
@@ -233,6 +238,13 @@ bool Hothouse::HandleControlChange(const daisy::ControlChangeEvent& cc) {
       return true;
     }
   }
+  if (cc.control_number == kBypassCcNumber) {
+    // Absolute, unlike the footswitch CCs: the host says what the state IS,
+    // so a repeated identical value is a no-op rather than another toggle.
+    bypass_cc_bypassed_ = cc.value < kFootswitchCcOnThreshold;
+    bypass_cc_seq_ = bypass_cc_seq_ + 1;
+    return true;
+  }
   return false;
 }
 
@@ -277,6 +289,15 @@ void Hothouse::ProcessDigitalCcOverrides() {
     const uint8_t seq = footswitch_cc_edge_seq_[i];
     footswitch_cc_rising_edge_[i] = seq != footswitch_cc_edge_seen_[i];
     footswitch_cc_edge_seen_[i] = seq;
+  }
+
+  // Adopting the CC here (rather than in the accessor) keeps bypassed_ to a
+  // single writer, and lets a footswitch toggle later in the same audio block
+  // override a CC that landed just before it.
+  const uint8_t bypass_seq = bypass_cc_seq_;
+  if (bypass_seq != bypass_cc_seen_) {
+    bypass_cc_seen_ = bypass_seq;
+    bypassed_ = bypass_cc_bypassed_;
   }
 }
 
@@ -373,6 +394,12 @@ bool Hothouse::GetFootswitchRisingEdge(Switches footswitch) {
   return switches[footswitch].RisingEdge() || footswitch_cc_rising_edge_[idx];
 }
 
+bool Hothouse::GetBypass() { return bypassed_; }
+
+void Hothouse::SetBypass(bool bypassed) { bypassed_ = bypassed; }
+
+void Hothouse::ToggleBypass() { bypassed_ = !bypassed_; }
+
 void Hothouse::CheckResetToBootloader() {
   if (switches[FOOTSWITCH_1].Pressed() && switches[FOOTSWITCH_2].Pressed()) {
     if (dfu_start_time_ == 0) {
@@ -425,7 +452,9 @@ void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
   if (footswitchCallbacks == NULL) {
     return; // Nothing to do if callbacks have not been registered
   }
-  bool is_pressed = switches[footswitch].RisingEdge();
+  // Read through the accessors, not switches[], so a MIDI CC press drives the
+  // same normal/double/long state machine a stomp does.
+  bool is_pressed = GetFootswitchRisingEdge(footswitch);
   int footswitch_index = footswitch == Hothouse::FOOTSWITCH_1 ? 0 : 1;
 
   uint32_t now = System::GetNow();
@@ -446,8 +475,9 @@ void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
 
   uint32_t press_duration = now - footswitch_start_time[footswitch_index];
 
-  if (switches[footswitch].Pressed() && press_duration >= HOLD_THRESHOLD_MS && !footswitch_long_press_triggered[footswitch_index]) {
-    // Both footswitches held = DFU gesture; don't fire a long-press callback
+  if (GetFootswitchPressed(footswitch) && press_duration >= HOLD_THRESHOLD_MS && !footswitch_long_press_triggered[footswitch_index]) {
+    // Both footswitches held = DFU gesture; don't fire a long-press callback.
+    // Physical-only on purpose: MIDI must not be able to reach DFU.
     bool dfu_gesture = switches[FOOTSWITCH_1].Pressed() && switches[FOOTSWITCH_2].Pressed();
     if (!dfu_gesture && footswitchCallbacks->HandleLongPress != NULL) {
       footswitchCallbacks->HandleLongPress(footswitch);
