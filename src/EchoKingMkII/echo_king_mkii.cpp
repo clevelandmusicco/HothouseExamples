@@ -480,13 +480,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   record_lpf.SetCutoff(active_model->record_fc, sample_rate);
   feedback_lpf.SetCutoff(active_model->feedback_fc, sample_rate);
 
+  // Trails: the tape loop keeps turning when bypassed or in Preamp-Only, but
+  // nothing new is recorded onto it.
+  const bool feeding = !bypass && !preamp_only;
+
   for (size_t i = 0; i < size; ++i) {
     const float dry_in = in[0][i];
-
-    if (bypass) {
-      out[0][i] = out[1][i] = dry_in;
-      continue;
-    }
 
     s_blend.Tick();
     s_feedback.Tick();
@@ -498,6 +497,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // --- 1. Preamp waveshaper ---
     // Always in path, even with BLEND fully dry: matches the real machine
     // and lets Preamp-Only mode use the preamp as a standalone tone shaper.
+    // Keeps running (result discarded) when bypassed so its DC blockers stay
+    // settled and re-engaging doesn't thump.
     float preamp_out;
     if (active_model->is_tube) {
       preamp_out = cascaded_tube.Process(dry_in, active_model->preamp_drive,
@@ -531,34 +532,42 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     float read_pos = fclamp(s_delay.current + wow_offset + flutter_offset, 1.0f,
                             static_cast<float>(kMaxDelaySamples) - 2.0f);
 
-    // --- 3-7. Wet path (skipped in Preamp-Only) ---
-    float wet = 0.0f;
-    if (!preamp_only) {
-      // Read before write so the read sees old loop content.
-      delay_line.SetDelay(read_pos);
-      float tape_out = delay_line.Read();
+    // --- 3-7. Wet path ---
+    // Read before write so the read sees old loop content.
+    delay_line.SetDelay(read_pos);
+    float tape_out = delay_line.Read();
 
-      // TONE multiplies the model cutoff by 10^(knob - 0.5).
-      float tone_mult = powf(10.0f, s_tone.current - 0.5f);
-      float eff_playback_fc =
-          fclamp(active_model->playback_fc * tone_mult, 400.0f, 18000.0f);
-      playback_lpf.SetCutoff(eff_playback_fc, sample_rate);
-      wet = playback_lpf.Process(tape_out);
+    // TONE multiplies the model cutoff by 10^(knob - 0.5).
+    float tone_mult = powf(10.0f, s_tone.current - 0.5f);
+    float eff_playback_fc =
+        fclamp(active_model->playback_fc * tone_mult, 400.0f, 18000.0f);
+    playback_lpf.SetCutoff(eff_playback_fc, sample_rate);
+    float wet = playback_lpf.Process(tape_out);
 
-      // Per-pass HF rolloff darkens repeats around the loop.
-      float fb = feedback_lpf.Process(wet);
+    // Per-pass HF rolloff darkens repeats around the loop.
+    float fb = feedback_lpf.Process(wet);
 
-      // SOS parks feedback just under unity (erase head bypassed).
-      float record_signal =
-          record_lpf.Process(preamp_out * s_record_level.current);
-      float feedback_amt =
-          sos_mode ? kSosFeedback
-                   : s_feedback.current * active_model->feedback_ceiling;
-      const float write_in = record_signal + fb * feedback_amt;
-      delay_line.Write(
-          tape_stage.Process(write_in, active_model, active_age, sample_rate));
+    // Zero into the record LPF (rather than skipping it) lets the record path
+    // ring down instead of stepping when the input is cut.
+    float record_signal = record_lpf.Process(
+        feeding ? preamp_out * s_record_level.current : 0.0f);
 
-      // LPF'd white noise; cutoff set in main().
+    // SOS parks feedback just under unity (erase head bypassed).
+    float feedback_amt =
+        sos_mode ? kSosFeedback
+                 : s_feedback.current * active_model->feedback_ceiling;
+    const float write_in = record_signal + fb * feedback_amt;
+    float write_out =
+        tape_stage.Process(write_in, active_model, active_age, sample_rate);
+
+    // Flush to true zero once a decaying trail goes inaudible: avoids denormal
+    // stalls and guarantees the buffer actually empties within one delay pass.
+    if (fabsf(write_out) < 1e-12f) write_out = 0.0f;
+    delay_line.Write(write_out);
+
+    // Hiss is a property of the engaged machine; a bypassed pedal shouldn't
+    // add a noise floor once its trail has died away.
+    if (!bypass) {
       float hiss =
           noise_lpf.Process(tape_noise.Process()) * active_model->noise_floor;
       wet += hiss;
@@ -568,7 +577,14 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     float blend = preamp_only ? 0.0f : s_blend.current;
     float dry_gain, wet_gain;
     EqualPowerGains(blend, &dry_gain, &wet_gain);
-    out[0][i] = out[1][i] = preamp_out * dry_gain + wet * wet_gain;
+
+    if (bypass) {
+      // Trails: dry is clean at unity (no preamp), only the decaying loop
+      // rides on top at the BLEND wet gain.
+      out[0][i] = out[1][i] = dry_in + wet * wet_gain;
+    } else {
+      out[0][i] = out[1][i] = preamp_out * dry_gain + wet * wet_gain;
+    }
   }
 }
 

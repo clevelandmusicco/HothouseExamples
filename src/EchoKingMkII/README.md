@@ -50,7 +50,7 @@ any other trademark holder. It is an educational DSP example.
 | TOGGLESWITCH 2 | **TAPE AGE**     | UP = new, MIDDLE = stock, DOWN = heavily-worn                                    |
 | TOGGLESWITCH 3 | **MODE**         | UP = SOS (sound-on-sound), MIDDLE = normal echo, DOWN = preamp only              |
 | FOOTSWITCH 1   | *unused*         | Hold *both* footswitches for 2 s to enter DFU (flashable) mode.                  |
-| FOOTSWITCH 2   |                  | Toggles effect engage / bypass.                                                  |
+| FOOTSWITCH 2   |                  | Toggles effect engage / bypass (trails: repeats ring out after bypass).          |
 | LED 1          |                  | Flashes when SOS active; solid in Preamp-Only mode. Off by default.              |
 | LED 2          |                  | Solid when effect is engaged.                                                    |
 
@@ -85,7 +85,28 @@ units predated Sound-on-sound mode).
 **Preamp-Only mode.** Output is preamp-coloured dry signal; BLEND and the wet
 path are bypassed. Runs slightly hotter than tape-engaged mode because the
 per-model `preamp_makeup` post-trim is skipped to preserve EP-3's signature +3-5
-dB boost.
+dB boost. The tape loop still drains in the background (see Bypass below), so
+switching back to echo doesn't dump a stale buffer at you.
+
+**Bypass (trails).** Bypassing cuts the input to the tape loop but leaves the
+loop running, so existing repeats decay away naturally instead of being frozen
+mid-buffer. While bypassed the dry signal is clean and at unity -- the preamp is
+out of the path -- and the trail rides on top at whatever wet level BLEND is
+set to. Tape hiss is muted. Nothing new is recorded until the effect is
+re-engaged.
+
+The trail decays at the loop gain you've actually dialled in, which means it
+does not always reach silence:
+
+| Setting                   | Bypassed trail                                             |
+| ---                       | ---                                                        |
+| SUSTAIN below max         | Decays to silence; buffer clears in a few seconds.         |
+| EP-2, SUSTAIN at max      | Loop gain 1.0 -- sustains indefinitely.                    |
+| EP-3, SUSTAIN at max      | Loop gain 1.05 -- grows until the tape stage saturates.    |
+| SOS mode                  | Loop gain 0.985 -- holds by design, decays over ~a minute. |
+
+That's intentional: bypass is not a mute for the loop. If you want a guaranteed
+clean slate, roll SUSTAIN back before or just after bypassing.
 
 **WOW/FLUTTER.** Fully CCW disables mechanical modulation entirely. The knob
 scales depth only; rates are fixed per model (EP-3 = least wobble, EP-1 = most).
