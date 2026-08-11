@@ -24,7 +24,9 @@ Experimental fork of BasicSynth demonstrating baked-in MIDI CC support. Same mon
 | FOOTSWITCH 1 | 23 | Unused (received, not acted on) |
 | FOOTSWITCH 2 | 24 | Unused (received, not acted on) |
 
-CC numbers are drawn from MIDI 1.0's undefined controller range so they won't collide with mod wheel, volume, pan, expression, sustain, etc. Channel is omni, so CC/PC on any channel is accepted. Program Change is received and available via `hw.GetProgramNumber()`, but this example doesn't act on it. Footswitch CC state is available via `hw.GetFootswitchPressed()`, but this example doesn't call it, since a monophonic synth has no bypass/path-select concept. Note `GetFootswitchPressed()` deliberately doesn't feed `CheckResetToBootloader()`'s DFU-reset gesture: MIDI shouldn't be able to trigger a firmware reset.
+CC numbers are drawn from MIDI 1.0's undefined controller range so they won't collide with mod wheel, volume, pan, expression, sustain, etc. Channel is omni, so CC/PC on any channel is accepted. Anything outside the map above, Program Change included, is passed to the callback registered with `hw.RegisterMidiEventCallback()`, so an effect can still define CCs of its own. Program Change is also latched and readable via `hw.GetProgramNumber()`, though this example doesn't act on it.
+
+Footswitch CC state is available via `hw.GetFootswitchPressed()` (held) and `hw.GetFootswitchRisingEdge()` (momentary, for the `bypass ^= ...` idiom most effects use). This example calls neither, since a monophonic synth has no bypass or path-select concept. Note that neither feeds `CheckResetToBootloader()`'s DFU-reset gesture: MIDI shouldn't be able to trigger a firmware reset.
 
 ### Controls
 

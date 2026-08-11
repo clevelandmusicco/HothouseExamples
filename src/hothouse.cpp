@@ -16,7 +16,7 @@
 
 #include "hothouse.h"
 
-#include <math.h>
+#include <cmath>
 
 using clevelandmusicco::Hothouse;
 using clevelandmusicco::HothouseParameter;
@@ -47,6 +47,8 @@ constexpr Pin PIN_KNOB_4 = daisy::seed::D19;
 constexpr Pin PIN_KNOB_5 = daisy::seed::D20;
 constexpr Pin PIN_KNOB_6 = daisy::seed::D21;
 
+namespace {
+
 // CC map for the 6 knobs, one per index. 14-19 sit in MIDI's undefined
 // controller range (no collision with mod wheel/volume/pan/etc). File
 // scope, not a class member: array statics ODR-fail on this toolchain.
@@ -66,11 +68,20 @@ constexpr uint8_t kFootswitchCcNumber[2] = {23, 24};
 constexpr uint8_t kFootswitchCcOnThreshold = 64;
 
 // CC 0-127 split into thirds, ascending to match TOGGLESWITCH_UP/MIDDLE/DOWN.
-static Hothouse::ToggleswitchPosition QuantizeToggleswitchCc(uint8_t value) {
-  if (value < 43) return Hothouse::TOGGLESWITCH_UP;
-  if (value < 86) return Hothouse::TOGGLESWITCH_MIDDLE;
+constexpr uint8_t kToggleswitchCcMiddle = 43;
+constexpr uint8_t kToggleswitchCcDown = 86;
+
+// Floor applied before log(min) so a 0.0 range bottom stays finite. Same
+// value daisy::Parameter uses.
+constexpr float kLogCurveMinInput = 0.0000001f;
+
+Hothouse::ToggleswitchPosition QuantizeToggleswitchCc(uint8_t value) {
+  if (value < kToggleswitchCcMiddle) return Hothouse::TOGGLESWITCH_UP;
+  if (value < kToggleswitchCcDown) return Hothouse::TOGGLESWITCH_MIDDLE;
   return Hothouse::TOGGLESWITCH_DOWN;
 }
+
+}  // namespace
 
 const uint32_t Hothouse::HOLD_THRESHOLD_MS;
 
@@ -133,11 +144,16 @@ void Hothouse::ProcessAnalogControls() {
   for (size_t i = 0; i < KNOB_LAST; i++) {
     knobs[i].Process();
 
-    if (knob_cc_active_[i]) {
-      // Baseline is frozen at hand-off (see the else branch below), so a
-      // slow turn still accumulates real distance: a normal turn moves
-      // the pot well under 1% of range within a single ~1ms audio block.
-      float delta = knobs[i].Value() - knob_cc_last_raw_[i];
+    const uint8_t seq = knob_cc_seq_[i];
+    if (seq != knob_cc_seen_[i]) {
+      // Hand-off freezes the baseline, so a slow turn accumulates real
+      // distance against a fixed point: a normal turn moves the pot well
+      // under 1% of range within a single ~1ms audio block.
+      knob_cc_seen_[i] = seq;
+      knob_cc_active_[i] = true;
+      knob_cc_last_raw_[i] = knobs[i].Value();
+    } else if (knob_cc_active_[i]) {
+      const float delta = knobs[i].Value() - knob_cc_last_raw_[i];
       if (delta > kKnobCcTouchThreshold || delta < -kKnobCcTouchThreshold) {
         // Physical knob moved, so it reclaims control from the CC override.
         knob_cc_active_[i] = false;
@@ -168,37 +184,56 @@ void Hothouse::ProcessMidi() {
   midi_.Listen();
   while (midi_.HasEvents()) {
     auto msg = midi_.PopEvent();
+    bool consumed = false;
     switch (msg.type) {
-      case daisy::ControlChange: {
-        auto cc = msg.AsControlChange();
-        for (size_t i = 0; i < KNOB_LAST; i++) {
-          if (cc.control_number == kKnobCcNumber[i]) {
-            knob_cc_value_[i] = cc.value / 127.0f;
-            knob_cc_active_[i] = true;
-          }
-        }
-        for (size_t i = 0; i < TOGGLESWITCH_LAST; i++) {
-          if (cc.control_number == kToggleswitchCcNumber[i]) {
-            toggle_cc_value_[i] = QuantizeToggleswitchCc(cc.value);
-            toggle_cc_active_[i] = true;
-          }
-        }
-        for (size_t i = 0; i < 2; i++) {
-          if (cc.control_number == kFootswitchCcNumber[i]) {
-            footswitch_cc_pressed_[i] = cc.value >= kFootswitchCcOnThreshold;
-          }
-        }
-      } break;
-      case daisy::ProgramChange: {
+      case daisy::ControlChange:
+        consumed = HandleControlChange(msg.AsControlChange());
+        break;
+      case daisy::ProgramChange:
+        // Latched for GetProgramNumber(), but still forwarded so an effect
+        // can act on the change instead of polling for it.
         program_number_ = msg.AsProgramChange().program;
-      } break;
+        break;
       default:
-        if (midi_event_callback_ != NULL) {
-          midi_event_callback_(msg);
-        }
         break;
     }
+    if (!consumed && midi_event_callback_ != nullptr) {
+      midi_event_callback_(msg);
+    }
   }
+}
+
+// Deposits the CC into the shared state the audio ISR picks up. Value is
+// written before the sequence number so the ISR can never observe a bump
+// without the data behind it.
+bool Hothouse::HandleControlChange(const daisy::ControlChangeEvent& cc) {
+  for (size_t i = 0; i < KNOB_LAST; i++) {
+    if (cc.control_number == kKnobCcNumber[i]) {
+      knob_cc_value_[i] = cc.value / 127.0f;
+      knob_cc_seq_[i] = knob_cc_seq_[i] + 1;
+      return true;
+    }
+  }
+  for (size_t i = 0; i < TOGGLESWITCH_LAST; i++) {
+    if (cc.control_number == kToggleswitchCcNumber[i]) {
+      toggle_cc_value_[i] = QuantizeToggleswitchCc(cc.value);
+      toggle_cc_seq_[i] = toggle_cc_seq_[i] + 1;
+      return true;
+    }
+  }
+  for (size_t i = 0; i < 2; i++) {
+    if (cc.control_number == kFootswitchCcNumber[i]) {
+      const bool pressed = cc.value >= kFootswitchCcOnThreshold;
+      // Edge is counted here, not in the ISR: a 127-then-0 pair can arrive
+      // within one audio block and the ISR would only ever see the 0.
+      if (pressed && !footswitch_cc_pressed_[i]) {
+        footswitch_cc_edge_seq_[i] = footswitch_cc_edge_seq_[i] + 1;
+      }
+      footswitch_cc_pressed_[i] = pressed;
+      return true;
+    }
+  }
+  return false;
 }
 
 void Hothouse::RegisterMidiEventCallback(MidiEventCallback callback) {
@@ -211,8 +246,38 @@ void Hothouse::ProcessDigitalControls() {
   for (size_t i = 0; i < SWITCH_LAST; i++) {
     switches[i].Debounce();
   }
+  ProcessDigitalCcOverrides();
   ProcessFootswitchPresses(FOOTSWITCH_1);
   ProcessFootswitchPresses(FOOTSWITCH_2);
+}
+
+// CC hand-off and reclaim for the discrete controls. Lives here rather than
+// in the accessors so the result doesn't depend on how often (or whether) an
+// effect happens to call them.
+void Hothouse::ProcessDigitalCcOverrides() {
+  for (size_t i = 0; i < TOGGLESWITCH_LAST; i++) {
+    const ToggleswitchPosition physical =
+        ReadPhysicalToggleswitchPosition(static_cast<Toggleswitch>(i));
+    const uint8_t seq = toggle_cc_seq_[i];
+    if (seq != toggle_cc_seen_[i]) {
+      toggle_cc_seen_[i] = seq;
+      toggle_cc_active_[i] = true;
+    } else if (toggle_cc_active_[i] && physical != toggle_last_physical_[i]) {
+      // Discrete state doesn't drift block-to-block like a knob's raw ADC
+      // value, so any change from the latched position is a real flip.
+      toggle_cc_active_[i] = false;
+    }
+    // Baseline tracks the switch until CC takes over, then stays frozen.
+    if (!toggle_cc_active_[i]) {
+      toggle_last_physical_[i] = physical;
+    }
+  }
+
+  for (size_t i = 0; i < 2; i++) {
+    const uint8_t seq = footswitch_cc_edge_seq_[i];
+    footswitch_cc_rising_edge_[i] = seq != footswitch_cc_edge_seen_[i];
+    footswitch_cc_edge_seen_[i] = seq;
+  }
 }
 
 void Hothouse::InitSwitches() {
@@ -250,43 +315,62 @@ void Hothouse::InitAnalogControls() {
   }
 }
 
+Hothouse::ToggleswitchPosition Hothouse::ReadPhysicalToggleswitchPosition(
+    Toggleswitch tsw) {
+  switch (tsw) {
+    case (TOGGLESWITCH_1):
+      return GetLogicalSwitchPosition(switches[SWITCH_1_UP],
+                                      switches[SWITCH_1_DOWN]);
+    case (TOGGLESWITCH_2):
+      return GetLogicalSwitchPosition(switches[SWITCH_2_UP],
+                                      switches[SWITCH_2_DOWN]);
+    case (TOGGLESWITCH_3):
+      return GetLogicalSwitchPosition(switches[SWITCH_3_UP],
+                                      switches[SWITCH_3_DOWN]);
+    default:
+      return TOGGLESWITCH_UNKNOWN;
+  }
+}
+
 // Public convenience function to get position of toggleswitches 1-3.
 Hothouse::ToggleswitchPosition Hothouse::GetToggleswitchPosition(
     Toggleswitch tsw) {
-  ToggleswitchPosition physical;
-  switch (tsw) {
-    case (TOGGLESWITCH_1):
-      physical = GetLogicalSwitchPosition(switches[SWITCH_1_UP],
-                                          switches[SWITCH_1_DOWN]);
-      break;
-    case (TOGGLESWITCH_2):
-      physical = GetLogicalSwitchPosition(switches[SWITCH_2_UP],
-                                          switches[SWITCH_2_DOWN]);
-      break;
-    case (TOGGLESWITCH_3):
-      physical = GetLogicalSwitchPosition(switches[SWITCH_3_UP],
-                                          switches[SWITCH_3_DOWN]);
-      break;
-    default:
-      seed.PrintLine(
-          "ERROR: Unexpected value provided for Toggleswitch 'tsw'. "
-          "Returning TOGGLESWITCH_UNKNOWN by default.");
-      return TOGGLESWITCH_UNKNOWN;
+  const ToggleswitchPosition physical = ReadPhysicalToggleswitchPosition(tsw);
+  if (physical == TOGGLESWITCH_UNKNOWN) {
+    seed.PrintLine(
+        "ERROR: Unexpected value provided for Toggleswitch 'tsw'. "
+        "Returning TOGGLESWITCH_UNKNOWN by default.");
+    return TOGGLESWITCH_UNKNOWN;
   }
-
-  // Discrete state doesn't drift block-to-block like a knob's raw ADC
-  // value, so (unlike GetKnobValue) comparing directly here is enough.
-  if (toggle_cc_active_[tsw] && physical != toggle_last_physical_[tsw]) {
-    toggle_cc_active_[tsw] = false;
-  }
-  toggle_last_physical_[tsw] = physical;
-
   return toggle_cc_active_[tsw] ? toggle_cc_value_[tsw] : physical;
 }
 
+// Collapses FOOTSWITCH_1/2 onto 0/1, rejecting every other Switches value.
+bool Hothouse::FootswitchIndex(Switches footswitch, size_t* idx) {
+  if (footswitch != FOOTSWITCH_1 && footswitch != FOOTSWITCH_2) {
+    seed.PrintLine(
+        "ERROR: Unexpected value provided for 'footswitch'. "
+        "Returning false by default.");
+    return false;
+  }
+  *idx = footswitch - FOOTSWITCH_1;
+  return true;
+}
+
 bool Hothouse::GetFootswitchPressed(Switches footswitch) {
-  int idx = footswitch == FOOTSWITCH_1 ? 0 : 1;
+  size_t idx;
+  if (!FootswitchIndex(footswitch, &idx)) {
+    return false;
+  }
   return switches[footswitch].Pressed() || footswitch_cc_pressed_[idx];
+}
+
+bool Hothouse::GetFootswitchRisingEdge(Switches footswitch) {
+  size_t idx;
+  if (!FootswitchIndex(footswitch, &idx)) {
+    return false;
+  }
+  return switches[footswitch].RisingEdge() || footswitch_cc_rising_edge_[idx];
 }
 
 void Hothouse::CheckResetToBootloader() {
@@ -325,8 +409,8 @@ void Hothouse::CheckResetToBootloader() {
   }
 }
 
-Hothouse::ToggleswitchPosition Hothouse::GetLogicalSwitchPosition(Switch up,
-                                                                  Switch down) {
+Hothouse::ToggleswitchPosition Hothouse::GetLogicalSwitchPosition(
+    const Switch& up, const Switch& down) {
   return up.Pressed()
              ? TOGGLESWITCH_UP
              : (down.Pressed() ? TOGGLESWITCH_DOWN : TOGGLESWITCH_MIDDLE);
@@ -390,33 +474,36 @@ void Hothouse::ProcessFootswitchPresses(Switches footswitch) {
 
 // --- HothouseParameter ---
 
-void HothouseParameter::Init(Hothouse &hw, Hothouse::Knob knob, float min,
-                              float max, Parameter::Curve curve) {
-  hw_ = &hw;
+void HothouseParameter::Init(Hothouse* hw, Hothouse::Knob knob, float min,
+                             float max, Parameter::Curve curve) {
+  hw_ = hw;
   knob_ = knob;
   pmin_ = min;
   pmax_ = max;
   curve_ = curve;
-  lmin_ = logf(min < 0.0000001f ? 0.0000001f : min);
-  lmax_ = logf(max);
+  lmin_ = std::log(min < kLogCurveMinInput ? kLogCurveMinInput : min);
+  lmax_ = std::log(max);
 }
 
 float HothouseParameter::Process() {
-  float in = hw_->GetKnobValue(knob_);
+  if (hw_ == nullptr) {
+    return val_;
+  }
+  const float in = hw_->GetKnobValue(knob_);
   switch (curve_) {
-    case Parameter::LINEAR:
-      val_ = (in * (pmax_ - pmin_)) + pmin_;
-      break;
     case Parameter::EXPONENTIAL:
       val_ = ((in * in) * (pmax_ - pmin_)) + pmin_;
       break;
     case Parameter::LOGARITHMIC:
-      val_ = expf((in * (lmax_ - lmin_)) + lmin_);
+      val_ = std::exp((in * (lmax_ - lmin_)) + lmin_);
       break;
     case Parameter::CUBE:
       val_ = ((in * (in * in)) * (pmax_ - pmin_)) + pmin_;
       break;
+    case Parameter::LINEAR:
+    case Parameter::LAST:
     default:
+      val_ = (in * (pmax_ - pmin_)) + pmin_;
       break;
   }
   return val_;

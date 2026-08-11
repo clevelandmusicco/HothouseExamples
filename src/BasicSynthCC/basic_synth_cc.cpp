@@ -1,5 +1,5 @@
 // BasicSynthCC for Hothouse DIY DSP Platform
-// Copyright (C) 2024 Cleveland Music Co. <code@clevelandmusicco.com>
+// Copyright (C) 2026 Cleveland Music Co. <code@clevelandmusicco.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ AdEnv env;
 
 bool note_active = false;
 
-const int waveforms[] = {
-    Oscillator::WAVE_SIN,              // Toggle position 0
-    Oscillator::WAVE_POLYBLEP_SQUARE,  // Toggle position 1
-    Oscillator::WAVE_POLYBLEP_SAW      // Toggle position 2
+constexpr int waveforms[] = {
+    Oscillator::WAVE_SIN,              // TOGGLESWITCH_UP
+    Oscillator::WAVE_POLYBLEP_SQUARE,  // TOGGLESWITCH_MIDDLE
+    Oscillator::WAVE_POLYBLEP_SAW      // TOGGLESWITCH_DOWN
 };
 
 // Registered with hw.RegisterMidiEventCallback(); receives whatever
@@ -73,6 +73,11 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   osc.SetWaveform(
       waveforms[hw.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1)]);
 
+  // Knobs are control rate, so scale them once per block; the LOGARITHMIC
+  // curve costs an expf() per call.
+  const float cutoff = p_freq.Process();
+  flt.SetRes(p_res.Process());
+
   for (size_t i = 0; i < size; ++i) {
     float env_out = env.Process();
 
@@ -81,11 +86,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     }
 
     // Modulate the filter cutoff using the envelope
-    float cutoff_mod = p_freq.Process() * env_out;
-    flt.SetFreq(cutoff_mod);
-
-    // Set resonance (Q)
-    flt.SetRes(p_res.Process());
+    flt.SetFreq(cutoff * env_out);
 
     out[0][i] = out[1][i] = flt.Process(osc.Process()) * env_out;
   }
@@ -96,10 +97,10 @@ int main() {
   hw.SetAudioBlockSize(48);
   hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
 
-  p_freq.Init(hw, Hothouse::KNOB_1, 20.0f, 20000.0f, Parameter::LOGARITHMIC);
-  p_res.Init(hw, Hothouse::KNOB_2, 0.0f, 1.0f, Parameter::LINEAR);
-  p_attack.Init(hw, Hothouse::KNOB_3, 0.001f, 0.25f, Parameter::LOGARITHMIC);
-  p_decay.Init(hw, Hothouse::KNOB_4, 0.05f, 2.0f, Parameter::LOGARITHMIC);
+  p_freq.Init(&hw, Hothouse::KNOB_1, 20.0f, 20000.0f, Parameter::LOGARITHMIC);
+  p_res.Init(&hw, Hothouse::KNOB_2, 0.0f, 1.0f, Parameter::LINEAR);
+  p_attack.Init(&hw, Hothouse::KNOB_3, 0.001f, 0.25f, Parameter::LOGARITHMIC);
+  p_decay.Init(&hw, Hothouse::KNOB_4, 0.05f, 2.0f, Parameter::LOGARITHMIC);
 
   hw.StartMidi();
   hw.RegisterMidiEventCallback(HandleMidiEvent);
@@ -115,9 +116,11 @@ int main() {
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
+  // 1 ms rather than the usual 10: at 10 ms, note-on jitter is audible and a
+  // dense CC stream can back up in the USB MIDI FIFO.
   while (true) {
     hw.ProcessMidi();
-    hw.DelayMs(10);
+    hw.DelayMs(1);
     hw.CheckResetToBootloader();
   }
   return 0;

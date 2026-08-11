@@ -179,12 +179,21 @@ class Hothouse {
   */
   ToggleswitchPosition GetToggleswitchPosition(Toggleswitch tsw);
 
-  /** \param footswitch Which footswitch to check (FOOTSWITCH_1/2).
-   * \return true if physically pressed OR its MIDI CC override is currently
+  /** \param footswitch Which footswitch to check (FOOTSWITCH_1 or
+   * FOOTSWITCH_2; anything else logs an error and returns false).
+   * \return true if physically held OR its MIDI CC override is currently
    * "on" (CC value >= 64, the standard MIDI button convention). Doesn't
    * feed RegisterFootswitchCallbacks or CheckResetToBootloader, since MIDI
    * shouldn't be able to trigger DFU reset. */
   bool GetFootswitchPressed(Switches footswitch);
+
+  /** Momentary-press equivalent of GetFootswitchPressed(), for the
+   * `bypass ^= ...` idiom most effects use.
+   * \param footswitch Which footswitch to check (FOOTSWITCH_1 or
+   * FOOTSWITCH_2; anything else logs an error and returns false).
+   * \return true for one ProcessDigitalControls() cycle after either the
+   * physical switch or its MIDI CC crosses into the pressed state. */
+  bool GetFootswitchRisingEdge(Switches footswitch);
 
   /** Check whether FOOTSWITCH_1 and FOOTSWITCH_2 have both been held down
    * simultaneously for 2 seconds and, if so, call System::ResetToBootloader().
@@ -201,8 +210,8 @@ class Hothouse {
    */
   void RegisterFootswitchCallbacks(FootswitchCallbacks *callbacks);
 
-  /** Signature for MIDI messages Hothouse doesn't consume itself (anything
-   * other than ControlChange/ProgramChange, e.g. NoteOn/NoteOff). */
+  /** Signature for MIDI messages Hothouse doesn't consume itself, i.e.
+   * everything but the CCs in its built-in control map. */
   using MidiEventCallback = void (*)(MidiEvent event);
 
   /** Init and start listening for MIDI over USB (device mode: the host
@@ -210,21 +219,20 @@ class Hothouse {
   void StartMidi();
 
   /** Drain pending MIDI messages; call once per main loop iteration.
-   * ControlChange/ProgramChange update internal state, everything else
-   * forwards to the registered MidiEventCallback. Sole drain point;
-   * don't touch midi_ elsewhere, or the two consumers will starve. */
+   * Only CCs in the built-in control map are consumed; everything else,
+   * Program Change included, forwards to the registered MidiEventCallback.
+   * Sole drain point; don't touch midi_ elsewhere or the two will starve. */
   void ProcessMidi();
 
-  /** Register/deregister the callback for MIDI messages not handled by the
-   * built-in CC/PC logic. Pass NULL to deregister.
+  /** Register/deregister the callback for MIDI messages not consumed by the
+   * built-in CC map. Pass nullptr to deregister.
    * \param callback Function to call for each unconsumed MIDI event.
    */
   void RegisterMidiEventCallback(MidiEventCallback callback);
 
   /** Most recently received MIDI Program Change number.
    * \return 0-127 if a Program Change has been received since boot, -1
-   * otherwise. (Not std::optional: this toolchain builds with
-   * -std=gnu++14, and libstdc++'s <optional> compiles out under it.) */
+   * otherwise. */
   int16_t GetProgramNumber();
 
   DaisySeed seed; /**< & */
@@ -236,8 +244,13 @@ class Hothouse {
   void SetHidUpdateRates();
   void InitSwitches();
   void InitAnalogControls();
-  ToggleswitchPosition GetLogicalSwitchPosition(Switch up, Switch down);
+  ToggleswitchPosition GetLogicalSwitchPosition(const Switch& up,
+                                                const Switch& down);
+  ToggleswitchPosition ReadPhysicalToggleswitchPosition(Toggleswitch tsw);
   void ProcessFootswitchPresses(Switches footswitch);
+  void ProcessDigitalCcOverrides();
+  bool HandleControlChange(const daisy::ControlChangeEvent& cc);
+  bool FootswitchIndex(Switches footswitch, size_t* idx);
 
   uint32_t footswitch_start_time[2] = {0, 0};
   uint32_t footswitch_last_press_time[2] = {0, 0};
@@ -253,15 +266,29 @@ class Hothouse {
   FootswitchCallbacks *footswitchCallbacks = NULL;
 
   MidiUsbHandler midi_;
-  MidiEventCallback midi_event_callback_ = NULL;
-  float knob_cc_value_[KNOB_LAST] = {};
+  MidiEventCallback midi_event_callback_ = nullptr;
+
+  // MIDI CC state crosses contexts: ProcessMidi() runs in the main loop, the
+  // rest runs in the audio ISR. Every word below has exactly one writer, so
+  // neither side can lose the other's read-modify-write.
+  volatile float knob_cc_value_[KNOB_LAST] = {};
+  volatile uint8_t knob_cc_seq_[KNOB_LAST] = {};
+  volatile ToggleswitchPosition toggle_cc_value_[TOGGLESWITCH_LAST] = {};
+  volatile uint8_t toggle_cc_seq_[TOGGLESWITCH_LAST] = {};
+  volatile bool footswitch_cc_pressed_[2] = {};
+  volatile uint8_t footswitch_cc_edge_seq_[2] = {};
+  volatile int16_t program_number_ = -1;
+
+  // ISR-side only: last sequence number consumed, plus the derived state the
+  // accessors read.
+  uint8_t knob_cc_seen_[KNOB_LAST] = {};
   float knob_cc_last_raw_[KNOB_LAST] = {};
   bool knob_cc_active_[KNOB_LAST] = {};
-  ToggleswitchPosition toggle_cc_value_[TOGGLESWITCH_LAST] = {};
+  uint8_t toggle_cc_seen_[TOGGLESWITCH_LAST] = {};
   ToggleswitchPosition toggle_last_physical_[TOGGLESWITCH_LAST] = {};
   bool toggle_cc_active_[TOGGLESWITCH_LAST] = {};
-  bool footswitch_cc_pressed_[2] = {};
-  int16_t program_number_ = -1;
+  uint8_t footswitch_cc_edge_seen_[2] = {};
+  bool footswitch_cc_rising_edge_[2] = {};
 };
 
 /** Drop-in replacement for daisy::Parameter that reads through
@@ -273,13 +300,13 @@ class HothouseParameter {
   HothouseParameter() = default;
   ~HothouseParameter() = default;
 
-  /** \param hw The Hothouse instance owning the knob.
+  /** \param hw Pointer to the Hothouse instance owning the knob.
    * \param knob Which knob to read.
    * \param min Bottom of range (when input is 0.0).
    * \param max Top of range (when input is 1.0).
    * \param curve Scaling curve for the input->output transformation.
    */
-  void Init(Hothouse &hw, Hothouse::Knob knob, float min, float max,
+  void Init(Hothouse* hw, Hothouse::Knob knob, float min, float max,
             Parameter::Curve curve);
 
   /** Processes the input signal; call once per audio block. */
@@ -289,7 +316,7 @@ class HothouseParameter {
   inline float Value() { return val_; }
 
  private:
-  Hothouse *hw_ = nullptr;
+  Hothouse* hw_ = nullptr;
   Hothouse::Knob knob_ = Hothouse::KNOB_1;
   float pmin_ = 0.0f, pmax_ = 0.0f;
   float lmin_ = 0.0f, lmax_ = 0.0f;
