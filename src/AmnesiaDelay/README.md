@@ -15,7 +15,21 @@ A BBD-style delay loosely modeled on the Electro-Harmonix Deluxe Memory Man. Thi
 | KNOB 5        | **RATE** -- modulation rate. CCW = chorus (slow); CW = vibrato (fast).                     |
 | KNOB 6        | **CLOCK NOISE** -- BBD clock leakage and bias-drift hiss. CCW = clean; CW = wonky DMM.     |
 | FOOTSWITCH 1  | *(unused)* Hold *both* footswitches for 2 s to enter DFU (flashable) mode.                |
-| FOOTSWITCH 2  | Engage / bypass.                                                                          |
+| FOOTSWITCH 2  | Engage / bypass, with trails (see below).                                                 |
+
+## Bypass (trails)
+
+Bypassing cuts the input to the delay line but leaves the loop running, so
+existing repeats decay away instead of being frozen mid-buffer and dumped back
+at you on re-engage. The dry signal passes clean at unity while bypassed and the
+trail rides on top at whatever wet level **BLEND** is set to. Clock noise and
+hiss are muted, since both feed the loop and would otherwise keep it topped up
+forever. Nothing new is recorded until the effect is re-engaged.
+
+The trail decays at the loop gain you've dialled in, so it doesn't always reach
+silence: **FEEDBACK** runs to 1.05, and past unity a bypassed trail keeps
+self-oscillating (bounded by the soft clipper) rather than dying out. Roll
+**FEEDBACK** back if you want a guaranteed clean slate.
 
 ## Some recommended settings
 

@@ -26,7 +26,7 @@
 //   KNOB 4 - DEPTH       Modulation depth (delay-time wobble).
 //   KNOB 5 - RATE        Modulation rate. CCW = chorus (slow), CW = vibrato.
 //   KNOB 6 - CLOCK NOISE Amount of BBD clock leakage and bias-drift noise.
-//   FOOTSWITCH 2         Engage / bypass the effect.
+//   FOOTSWITCH 2         Engage / bypass (trails: repeats ring out on bypass).
 //   LED 2                Lit when the effect is engaged.
 // -----------------------------------------------------------------------------
 
@@ -131,6 +131,11 @@ Smoothed s_depth{0.0f, 0.0f, 0.0008f};
 Smoothed s_rate{0.5f, 0.5f, 0.0008f};  // Hz
 Smoothed s_clock{0.0f, 0.0f, 0.0008f};
 
+// Input-to-loop gain: 1 engaged, 0 bypassed. Cutting the input to the delay
+// line abruptly would write a step into the buffer and repeat it forever, so
+// it crossfades over ~5 ms. Starts at 0 to match the boot bypass state.
+Smoothed s_engage{0.0f, 0.0f, 0.004f};
+
 // Sample rate, populated in main() after hardware init.
 float sample_rate = 48000.0f;
 
@@ -185,16 +190,11 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   // Hothouse pattern.
   bypass ^= hw.switches[Hothouse::FOOTSWITCH_2].RisingEdge();
 
+  // Trails: the loop keeps running when bypassed, but nothing new goes into it.
+  s_engage.target = bypass ? 0.0f : 1.0f;
+
   for (size_t i = 0; i < size; ++i) {
     const float dry = in[0][i];
-
-    // Bypass path: just pass the dry signal through, untouched. We still
-    // duplicate to both output channels so users with stereo cables hear
-    // signal on both sides (the rest of the effect is mono throughout).
-    if (bypass) {
-      out[0][i] = out[1][i] = dry;
-      continue;
-    }
 
     // Smooth knob movements one sample at a time.
     s_blend.Tick();
@@ -203,6 +203,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     s_depth.Tick();
     s_rate.Tick();
     s_clock.Tick();
+    s_engage.Tick();
+    const float engage = s_engage.current;
 
     // --- 1. LFO (smooth sine, no wavetable, no reset) ---
     // The phase accumulator advances continuously and is fed directly to
@@ -262,8 +264,10 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     const float hiss = hiss_lpf.Process(hiss_noise.Process());
 
     // Mix the two noise components in. The 0.0035/0.001 weights are taste:
-    // the tone should peek out audibly with the knob fully CW.
-    const float clock_amount = s_clock.current;
+    // the tone should peek out audibly with the knob fully CW. Both feed the
+    // loop, so `engage` has to gate them too or a bypassed trail would never
+    // decay to silence.
+    const float clock_amount = s_clock.current * engage;
     wet += clock_tone * clock_amount * 0.0035f;
     wet += hiss * clock_amount * darkening_ratio * 0.001f;
 
@@ -273,14 +277,21 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // keeping the buffer values bounded (no NaNs, no DC explosion). The
     // soft saturation also adds a touch of warmth, just as the real
     // DMM's compander does on its way around the loop.
-    const float into_delay = SoftClip(dry + wet * s_feedback.current);
+    float into_delay = SoftClip(dry * engage + wet * s_feedback.current);
+
+    // Flush to true zero once a decaying trail goes inaudible: avoids denormal
+    // stalls and lets the buffer actually empty within one delay pass.
+    if (fabsf(into_delay) < 1e-12f) into_delay = 0.0f;
     delay_line.Write(into_delay);
 
     // --- 6. Equal-power dry/wet blend ---
+    // Bypassed, the dry gain rides up to unity so the dry path is untouched
+    // and only the decaying trail sits on top at the BLEND wet level.
     float dry_gain;
     float wet_gain;
     EqualPowerGains(s_blend.current, &dry_gain, &wet_gain);
-    const float mixed = dry * dry_gain + wet * wet_gain;
+    const float out_dry_gain = dry_gain + (1.0f - dry_gain) * (1.0f - engage);
+    const float mixed = dry * out_dry_gain + wet * wet_gain;
 
     // Mono effect; write the same sample to both output channels.
     out[0][i] = out[1][i] = mixed;
