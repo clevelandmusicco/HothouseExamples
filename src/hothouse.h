@@ -18,7 +18,7 @@
 
 /** Factory default MIDI channel: 0 = omni, 1-16 = that channel. Override per
  * effect with -DHOTHOUSE_MIDI_CHANNEL=n. A channel learned at boot and saved
- * to QSPI takes precedence over this. */
+ * to QSPI takes precedence until the FOOTSWITCH_2 boot gesture clears it. */
 #ifndef HOTHOUSE_MIDI_CHANNEL
 #define HOTHOUSE_MIDI_CHANNEL 0
 #endif
@@ -329,6 +329,7 @@ class Hothouse {
   bool HandleControlChange(const daisy::ControlChangeEvent& cc);
   bool FootswitchIndex(Switches footswitch, size_t* idx);
   void LoadSettings();
+  void RestoreFactorySettings();
   void RunMidiChannelGestures();
   bool RunMidiChannelLearn();
   void DebounceFootswitches(uint32_t duration_ms);

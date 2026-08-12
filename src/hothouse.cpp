@@ -293,16 +293,29 @@ void Hothouse::LoadSettings() {
   defaults.reserved = 0;
   settings_storage_.Init(defaults, HOTHOUSE_SETTINGS_QSPI_OFFSET);
 
+  // A FACTORY block is just some earlier build's defaults sitting in QSPI, and
+  // PersistentStorage hands those back in preference to the ones passed to
+  // Init(). Only a USER block (a learned channel) outranks HOTHOUSE_MIDI_CHANNEL.
+  using SettingsState = daisy::PersistentStorage<Settings>::State;
   const Settings& saved = settings_storage_.GetSettings();
-  if (saved.version == kSettingsVersion &&
+  if (settings_storage_.GetState() == SettingsState::USER &&
+      saved.version == kSettingsVersion &&
       saved.midi_channel <= kMidiChannelMax) {
     midi_channel_ = saved.midi_channel;
   } else {
-    // Older layout or garbage. Lay down this build's defaults rather than
-    // reinterpreting bytes that meant something else.
+    // Untouched, older layout, or garbage. Lay down this build's defaults
+    // rather than reinterpreting bytes that meant something else.
     settings_storage_.RestoreDefaults();
     midi_channel_ = defaults.midi_channel;
   }
+}
+
+// SetMidiChannel() can't do this: it saves as USER by definition, which is the
+// one state that outranks HOTHOUSE_MIDI_CHANNEL on the next boot.
+void Hothouse::RestoreFactorySettings() {
+  LoadSettings();
+  settings_storage_.RestoreDefaults();
+  midi_channel_ = settings_storage_.GetSettings().midi_channel;
 }
 
 // Boot-time channel config, identical on every effect that calls StartMidi()
@@ -322,8 +335,8 @@ void Hothouse::RunMidiChannelGestures() {
     return;
   }
   if (fsw_2 && !fsw_1) {
-    SetMidiChannel(MIDI_CHANNEL_OMNI);
-    BlinkChannel(MIDI_CHANNEL_OMNI);
+    RestoreFactorySettings();
+    BlinkChannel(midi_channel_);
     return;
   }
 

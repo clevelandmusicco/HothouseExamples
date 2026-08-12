@@ -38,10 +38,15 @@ included, is handed to the effect, which may or may not do something with it.
 
 ## MIDI channel
 
-**Out of the box the Hothouse is omni**, meaning it responds to every channel.
-That's fine for one pedal and a bad time on a board with two of them, so the
-channel is configurable on the pedal itself. No recompiling, no computer beyond
-whatever is already sending the MIDI.
+Every binary has a **factory channel**, fixed when it was compiled: omni unless
+it was built with `-DHOTHOUSE_MIDI_CHANNEL=n` (see [compile-time
+options](#compile-time-options)). Stock builds and everything on the releases
+page are omni, meaning they respond to every channel.
+
+Omni is fine for one pedal and a bad time on a board with two of them, so the
+channel is also settable on the pedal itself, no recompiling and no computer
+beyond whatever is already sending the MIDI. A channel set that way is saved and
+overrides the factory channel until you reset it.
 
 The gestures below are identical in every MIDI-capable effect, including the
 pre-built binaries on the
@@ -63,10 +68,12 @@ One deliberate exception: "reset all controllers" and the other channel-mode
 messages (CC 120-127) are ignored during learn, because plenty of hosts
 broadcast those at startup and they'd pick the channel for you.
 
-### Resetting to omni
+### Resetting to the factory channel
 
-Power the pedal up with **FOOTSWITCH 2 held down**. Both LEDs double-blink
-together to confirm, and the pedal is back to responding on every channel.
+Power the pedal up with **FOOTSWITCH 2 held down**. The saved channel is
+forgotten and the LEDs blink back the factory channel. On a stock build that's
+omni: both LEDs double-blink together and the pedal responds on every channel
+again.
 
 Holding *both* footswitches at power-up does nothing to the MIDI channel. That
 grip is the DFU gesture, and it shouldn't reconfigure MIDI on the way past.
@@ -103,8 +110,39 @@ Only relevant if you build your own binaries. Both are `#ifndef`-guarded in
 
 | DEFINE | DEFAULT | MEANING |
 |-|-|-|
-| `HOTHOUSE_MIDI_CHANNEL` | `0` | Factory default channel; 0 is omni, 1-16 is a channel. A channel learned on the pedal overrides this. |
+| `HOTHOUSE_MIDI_CHANNEL` | `0` | The binary's factory channel; 0 is omni, 1-16 is a channel. A channel set on the pedal overrides it until FOOTSWITCH 2 at power-up clears it, and changing this and reflashing only takes effect on a pedal that has no saved channel. |
 | `HOTHOUSE_SETTINGS_QSPI_OFFSET` | `0x400000` | Where the settings block lives on the 8 MB QSPI chip. 4 MB in, well clear of a program flashed to QSPI by the Daisy bootloader. |
+
+Set them with `C_DEFS` in the effect's Makefile, alongside the other project
+variables and before the `include` lines. This is the same knob libDaisy's own
+core Makefile uses, and it reaches the C++ sources as well as the C ones:
+
+```make
+# Project Name
+TARGET = my_effect
+
+# Sources and Hothouse header files
+CPP_SOURCES = my_effect.cpp ../hothouse.cpp
+C_INCLUDES = -I..
+
+# Default to MIDI channel 4 instead of omni
+C_DEFS += -DHOTHOUSE_MIDI_CHANNEL=4
+
+# Library Locations
+LIBDAISY_DIR = ../../libDaisy
+DAISYSP_DIR = ../../DaisySP
+
+# Core location, and generic Makefile.
+SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
+include $(SYSTEM_FILES_DIR)/Makefile
+
+# Global helpers
+include ../Makefile
+```
+
+Run `make clean` after changing a define. The dependency files track headers,
+not the Makefile, so an incremental build will happily relink stale objects that
+still have the old value baked in.
 
 From code, `hw.GetMidiChannel()` and `hw.SetMidiChannel()` read and write it.
 `SetMidiChannel()` erases and writes flash, so call it before `StartAudio()` and
