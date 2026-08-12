@@ -20,6 +20,7 @@
 
 using clevelandmusicco::Hothouse;
 using clevelandmusicco::HothouseParameter;
+using daisy::GPIO;
 using daisy::MidiUsbTransport;
 using daisy::System;
 
@@ -38,6 +39,11 @@ constexpr Pin PIN_SW_3_UP = daisy::seed::D5;
 constexpr Pin PIN_SW_3_DOWN = daisy::seed::D6;
 constexpr Pin PIN_FSW_1 = daisy::seed::D25;
 constexpr Pin PIN_FSW_2 = daisy::seed::D26;
+
+// Footswitch LEDs. Same pins as the Hothouse::LED_1/LED_2 enum, but as a
+// daisy::Pin: seed.GetPin() still hands back the legacy dsy_gpio_pin.
+constexpr Pin PIN_LED_1 = daisy::seed::D22;
+constexpr Pin PIN_LED_2 = daisy::seed::D23;
 
 // Knobs
 constexpr Pin PIN_KNOB_1 = daisy::seed::D16;
@@ -80,15 +86,90 @@ constexpr uint8_t kToggleswitchCcDown = 86;
 // value daisy::Parameter uses.
 constexpr float kLogCurveMinInput = 0.0000001f;
 
+// Settings block layout version. A block that doesn't match is thrown away and
+// the compile-time defaults are used, so old QSPI contents can't be misread.
+constexpr uint16_t kSettingsVersion = 1;
+
+constexpr uint8_t kMidiChannelMax = 16;
+
+// Clamped here rather than at the use site so a bogus -DHOTHOUSE_MIDI_CHANNEL
+// falls back to omni instead of matching nothing.
+constexpr uint8_t kCompileTimeMidiChannel =
+    (HOTHOUSE_MIDI_CHANNEL) <= kMidiChannelMax ? (HOTHOUSE_MIDI_CHANNEL) : 0;
+
+// Boot gesture timings, all in ms.
+constexpr uint32_t kSwitchSettleMs = 20;      // enough Debounce() shifts to latch
+constexpr uint32_t kLearnTimeoutMs = 10000;   // give up and keep the old channel
+constexpr uint32_t kLearnBlinkMs = 200;       // "listening" flash, both LEDs
+constexpr uint32_t kBlinkOnMs = 100;          // channel readout digit
+constexpr uint32_t kBlinkOffMs = 150;
+constexpr uint32_t kBlinkDigitGapMs = 300;
+constexpr uint32_t kLongFlashMs = 600;        // "nothing changed"
+
 Hothouse::ToggleswitchPosition QuantizeToggleswitchCc(uint8_t value) {
   if (value < kToggleswitchCcMiddle) return Hothouse::TOGGLESWITCH_UP;
   if (value < kToggleswitchCcDown) return Hothouse::TOGGLESWITCH_MIDDLE;
   return Hothouse::TOGGLESWITCH_DOWN;
 }
 
+// True for message types that carry a channel nibble. System Common and System
+// Real Time (clock, sysex, transport) don't, so they're never channel-filtered.
+bool IsChannelMessage(const daisy::MidiEvent& msg) {
+  switch (msg.type) {
+    case daisy::NoteOff:
+    case daisy::NoteOn:
+    case daisy::PolyphonicKeyPressure:
+    case daisy::ControlChange:
+    case daisy::ProgramChange:
+    case daisy::ChannelPressure:
+    case daisy::PitchBend:
+    case daisy::ChannelMode:
+      return true;
+    default:
+      return false;
+  }
+}
+
+// Channel learn ignores ChannelMode: libDaisy parses CC 120-127 into it, and a
+// host that broadcasts "reset all controllers" at startup would otherwise pick
+// the channel for you.
+bool IsChannelLearnMessage(const daisy::MidiEvent& msg) {
+  return IsChannelMessage(msg) && msg.type != daisy::ChannelMode;
+}
+
+// Both footswitch LEDs as plain on/off GPIO. daisy::Led is software PWM and
+// wants a steady Update() cadence; boot-time blinking has no use for that.
+class BootLeds {
+ public:
+  void Init(Pin led_1, Pin led_2) {
+    leds_[0].Init(led_1, GPIO::Mode::OUTPUT);
+    leds_[1].Init(led_2, GPIO::Mode::OUTPUT);
+    Set(false, false);
+  }
+
+  void Set(bool led_1_on, bool led_2_on) {
+    leds_[0].Write(led_1_on);
+    leds_[1].Write(led_2_on);
+  }
+
+ private:
+  GPIO leds_[2];
+};
+
+// One decimal digit as `count` flashes on a single LED.
+void BlinkDigit(BootLeds* leds, size_t led_index, uint8_t count) {
+  for (uint8_t i = 0; i < count; i++) {
+    leds->Set(led_index == 0, led_index == 1);
+    System::Delay(kBlinkOnMs);
+    leds->Set(false, false);
+    System::Delay(kBlinkOffMs);
+  }
+}
+
 }  // namespace
 
 const uint32_t Hothouse::HOLD_THRESHOLD_MS;
+const uint8_t Hothouse::MIDI_CHANNEL_OMNI;
 
 void Hothouse::Init(bool boost) {
   // Initialize the hardware.
@@ -180,15 +261,155 @@ float Hothouse::GetKnobValue(Knob k) {
 }
 
 void Hothouse::StartMidi() {
+  LoadSettings();
   MidiUsbHandler::Config midi_cfg;
   midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
   midi_.Init(midi_cfg);
+  RunMidiChannelGestures();
+}
+
+uint8_t Hothouse::GetMidiChannel() const { return midi_channel_; }
+
+void Hothouse::SetMidiChannel(uint8_t channel) {
+  if (channel > kMidiChannelMax) return;
+  LoadSettings();
+  midi_channel_ = channel;
+  Settings& settings = settings_storage_.GetSettings();
+  settings.version = kSettingsVersion;
+  settings.midi_channel = channel;
+  settings.reserved = 0;
+  settings_storage_.Save();
+}
+
+// Idempotent: SetMidiChannel() can be called before StartMidi(), and saving
+// through an uninitialized storage object would write to QSPI offset 0.
+void Hothouse::LoadSettings() {
+  if (settings_loaded_) return;
+  settings_loaded_ = true;
+
+  Settings defaults;
+  defaults.version = kSettingsVersion;
+  defaults.midi_channel = kCompileTimeMidiChannel;
+  defaults.reserved = 0;
+  settings_storage_.Init(defaults, HOTHOUSE_SETTINGS_QSPI_OFFSET);
+
+  const Settings& saved = settings_storage_.GetSettings();
+  if (saved.version == kSettingsVersion &&
+      saved.midi_channel <= kMidiChannelMax) {
+    midi_channel_ = saved.midi_channel;
+  } else {
+    // Older layout or garbage. Lay down this build's defaults rather than
+    // reinterpreting bytes that meant something else.
+    settings_storage_.RestoreDefaults();
+    midi_channel_ = defaults.midi_channel;
+  }
+}
+
+// Boot-time channel config, identical on every effect that calls StartMidi()
+// so the gesture is worth learning once. Runs before StartAudio(), which is
+// what makes the blocking QSPI writes and LED delays safe here.
+void Hothouse::RunMidiChannelGestures() {
+  // Nothing has called ProcessAllControls() yet, so the debouncers still read
+  // "released"; give them enough shifts to latch the real state.
+  DebounceFootswitches(kSwitchSettleMs);
+  const bool fsw_1 = switches[FOOTSWITCH_1].Pressed();
+  const bool fsw_2 = switches[FOOTSWITCH_2].Pressed();
+
+  // Each gesture wants its footswitch alone: both held is the DFU grip, and
+  // that shouldn't reconfigure MIDI on the way to the bootloader.
+  if (fsw_1 && !fsw_2) {
+    if (RunMidiChannelLearn()) BlinkChannel(midi_channel_);
+    return;
+  }
+  if (fsw_2 && !fsw_1) {
+    SetMidiChannel(MIDI_CHANNEL_OMNI);
+    BlinkChannel(MIDI_CHANNEL_OMNI);
+    return;
+  }
+
+  // Omni boots silently, so users who never touch MIDI see no change.
+  if (midi_channel_ != MIDI_CHANNEL_OMNI) BlinkChannel(midi_channel_);
+}
+
+// \return true if a channel was learned, false on timeout.
+bool Hothouse::RunMidiChannelLearn() {
+  BootLeds leds;
+  leds.Init(PIN_LED_1, PIN_LED_2);
+
+  const uint32_t start = System::GetNow();
+  uint32_t last_blink = start;
+  bool blink_on = true;
+  leds.Set(true, true);
+
+  while (System::GetNow() - start < kLearnTimeoutMs) {
+    const uint32_t now = System::GetNow();
+    if (now - last_blink >= kLearnBlinkMs) {
+      last_blink = now;
+      blink_on = !blink_on;
+      leds.Set(blink_on, blink_on);
+    }
+
+    midi_.Listen();
+    while (midi_.HasEvents()) {
+      auto msg = midi_.PopEvent();
+      if (!IsChannelLearnMessage(msg)) continue;
+      leds.Set(false, false);
+      // Wire channels are 0-15; this class talks 1-16 with 0 meaning omni.
+      SetMidiChannel(static_cast<uint8_t>(msg.channel + 1));
+      return true;
+    }
+  }
+
+  // Timed out. One long flash on both LEDs means "nothing changed".
+  leds.Set(true, true);
+  System::Delay(kLongFlashMs);
+  leds.Set(false, false);
+  return false;
+}
+
+void Hothouse::DebounceFootswitches(uint32_t duration_ms) {
+  const uint32_t start = System::GetNow();
+  while (System::GetNow() - start < duration_ms) {
+    switches[FOOTSWITCH_1].Debounce();
+    switches[FOOTSWITCH_2].Debounce();
+    System::Delay(1);
+  }
+}
+
+// Two LEDs as a two-digit readout: LED_1 flashes the tens, LED_2 the ones.
+// Channel 1 is one flash on LED_2 alone; channel 10 is one flash on LED_1
+// alone. Omni has no digits, so both LEDs blink together twice instead.
+void Hothouse::BlinkChannel(uint8_t channel) {
+  BootLeds leds;
+  leds.Init(PIN_LED_1, PIN_LED_2);
+
+  if (channel == MIDI_CHANNEL_OMNI) {
+    for (int i = 0; i < 2; i++) {
+      leds.Set(true, true);
+      System::Delay(kBlinkOnMs * 2);
+      leds.Set(false, false);
+      System::Delay(kBlinkOffMs * 2);
+    }
+    return;
+  }
+
+  BlinkDigit(&leds, 0, channel / 10);
+  System::Delay(kBlinkDigitGapMs);
+  BlinkDigit(&leds, 1, channel % 10);
 }
 
 void Hothouse::ProcessMidi() {
   midi_.Listen();
   while (midi_.HasEvents()) {
     auto msg = midi_.PopEvent();
+
+    // Wrong channel: dropped outright, so the effect's own CCs obey the same
+    // channel as the built-in map. Clock and sysex carry no channel and pass.
+    if (midi_channel_ != MIDI_CHANNEL_OMNI && IsChannelMessage(msg) &&
+        msg.channel != midi_channel_ - 1) {
+      continue;
+    }
+
     bool consumed = false;
     switch (msg.type) {
       case daisy::ControlChange:

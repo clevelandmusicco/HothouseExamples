@@ -24,7 +24,7 @@ A brief description of the effect goes here.
 
 ### MIDI CC mapping
 
-Every knob, toggleswitch, and footswitch is drivable by MIDI CC over USB, so you'll need a USB host (your computer, a [commercial](https://www.google.com/search?q=USB+midi+host) or [DIY solution](https://youtu.be/N4yUduOqR3M?feature=shared)). Channel is omni.
+Every knob, toggleswitch, and footswitch is drivable by MIDI CC over USB, so you'll need a USB host (your computer, a [commercial](https://www.google.com/search?q=USB+midi+host) or [DIY solution](https://youtu.be/N4yUduOqR3M?feature=shared)). Channel is omni by default; power up with FOOTSWITCH 1 held to set a specific one. See [src/MIDI.md](../MIDI.md).
 
 | CONTROL | CC # | PARAM |
 |-|-|-|

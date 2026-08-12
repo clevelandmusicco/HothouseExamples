@@ -16,6 +16,19 @@
 
 #include "daisy_seed.h"
 
+/** Factory default MIDI channel: 0 = omni, 1-16 = that channel. Override per
+ * effect with -DHOTHOUSE_MIDI_CHANNEL=n. A channel learned at boot and saved
+ * to QSPI takes precedence over this. */
+#ifndef HOTHOUSE_MIDI_CHANNEL
+#define HOTHOUSE_MIDI_CHANNEL 0
+#endif
+
+/** Where the settings block lives on the 8 MB QSPI chip. Kept well clear of
+ * address 0 so it survives a program flashed there by the Daisy bootloader. */
+#ifndef HOTHOUSE_SETTINGS_QSPI_OFFSET
+#define HOTHOUSE_SETTINGS_QSPI_OFFSET 0x400000
+#endif
+
 using daisy::AdcChannelConfig;
 using daisy::AnalogControl;
 using daisy::AudioHandle;
@@ -86,6 +99,24 @@ class Hothouse {
     /** Called when a long footswitch press is detected. */
     void (*HandleLongPress)(Switches footswitch);
   };
+
+  /** Non-volatile settings, persisted to QSPI. Bump kSettingsVersion when the
+   * layout changes; a mismatched block is discarded rather than reinterpreted.
+   * \note PersistentStorage compares before erasing, hence operator!=. */
+  struct Settings {
+    uint16_t version;
+    uint8_t midi_channel; /**< 0 = omni, 1-16 = that channel */
+    uint8_t reserved;     /**< Pads to a word; free for the next setting */
+
+    bool operator==(const Settings& other) const {
+      return version == other.version && midi_channel == other.midi_channel &&
+             reserved == other.reserved;
+    }
+    bool operator!=(const Settings& other) const { return !(*this == other); }
+  };
+
+  /** MIDI channel value meaning "listen on all channels". */
+  static const uint8_t MIDI_CHANNEL_OMNI = 0;
 
   // Constructor and Destructor
   Hothouse() = default;
@@ -240,12 +271,29 @@ class Hothouse {
   using MidiEventCallback = void (*)(MidiEvent event);
 
   /** Init and start listening for MIDI over USB (device mode: the host
-   * computer enumerates the Hothouse as a class-compliant USB MIDI port). */
+   * computer enumerates the Hothouse as a class-compliant USB MIDI port).
+   * Also loads the saved MIDI channel and runs the boot-time channel gestures
+   * (FOOTSWITCH_1 held = learn, FOOTSWITCH_2 held = reset to omni), so call it
+   * from main() before StartAudio(): it blinks the LEDs and blocks for up to
+   * 10 s if a gesture is held. */
   void StartMidi();
+
+  /** \return The MIDI channel currently being listened to: MIDI_CHANNEL_OMNI
+   * (0) for all channels, otherwise 1-16. */
+  uint8_t GetMidiChannel() const;
+
+  /** Set the MIDI channel and persist it to QSPI, surviving power cycles and
+   * reflashes. Values above 16 are ignored.
+   * \note Blocking flash erase/write; call before StartAudio(), never from the
+   * audio callback.
+   * \param channel MIDI_CHANNEL_OMNI (0) for all channels, or 1-16. */
+  void SetMidiChannel(uint8_t channel);
 
   /** Drain pending MIDI messages; call once per main loop iteration.
    * Only CCs in the built-in control map are consumed; everything else,
    * Program Change included, forwards to the registered MidiEventCallback.
+   * Messages carrying a channel are dropped unless it matches GetMidiChannel();
+   * clock, sysex and the rest of System Common/Real Time always get through.
    * Sole drain point; don't touch midi_ elsewhere or the two will starve. */
   void ProcessMidi();
 
@@ -280,6 +328,11 @@ class Hothouse {
   void ProcessDigitalCcOverrides();
   bool HandleControlChange(const daisy::ControlChangeEvent& cc);
   bool FootswitchIndex(Switches footswitch, size_t* idx);
+  void LoadSettings();
+  void RunMidiChannelGestures();
+  bool RunMidiChannelLearn();
+  void DebounceFootswitches(uint32_t duration_ms);
+  void BlinkChannel(uint8_t channel);
 
   uint32_t footswitch_start_time[2] = {0, 0};
   uint32_t footswitch_last_press_time[2] = {0, 0};
@@ -296,6 +349,16 @@ class Hothouse {
 
   MidiUsbHandler midi_;
   MidiEventCallback midi_event_callback_ = nullptr;
+
+  // Read once in StartMidi(), so effects that never ask for MIDI don't spin up
+  // QSPI storage at all. Declared after seed, which owns the qspi handle.
+  daisy::PersistentStorage<Settings> settings_storage_{seed.qspi};
+  bool settings_loaded_ = false;
+
+  // LoadSettings() is what actually applies HOTHOUSE_MIDI_CHANNEL, after
+  // range-checking it. Starting omni keeps an out-of-range define from ever
+  // being visible here.
+  uint8_t midi_channel_ = MIDI_CHANNEL_OMNI;
 
   // MIDI CC state crosses contexts: ProcessMidi() runs in the main loop, the
   // rest runs in the audio ISR. Every word below has exactly one writer, so

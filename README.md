@@ -22,6 +22,12 @@ If you're not familar with the Daisy Seed or its development environment, check 
 * [**Using the `build_examples.py` helper script**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Using-the-build_examples.py-helper-script) - A brief explanation of how to use the helper script and why you might want to.
 * [**Frequently Asked Questions**](https://github.com/clevelandmusicco/HothouseExamples/wiki/Frequently-Asked-Questions) - A growing list of questions and answers. Check here first if you're having trouble figuring something out.
 
+## MIDI
+
+Some of the examples accept MIDI over USB, which puts every knob, toggleswitch, and footswitch under CC control. The pedal ships listening on all channels (omni); if that's a problem on your board, you can set a specific channel on the pedal itself by powering it up with FOOTSWITCH 1 held and sending it a message from your controller. No recompiling, and it works on the pre-built binaries from the releases page.
+
+See [src/MIDI.md](./src/MIDI.md) for the CC map, the channel gestures, and the LED readout.
+
 ## Open Source Hardware
 
 The Hothouse is released as [Open Source Hardware](https://oshwa.org/resources/open-source-hardware-definition/) distributed under a [Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/). If you're an avid DIYer familiar with the process of PCB fabrication using gerber, BOM, and CPL/Centroid files, you can find everything you need in the [open-source-pedals repo](https://github.com/clevelandmusicco/open-source-pedals). Whether you buy a retail kit or you get the boards fabricated and source the parts yourself, all the code in the HothouseExamples repo should work.

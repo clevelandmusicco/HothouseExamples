@@ -37,7 +37,7 @@ Knobs and toggles use hard takeover: a CC overrides the physical control until y
 | FOOTSWITCH 2 | 24 | Press of footswitch 2, i.e. toggles bypass |
 | (bypass) | 25 | Bypass: >= 64 engages the reverb, < 64 bypasses it |
 
-CC numbers come from MIDI 1.0's undefined controller range, so no collision with mod wheel, volume, pan, expression, sustain, etc. Channel is omni. The DFU-reset gesture is deliberately not reachable over MIDI: CC 23/24 can't trigger a firmware reset.
+CC numbers come from MIDI 1.0's undefined controller range, so no collision with mod wheel, volume, pan, expression, sustain, etc. Channel is omni by default; power up with FOOTSWITCH 1 held to set a specific one, or FOOTSWITCH 2 held to go back to omni. See [src/MIDI.md](../MIDI.md). The DFU-reset gesture is deliberately not reachable over MIDI: CC 23/24 can't trigger a firmware reset.
 
 CC 23/24 mean "press that footswitch", whatever it happens to be wired to. Here footswitch 2 is bypass, so CC 24 toggles bypass; in an effect where footswitch 2 is a freeze or a tap, CC 24 would do that instead. They model *momentary presses*: a press needs a matching release before it can press again.
 
