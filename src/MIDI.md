@@ -100,8 +100,13 @@ Channel 16 is the slowest case at roughly two seconds.
 
 Everything that carries a channel: the CC map above, effect-specific CCs, notes,
 program change, pitch bend, aftertouch. Messages that carry no channel at all
-(MIDI clock, transport, sysex) always get through, so tempo sync keeps working
-no matter what the channel is set to.
+(MIDI clock, transport, sysex) can't be filtered and always reach
+`RegisterMidiEventCallback()`, whatever channel the pedal is on.
+
+`Hothouse` does not consume clock itself and there are no plans for it to. An
+effect that wants tempo sync counts `TimingClock` (24 per quarter note) in its
+own MIDI callback, because how you smooth the tempo and what you do when clock
+stops are effect-specific choices, not something the shared class should pick.
 
 ## Compile-time options
 
