@@ -257,6 +257,11 @@ volatile bool RECORDING = false;
 volatile bool CLEAR_REQUESTED = false;
 volatile uint32_t TICK_COUNT = 0;
 
+// the patch hard-pans its two buses, so with a mono cable you'd only hear
+// the four left voices. default is mono (both buses summed to both jacks).
+// hold FS1 while powering up for stereo.
+bool STEREO = false;
+
 size_t REC_POS = 0;
 uint32_t LOCKOUT = 0;
 float ENV_SQ = 0;    // smoothed input power for the trigger
@@ -381,8 +386,16 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // bypass fade. the fade is a linear 1s ramp toward 0 or 1.
     WET_FADE += fclamp(wet_target - WET_FADE, -FADE_STEP, FADE_STEP);
     float wet_gain = wet_level * WET_FADE;
+    // mono: fold the right bus into the left and copy it to both jacks.
+    // only one tone filter gets used, the other just sits idle.
+    if (!STEREO) {
+      bus[BUS_L] += bus[BUS_R];
+      bus[BUS_R] = 0;
+    }
     float wet_l = TONE[BUS_L].Process(bus[BUS_L] * WET_BOOST) * wet_gain;
-    float wet_r = TONE[BUS_R].Process(bus[BUS_R] * WET_BOOST) * wet_gain;
+    float wet_r = STEREO
+                      ? TONE[BUS_R].Process(bus[BUS_R] * WET_BOOST) * wet_gain
+                      : wet_l;
 
     // out you go. dry is always at unity.
     out[0][i] = dry + wet_l;
@@ -424,6 +437,17 @@ int main() {
     TONE[ch].SetFilterMode(OnePole::FILTER_MODE_LOW_PASS);
     LIMITERS[ch].Init();
   }
+
+  // check for FS1 held at power up -> stereo. Switch::Debounce() shifts one
+  // reading into an 8 bit history per ms and Pressed() wants all 8 high, so
+  // give it 10ms of readings. this also means the held press is already
+  // "old" when audio starts, so it won't count as a RisingEdge and flip
+  // the bypass. callbacks aren't registered yet so nothing else fires.
+  for (int i = 0; i < 10; i++) {
+    hw.ProcessDigitalControls();
+    hw.DelayMs(1);
+  }
+  STEREO = hw.switches[Hothouse::FOOTSWITCH_1].Pressed();
 
   hw.RegisterFootswitchCallbacks(&FOOTSWITCH_CALLBACKS);
 

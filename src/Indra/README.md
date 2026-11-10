@@ -45,6 +45,8 @@ The LEDs show a couple things:
 | FOOTSWITCH 1 | Effect on/off | Wet signal fades in or out over 1 s. Auto-recording is off while bypassed. LED 1 is lit when on and blinks while recording. |
 | FOOTSWITCH 2 | Record / clear | **Tap** - record now, skipping the probability and lockout<br/>**Double-tap** - clear the buffer |
 
+**Mono or stereo.** Indra starts in mono, with all seven voices sent to both outputs. Hold FOOTSWITCH 1 while powering up for stereo, which sends voices A, C, E and G left and B, D and F right, as in the original patch.
+
 Hold both footswitches for 2 seconds to enter the bootloader.
 
 ### Rules
