@@ -64,8 +64,11 @@ using daisysp::OnePole;
 #define PREDELAY_LEN static_cast<size_t>(SAMPLE_RATE * 0.3f)
 #define PREDELAY_TIME (SAMPLE_RATE * 0.25f)
 
-// pd: SPIGOTTER [delay 10000] -- after an auto-trigger, ignore the input for
-// 10s (the length of a recording) so we don't keep restarting it.
+// pd: SPIGOTTER [delay 10000] -- ignore the input for 10s so we don't keep
+// restarting recordings. pd started the 10s at the trigger, so it ran out
+// just as the recording finished and the next loud note could start
+// another one straight away. here it starts when the recording *ends* (or
+// at the trigger, if MAYBE said no).
 #define LOCKOUT_SAMPLES static_cast<uint32_t>(SAMPLE_RATE * 10)
 
 // pd: GRAIN-ENV [delay 10] / [delay 4000]
@@ -281,6 +284,9 @@ CrossFade MIX;
 void StartRecording() {
   REC_POS = 0;
   RECORDING = true;
+  // the countdown is frozen while recording (see step 4), so this really
+  // means "10s after the recording finishes". forced recordings get it too.
+  LOCKOUT = LOCKOUT_SAMPLES;
 }
 
 // footswitch callbacks run inside hw.ProcessAllControls(), so inside the
@@ -376,7 +382,9 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     // 4. auto-trigger. pd: [env~] -> [> 65] -> [spigot] -> [pd MAYBE]
     // fonepole is a one-pole smoother; ~23ms like env~'s 1024 window.
     fonepole(ENV_SQ, dry * dry, 0.0009f);
-    if (LOCKOUT > 0) {
+    if (RECORDING) {
+      // no auto-triggers mid-recording, and the lockout waits for the end
+    } else if (LOCKOUT > 0) {
       LOCKOUT--;
     } else if (!BYPASS && ENV_SQ > threshold_sq) {
       // lock out on every trigger, even when MAYBE says no. same as pd.

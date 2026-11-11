@@ -35,7 +35,7 @@ The LEDs show a couple things:
 |-|-|-|
 | KNOB 1 | Tempo | 40–200 BPM, quarter notes. LED 2 flashes on each beat. |
 | KNOB 2 | Intensity | Sets how many voices may sound. Fully down, only voice A can fire; fully up, all seven can. |
-| KNOB 3 | Record probability | Chance that a loud note starts a recording. After a trigger, further triggers are ignored for 10 s. |
+| KNOB 3 | Record probability | Chance that a loud note starts a recording. A new auto-recording can only start 10 s after the last recording ends. |
 | KNOB 4 | Dry/wet mix | Fully left is all dry, fully right all loops. Constant-power, so noon has no volume dip. |
 | KNOB 5 | Trigger threshold | −60 to −20 dBFS RMS. The original patch used −35. |
 | KNOB 6 | Tone | Output low-pass, 80 Hz–8 kHz. The original patch used 800 Hz, which is noon. |
