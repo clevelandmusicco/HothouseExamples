@@ -42,6 +42,7 @@ using daisy::Led;
 using daisy::SaiHandle;
 using daisy::System;
 using daisysp::Adsr;
+using daisysp::CrossFade;
 using daisysp::DelayLine;
 using daisysp::fclamp;
 using daisysp::fmap;
@@ -71,7 +72,8 @@ using daisysp::OnePole;
 #define DIP_SAMPLES static_cast<uint32_t>(SAMPLE_RATE * 0.01f)
 #define HOLD_SAMPLES static_cast<uint32_t>(SAMPLE_RATE * 4.0f)
 
-// bypass fades the wet signal over 1s. this is the step per sample.
+// bypass fades the mix back to full dry over 1s. this is the step per
+// sample.
 #define FADE_STEP (1.0f / SAMPLE_RATE)
 
 // pd scaled each bus by 0.5, which sat too far under the dry signal. 1.125
@@ -273,6 +275,7 @@ Metro CLOCK;
 Maytrig MAYBE;
 OnePole TONE[2];
 Limiter LIMITERS[2];
+CrossFade MIX;
 
 // pd: [tabwrite~] bang. starts (or restarts) a 10s recording.
 void StartRecording() {
@@ -322,9 +325,13 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
   float bpm = fmap(hw.GetKnobValue(Hothouse::KNOB_1), 40.0f, 200.0f);
   float intensity = hw.GetKnobValue(Hothouse::KNOB_2);
   float probability = hw.GetKnobValue(Hothouse::KNOB_3);
-  float wet_level = hw.GetKnobValue(Hothouse::KNOB_4);
+  // pots and the ADC never quite hit 0.0 or 1.0, and the crossfade is
+  // steep at the ends: a reading of 0.98 still leaks ~3% dry (-30dB). a 3%
+  // dead zone at each end makes fully left/right exactly all dry/all wet.
+  float mix_knob =
+      fclamp((hw.GetKnobValue(Hothouse::KNOB_4) - 0.03f) / 0.94f, 0.0f, 1.0f);
   float threshold_db = fmap(hw.GetKnobValue(Hothouse::KNOB_5), -60.0f, -20.0f);
-  float tone = fmap(hw.GetKnobValue(Hothouse::KNOB_6), 200.0f, 8000.0f,
+  float tone = fmap(hw.GetKnobValue(Hothouse::KNOB_6), 80.0f, 8000.0f,
                     Mapping::LOG);
 
   // the env follower tracks power (x squared), so compare against power
@@ -347,7 +354,15 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
     VOICES[v].window = sinf(PI_F * VOICES[v].pos / BUFFER_LEN);
   }
 
+  // dry/wet mix. bypass ramps the mix back to full dry over 1s (rather
+  // than cutting the wet), so turning the effect off always lands on the
+  // clean signal at unity whatever the knob says. the ramp moves once per
+  // block, 4 samples' worth at a time, so the crossfade's two sinf calls
+  // run once per block too.
   float wet_target = BYPASS ? 0.0f : 1.0f;
+  WET_FADE += fclamp(wet_target - WET_FADE, -FADE_STEP * size,
+                     FADE_STEP * size);
+  MIX.SetPos(mix_knob * WET_FADE);
 
   for (size_t i = 0; i < size; ++i) {
     float dry = in[0][i];
@@ -384,24 +399,20 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out,
       bus[VOICES[v].bus] += VOICES[v].Process();
     }
 
-    // 8. pd: [catch~] -> [*~ 0.5] -> [lop~ 800], then wet level and the
-    // bypass fade. the fade is a linear 1s ramp toward 0 or 1.
-    WET_FADE += fclamp(wet_target - WET_FADE, -FADE_STEP, FADE_STEP);
-    float wet_gain = wet_level * WET_FADE;
+    // 8. pd: [catch~] -> [*~ 0.5] -> [lop~ 800]
     // mono: fold the right bus into the left and copy it to both jacks.
     // only one tone filter gets used, the other just sits idle.
     if (!STEREO) {
       bus[BUS_L] += bus[BUS_R];
       bus[BUS_R] = 0;
     }
-    float wet_l = TONE[BUS_L].Process(bus[BUS_L] * WET_BOOST) * wet_gain;
-    float wet_r = STEREO
-                      ? TONE[BUS_R].Process(bus[BUS_R] * WET_BOOST) * wet_gain
-                      : wet_l;
+    float wet_l = TONE[BUS_L].Process(bus[BUS_L] * WET_BOOST);
+    float wet_r = STEREO ? TONE[BUS_R].Process(bus[BUS_R] * WET_BOOST) : wet_l;
 
-    // out you go. dry is always at unity.
-    out[0][i] = dry + wet_l;
-    out[1][i] = dry + wet_r;
+    // out you go. constant power crossfade: at noon both sides sit at
+    // ~0.71 (-3dB) rather than 0.5, so the middle doesn't sound like a dip.
+    out[0][i] = MIX.Process(dry, wet_l);
+    out[1][i] = MIX.Process(dry, wet_r);
   }
 
   // 9. limiter on the final mix. daisysp's Limiter always multiplies by 0.7
@@ -439,6 +450,7 @@ int main() {
     TONE[ch].SetFilterMode(OnePole::FILTER_MODE_LOW_PASS);
     LIMITERS[ch].Init();
   }
+  MIX.Init(daisysp::CROSSFADE_CPOW);
 
   // check for FS1 held at power up -> stereo. Switch::Debounce() shifts one
   // reading into an 8 bit history per ms and Pressed() wants all 8 high, so

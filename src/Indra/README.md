@@ -36,13 +36,13 @@ The LEDs show a couple things:
 | KNOB 1 | Tempo | 40–200 BPM, quarter notes. LED 2 flashes on each beat. |
 | KNOB 2 | Intensity | Sets how many voices may sound. Fully down, only voice A can fire; fully up, all seven can. |
 | KNOB 3 | Record probability | Chance that a loud note starts a recording. After a trigger, further triggers are ignored for 10 s. |
-| KNOB 4 | Wet level | Dry signal always stays at unity. |
+| KNOB 4 | Dry/wet mix | Fully left is all dry, fully right all loops. Constant-power, so noon has no volume dip. |
 | KNOB 5 | Trigger threshold | −60 to −20 dBFS RMS. The original patch used −35. |
-| KNOB 6 | Tone | Output low-pass, 200 Hz–8 kHz. The original patch used 800 Hz (about 10 o'clock). |
+| KNOB 6 | Tone | Output low-pass, 80 Hz–8 kHz. The original patch used 800 Hz, which is noon. |
 | SWITCH 1 | Rule family | **UP** - evolving<br/>**MIDDLE** - chaotic<br/>**DOWN** - rhythmic loops |
 | SWITCH 2 | Rule select | Together with SWITCH 3, picks one of 9 rules in the family. All switches in the middle gives rule 30, the original. |
 | SWITCH 3 | Rule select | See SWITCH 2 |
-| FOOTSWITCH 1 | Effect on/off | Wet signal fades in or out over 1 s. Auto-recording is off while bypassed. LED 1 is lit when on and blinks while recording. |
+| FOOTSWITCH 1 | Effect on/off | Fades between the mix and full dry over 1 s. Auto-recording is off while bypassed. LED 1 is lit when on and blinks while recording. |
 | FOOTSWITCH 2 | Record / clear | **Tap** - record now, skipping the probability and lockout<br/>**Double-tap** - clear the buffer |
 
 **Mono or stereo.** Indra starts in mono, with all seven voices sent to both outputs. Hold FOOTSWITCH 1 while powering up for stereo, which sends voices A, C, E and G left and B, D and F right, as in the original patch.
