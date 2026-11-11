@@ -74,10 +74,12 @@ using daisysp::OnePole;
 // bypass fades the wet signal over 1s. this is the step per sample.
 #define FADE_STEP (1.0f / SAMPLE_RATE)
 
-// pd scaled each bus by 0.5. on the pedal that sat too far under the dry
-// signal, so the wet buses got boosted 50% twice (0.5 * 1.5 * 1.5). the
-// output limiter catches the peaks when lots of voices stack up.
-#define WET_BOOST (1.125f)
+// pd scaled each bus by 0.5, which sat too far under the dry signal. 1.125
+// sounded right with only the 4 left voices, but mono sums all 7, and that
+// pushed the limiter into clipping. scaled down by sqrt(4/7) (~0.76) so 7
+// voices are about as loud as those 4 were. (independent signals add in
+// power, so loudness grows with the square root of the voice count.)
+#define WET_BOOST (0.85f)
 
 Hothouse hw;
 
